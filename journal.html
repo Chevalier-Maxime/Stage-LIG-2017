@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2017-05-09 mar. 14:04 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Journal</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Put your name here" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2017 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Journal</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org901ba77">1. 2016</a>
+<ul>
+<li><a href="#orgcd65c92">1.1. 2016-03 March</a>
+<ul>
+<li><a href="#org35b27ff">1.1.1. 2016-03-07 Monday</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org45fe661">2. 2017</a>
+<ul>
+<li><a href="#orga2ad7fb">2.1. 2017-05 mai</a>
+<ul>
+<li><a href="#org31bfef8">2.1.1. 2017-05-09 mardi</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org901ba77" class="outline-2">
+<h2 id="org901ba77"><span class="section-number-2">1</span> 2016</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-orgcd65c92" class="outline-3">
+<h3 id="orgcd65c92"><span class="section-number-3">1.1</span> 2016-03 March</h3>
+<div class="outline-text-3" id="text-1-1">
+</div><div id="outline-container-org35b27ff" class="outline-4">
+<h4 id="org35b27ff"><span class="section-number-4">1.1.1</span> 2016-03-07 Monday</h4>
+<div class="outline-text-4" id="text-1-1-1">
+</div><ol class="org-ol"><li><a id="org5b2ad64"></a><a href="https://github.com/alegrand/RR_webinars/blob/master/1_replicable_article_laboratory_notebook/index.org">First webinar on reproducible research: litterate programming</a><br /><ol class="org-ol"><li><a id="org2945a85"></a>Emacs shortcuts<br /><div class="outline-text-6" id="text-1-1-1-1-1">
+<p>
+Here are a few convenient emacs shortcuts for those that have never
+used emacs. In all of the emacs shortcuts, <code>C=Ctrl</code>, <code>M=Alt/Esc</code> and
+<code>S=Shift</code>.  Note that you may want to use two hours to follow the emacs
+tutorial (<code>C-h t</code>). In the configuration file CUA keys have been
+activated and allow you to use classical copy/paste (<code>C-c/C-v</code>)
+shortcuts. This can be changed from the Options menu.
+</p>
+<ul class="org-ul">
+<li><code>C-x C-c</code> exit</li>
+<li><code>C-x C-s</code> save buffer</li>
+<li><code>C-g</code> panic mode ;) type this whenever you want to exit an awful
+series of shortcuts</li>
+<li><code>C-Space</code> start selection marker although selection with shift and
+arrows should work as well</li>
+<li><code>C-l</code> reposition the screen</li>
+<li><code>C-_</code> (or <code>C-z</code> if CUA keys have been activated)</li>
+<li><code>C-s</code> search</li>
+<li><code>M-%</code> replace</li>
+<li><code>C-x C-h</code> get the list of emacs shortcuts</li>
+<li><code>C-c C-h</code> get the list of emacs shortcuts considering the mode you are
+currently using (e.g., C, Lisp, org, &#x2026;)</li>
+</ul>
+<p>
+There are a bunch of cheatsheets also available out there (e.g.,
+<a href="http://www.shortcutworld.com/en/linux/Emacs_23.2.1.html">this one for emacs</a> and <a href="http://orgmode.org/orgcard.txt">this one for org-mode</a> or this <a href="http://sachachua.com/blog/wp-content/uploads/2013/05/How-to-Learn-Emacs-v2-Large.png">graphical one</a>).
+</p>
+</div></li>
+<li><a id="orge539d09"></a>Org-mode&#xa0;&#xa0;&#xa0;<span class="tag"><span class="OrgMode">OrgMode</span></span><br /><div class="outline-text-6" id="text-1-1-1-1-2">
+<p>
+Many emacs shortcuts start by <code>C-x</code>. Org-mode's shortcuts generaly
+start with <code>C-c</code>.
+</p>
+<ul class="org-ul">
+<li><code>Tab</code> fold/unfold</li>
+<li><code>C-c c</code> capture (finish capturing with <code>C-c C-c</code>, this is explained on
+the top of the buffer that just opened)</li>
+<li><code>C-c C-c</code> do something useful here (tag, execute, &#x2026;)</li>
+<li><code>C-c C-o</code> open link</li>
+<li><code>C-c C-t</code> switch todo</li>
+<li><code>C-c C-e</code> export</li>
+<li><code>M-Enter</code> new item/section</li>
+<li><code>C-c a</code> agenda (try the <code>L</code> option)</li>
+<li><code>C-c C-a</code> attach files</li>
+<li><code>C-c C-d</code> set a deadl1ine (use <code>S-arrows</code> to navigate in the dates)</li>
+<li><code>A-arrows</code> move subtree (add shift for the whole subtree)</li>
+</ul>
+</div></li>
+<li><a id="org264500f"></a>Org-mode Babel (for literate programming)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="OrgMode">OrgMode</span></span><br /><div class="outline-text-6" id="text-1-1-1-1-3">
+<ul class="org-ul">
+<li><p>
+<code>&lt;s + tab</code> template for source bloc. You can easily adapt it to get this:
+</p>
+<pre class="example">
+#+BEGIN_SRC sh
+ls
+#+END_SRC
+
+</pre>
+<p>
+Now if you <code>C-c C-c</code>, it will execute the block.
+</p>
+<pre class="example">
+  #+RESULTS:
+  | #journal.org# |
+  | journal.html  |
+  | journal.org   |
+  | journal.org~  |
+</pre></li>
+
+<li><p>
+Source blocks have many options (formatting, arguments, names,
+sessions,&#x2026;), which is why I have my own shortcuts <code>&lt;b + tab</code> bash
+block (or <code>B</code> for sessions).
+</p>
+<pre class="example">
+  #+begin_src sh :results output :exports both
+  ls /tmp/*201*.pdf
+  #+end_src
+
+  #+RESULTS:
+  : /tmp/2015_02_bordeaux_otl_tutorial.pdf
+  : /tmp/2015-ASPLOS.pdf
+  : /tmp/2015-Europar-Threadmap.pdf
+  : /tmp/europar2016-1.pdf
+  : /tmp/europar2016.pdf
+  : /tmp/M2-PDES-planning-examens-janvier2016.pdf
+</pre></li>
+<li>I have defined many such templates in my configuration. You can
+give a try to <code>&lt;r</code>, <code>&lt;R</code>, <code>&lt;RR</code>, <code>&lt;g</code>, <code>&lt;p</code>, <code>&lt;P</code>, <code>&lt;m</code> &#x2026;</li>
+<li>Some of these templates are not specific to babel: e.g., <code>&lt;h</code>, <code>&lt;l</code>,
+<code>&lt;L</code>, <code>&lt;c</code>, <code>&lt;e</code>, &#x2026;</li>
+</ul>
+</div></li>
+<li><a id="org27fd07b"></a>In case you want to play with ipython on a recent debian&#xa0;&#xa0;&#xa0;<span class="tag"><span class="Python">Python</span></span><br /><div class="outline-text-6" id="text-1-1-1-1-4">
+<p>
+Here is what you should install:
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">sudo apt-get install python3-pip ipython3 ipython3-notebook python3-numpy python3-matplotlib
+</pre>
+</div>
+
+<p>
+The ipython notebook can then be run with the following command:
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">ipython3 notebook
+</pre>
+</div>
+
+<p>
+The latest version of this notebook is called <a href="http://jupyter.org/">Jupyter</a> and is polyglot
+like babel. Playing with it is easy as it's deployed on the cloud but
+as I'm not a python expert I'm not sure to know how to deploy it locally.
+</p>
+</div></li>
+<li><a id="org64bb854"></a>In case you want to play with R/knitR/rstudio:&#xa0;&#xa0;&#xa0;<span class="tag"><span class="R">R</span></span><br /><div class="outline-text-6" id="text-1-1-1-1-5">
+<p>
+Here is what you should install on debian:
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">sudo apt-get install r-base r-cran-ggplot2
+</pre>
+</div>
+
+<p>
+Rstudio and knitr are unfortunately not packaged within debian so the
+easiest is to download the corresponding debian package on the <a href="http://www.rstudio.com/ide/download/desktop">Rstudio
+webpage</a> and then to install it manually (depending on when you do
+this, you can obviously change the version number).
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">wget https://download1.rstudio.org/rstudio-0.99.887-amd64.deb
+sudo dpkg -i rstudio-0.99.887-amd64.deb
+sudo apt-get -f install # to fix possibly missing dependencies
+</pre>
+</div>
+<p>
+You will also need to install knitr. To this end, you should simply
+run R (or Rstudio) and use the following command.
+</p>
+<div class="org-src-container">
+<pre class="src src-R">install.packages("knitr")
+</pre>
+</div>
+<p>
+If <code>r-cran-ggplot2</code> could not be installed for some reason, you can also
+install it through R by doing:
+</p>
+<div class="org-src-container">
+<pre class="src src-R">install.packages("ggplot2")
+</pre>
+</div>
+
+<p>
+As you will experience, knitr is polyglot but not Rstudio, which
+makes its use not as fluid when using other languages than R.
+</p>
+</div></li></ol></li></ol>
+</div>
+</div>
+</div>
+<div id="outline-container-org45fe661" class="outline-2">
+<h2 id="org45fe661"><span class="section-number-2">2</span> 2017</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-orga2ad7fb" class="outline-3">
+<h3 id="orga2ad7fb"><span class="section-number-3">2.1</span> 2017-05 mai</h3>
+<div class="outline-text-3" id="text-2-1">
+</div><div id="outline-container-org31bfef8" class="outline-4">
+<h4 id="org31bfef8"><span class="section-number-4">2.1.1</span> 2017-05-09 mardi</h4>
+<div class="outline-text-4" id="text-2-1-1">
+</div><ol class="org-ol"><li><a id="orgac8c405"></a>Premiers pas avec org-mode<br /></li>
+<li><a id="org4c52e80"></a>Réunion avec Florence et Arnaud<br /><ol class="org-ol"><li><a id="org1b27e1b"></a><span class="todo TODO">TODO</span> Mettre en place mon cahier de laboratoire <code>[1/3]</code><br /><div class="outline-text-6" id="text-2-1-1-2-1">
+<p>
+<a href="http://www.google.com">http://www.google.com</a>
+</p>
+<ul class="org-ul">
+<li class="trans"><code>[-]</code> github</li>
+<li class="on"><code>[X]</code> org-mode</li>
+<li class="off"><code>[&#xa0;]</code> intégrer le mail</li>
+</ul>
+
+<p>
+Entered on <span class="timestamp-wrapper"><span class="timestamp">[2017-05-09 mar. 13:45]</span></span>
+</p>
+</div></li>
+<li><a id="orgd596310"></a><br /></li></ol></li></ol>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Put your name here</p>
+<p class="date">Created: 2017-05-09 mar. 14:04</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
