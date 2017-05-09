@@ -140,6 +140,14 @@ makes its use not as fluid when using other languages than R.
 :ID:       a3acf95b-21d5-4621-a955-41bab99b38f6
 :END:
 :LOGBOOK:
+- State "TODO"       from "TODO"       [2017-05-09 mar. 16:49]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 16:49]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 16:49]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 16:30]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 16:27]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 16:15]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 16:15]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 16:15]
 - State "TODO"       from "TODO"       [2017-05-09 mar. 15:54]
 - State "TODO"       from "TODO"       [2017-05-09 mar. 15:54]
 - State "TODO"       from "TODO"       [2017-05-09 mar. 15:36]
@@ -152,6 +160,35 @@ makes its use not as fluid when using other languages than R.
 :END:
 - [ ] simulation «[[file:Papiers/Timeparallelsimulation.pdf][temps parallèle]]» (extrait du livre de
       Fujimoto, 2000)
+  - *Space parallel approch* : C'est la decomposition horizontale d'un
+    programme, où chaque process maintient ses variables d'état tout au long de la simulation.
+  - *Time parallel approch* :
+    - Propriétés : Parallélisme massif, indépendance des processeurs
+      logiques (moins de synchronisation)
+    - Approches : comment déterminer l'état initial des process (sauf le premier process), il faut corriger la trajectoire.
+      - *Fix-up computation* : Etat initial random, qui ne match presque
+        jamais, donc il faut faire une correction avec une seconde
+        simulation (et ca fonctionne grâce à la contraction des
+        ensembles de trajectoires) prenant en état initial l'état
+        final du process précédant. Et quand ca match, c'est gagné!
+        Fonction le mieux lorsque l'état final ne dépend pas de l'état
+        initial (2 itérations et c'est fini). Lorsque ce n'est pas le
+        cas, (pire cas) il faut pour N intervals, N itérations, soit
+        du sequentiel avec des ressources pour du parallèle
+        (bad!). *Exemple ou ca fonctionne* cache LRU.
+      - *Precomputation of state at specific time division points* : Il
+        se peut que dans certains programmes on puisse déterminer des
+        points spécifiques (débordement de buffer par exemple) qui
+        vont arriver et donc en faire des états de départ. :TODO: 6.2
+      - *Parallel prefix computations* :
+    - Plutôt utilisé pour développer des algo de simulation parallèle
+      spécifique.
+
+
+
+
+
+
 - [ ] Et un [[file:Papiers/PDS_fujimoto2015.pdf][autre]] Fujimoto (2015) pour avoir une vision d’ensemble sur la
       simulation parallèle (sauf sur la technique «  temps-parallèle »  qui
       n’est pas mentionnée dans cet article)
@@ -172,8 +209,8 @@ makes its use not as fluid when using other languages than R.
                 http://carothersc.github.io/ROSS/about.html
                 https://github.com/carothersc/ROSS. 
                 Voici en attachement 2 articles présentant CODES
-    - [[file:Papiers/P1884.pdf][1]]
-    - [[file:Papiers/LiuCarothers2012.pdf][2]]
+    -[ ] [[file:Papiers/P1884.pdf][1]]
+    -[ ] [[file:Papiers/LiuCarothers2012.pdf][2]]
   - [ ] Time Warp : Pour Time Warp il y a l’[[file:Papiers/Jefferson87.pdf][article]] de Jefferson et
                     al. qui résume à peu près.
 
@@ -244,4 +281,3 @@ Table of Contents
 
 Entered on [2017-05-09 mar. 13:45]
 ***** 
-**** Lecture de [[file:fujimoto.pdf][Fujimoto, simulation parallèle]]
