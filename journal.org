@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 #+STARTUP: overview indent inlineimages logdrawer
 #+TITLE:       Journal
-#+AUTHOR:      Put your name here
-#+LANGUAGE:    en
-#+TAGS: LIG(L) HOME(H) Europe(E) Blog(B) noexport(n) Stats(S)
-#+TAGS: Epistemology(E) Vulgarization(V) Teaching(T) R(R) OrgMode(O) Python(P)
+#+AUTHOR:      Maxime Chevalier 
+#+LANGUAGE:    fr
+#+TAGS: LIG(L) SimGrid(S) PSI3(P) CODES(C) ROSS(O) Space(A) Time(T)
+#+TAGS: R(R) OrgMode(M)
 #+EXPORT_SELECT_TAGS: Blog
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
@@ -134,6 +134,69 @@ makes its use not as fluid when using other languages than R.
 * 2017
 ** 2017-05 mai
 *** 2017-05-09 mardi
+**** TODO Lecture papiers [0/3]                                   :ATTACH:
+:PROPERTIES:
+:Attachments: PDS_fujimoto2015.pdf
+:ID:       a3acf95b-21d5-4621-a955-41bab99b38f6
+:END:
+:LOGBOOK:
+- State "TODO"       from "TODO"       [2017-05-09 mar. 15:54]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 15:54]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 15:36]
+- State "TODO"       from "DONE"       [2017-05-09 mar. 15:36]
+- State "DONE"       from "TODO"       [2017-05-09 mar. 15:36]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 15:36]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 15:36]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 15:36]
+- State "TODO"       from              [2017-05-09 mar. 15:12]
+:END:
+- [ ] simulation «[[file:Papiers/Timeparallelsimulation.pdf][temps parallèle]]» (extrait du livre de
+      Fujimoto, 2000)
+- [ ] Et un [[file:Papiers/PDS_fujimoto2015.pdf][autre]] Fujimoto (2015) pour avoir une vision d’ensemble sur la
+      simulation parallèle (sauf sur la technique «  temps-parallèle »  qui
+      n’est pas mentionnée dans cet article)
+- [-] Les outils : 
+  - [ ] SimGrid un simulateur d’applications parallèles 
+    http://simgrid.gforge.inria.fr (présentation générale http://simgrid.gforge.inria.fr/tutorials/simgrid-101.pdf)
+
+  - [-] PSi3 : 
+    - [-] un simulateur [développé par Inria] contenant une version
+      parallèle « à la Fujimoto/Nicol » 
+      https://gforge.inria.fr/projects/psi/ 
+    - [-]  [[file:Papiers/PDS_fujimoto2015.pdf][slides de présentation ci-joints (Briot/Vincent)]] 
+  - [ ] CODES : un simulateur [développé par Argonne] un simulateur
+                parallèle d’applications parallèles
+                https://press3.mcs.anl.gov/codes/ basé sur le framework
+  - [ ] ROSS :  simulateur parallèle, lui-même basé sur le
+                mécanisme Time Warp 
+                http://carothersc.github.io/ROSS/about.html
+                https://github.com/carothersc/ROSS. 
+                Voici en attachement 2 articles présentant CODES
+    - [[file:Papiers/P1884.pdf][1]]
+    - [[file:Papiers/LiuCarothers2012.pdf][2]]
+  - [ ] Time Warp : Pour Time Warp il y a l’[[file:Papiers/Jefferson87.pdf][article]] de Jefferson et
+                    al. qui résume à peu près.
+
+
+**** Réunion Maxime Chevalier, simulation parallèle
+- Lu chapitre simulation time // de Fujimoto
+- A lu papier sur SG, PSI, CODES/ROSS (torus)
+- A commencé à intégrer les notions de simulation time //, space //,
+  simulation parfaite, simulation de Monte Carlo, à évènements
+  discrets (pas forcément de chaine de Markov).
+- À faire:
+  - Journal:
+    - Créer un repos github privé et nous donner les droits
+      (alegrand, fperronnin).
+    - On vérifie la config org-mode
+  - Simulation:
+    - Installer CODES/ROSS
+    - Récupérer une trace de HPL (générée "en vrai" ou avec SimGrid)
+    - Rejouer cette trace au dessus de CODES en séquentiel
+    - Rejouer cette trace au dessus de SimGrid (en séquentiel donc)
+    - Rejouer cette trace au dessus de CODES en multi-core
+    - Rejouer cette trace au dessus de CODES en distribué (MPI)
+    - Puis on avise pour le time //
 **** Premiers pas avec org-mode
 #+begin_src sh :results output :exports both
 ls /tmp/
@@ -158,19 +221,26 @@ print("Hello")
 summary(cars)
 #+end_src
 
+#+BEGIN_EXAMPLE
+This seminar took place on March 7, 2016. The link to the video is below. Do not forget to check the section on software installation if you want to test yourself the demoed tools.
+
+Table of Contents
+#+END_EXAMPLE
+
 **** Réunion avec Florence et Arnaud
-***** TODO Mettre en place mon cahier de laboratoire [1/3]
+***** DONE Mettre en place mon cahier de laboratoire [3/3]
 :LOGBOOK:
+- State "DONE"       from "TODO"       [2017-05-09 mar. 15:05]
+- State "TODO"       from "TODO"       [2017-05-09 mar. 15:05]
 - State "TODO"       from "TODO"       [2017-05-09 mar. 13:54]
 - State "TODO"       from "STARTED"    [2017-05-09 mar. 13:54]
 - State "STARTED"    from "TODO"       [2017-05-09 mar. 13:52]
 - State "TODO"       from              [2017-05-09 mar. 13:52]
 :END:
 
-http://www.google.com
-- [-] github
+- [X] github
 - [X] org-mode
-- [ ] intégrer le mail
+- [X] intégrer le mail
 
 Entered on [2017-05-09 mar. 13:45]
 ***** 
