@@ -140,6 +140,20 @@ makes its use not as fluid when using other languages than R.
 :ID:       a3acf95b-21d5-4621-a955-41bab99b38f6
 :END:
 :LOGBOOK:
+- State "TODO"       from "TODO"       [2017-05-10 mer. 17:23]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 16:06]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 16:04]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 16:04]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 16:04]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 16:03]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 15:56]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 15:32]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 15:27]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 15:15]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 15:11]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 15:11]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 15:11]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 15:11]
 - State "TODO"       from "TODO"       [2017-05-10 mer. 14:39]
 - State "TODO"       from "TODO"       [2017-05-10 mer. 13:56]
 - State "TODO"       from "TODO"       [2017-05-10 mer. 13:48]
@@ -312,28 +326,98 @@ makes its use not as fluid when using other languages than R.
           plus tard.
 
 - [-] Les outils : 
-  - [ ] SimGrid un simulateur d’applications parallèles 
+  - [X] SimGrid un simulateur d’applications parallèles 
     http://simgrid.gforge.inria.fr (présentation générale http://simgrid.gforge.inria.fr/tutorials/simgrid-101.pdf)
 
-  - [-] PSi3 : 
-    - [-] un simulateur [développé par Inria] contenant une version
+    - SimDag : Framework pour application parralèles. Les tâches avec
+      dépendances limitent la parralèlisme. On fourni à SimDag le
+      graphe des tâches et ça retourne des informations sur les
+      machines qui ont fait tels taches.
+
+    - MPI : couche d'abstracton adapté à la programation parallèle
+      (partie communication).
+
+    - SMPI : Simule des application // avec MPI. Réalise le calcul
+      pour de vrais en simulant l'architecture, mais en séquentiel. LE
+      but c'est pas forcément le résultat, mais plutôt de voir si
+      l'algorithme fonctionne bien sur l'architecture choisie.
+
+    - MSG : Visualisation de données
+
+    - Fonctionne comme en RO pour simuler les architechtures.
+
+    - Permet plusieurs approches :
+
+      - On-line : simulation sur sa propre machine. Mais /!\ à la
+        topologie logique (grille par ex) qui est ensuite mappé sur
+        une topologie physique différente. SimGrid peut également
+        simuler cette différence.
+
+      - Off-line : Execution du programme sur un super-calculateur
+        puis récupération des traces. Avec ces trâces, rejouer avec
+        des topologies différentes. Cependant cette approche nécéssite
+        d'avoir accès à un super-calculateur, mais est limité pas la
+        taille initiale de la topologie (on peut difficilement
+        extrapoler). De plus, pour pouvoir jouer avec les trâce sur
+        des configurations différentes, il faut que le code soit
+        déterministe, hors il ne l'est pas nécessairement.
+
+  - [X] PSi3 : Perfect simulator. S'arrête à la districbution
+    stationnaire /!\ coût élevé
+    - [X] un simulateur [développé par Inria] contenant une version
       parallèle « à la Fujimoto/Nicol » 
-      https://gforge.inria.fr/projects/psi/ 
-    - [-]  [[file:Papiers/PDS_fujimoto2015.pdf][slides de présentation ci-joints (Briot/Vincent)]] 
-  - [ ] CODES : un simulateur [développé par Argonne] un simulateur
+      https://gforge.inria.fr/projects/psi/ dédié aux files d'attentes
+      réseaux (en temps discret). Le logiciel fournis des traces
+      d'éxecution qui sont ensuite utilisable pour analyse (avec R par
+      exemple). Ressemble beaucoup aux TD/DM de EP (les exemples).
+    - [X]  [[file:Papiers/PDS_fujimoto2015.pdf][slides de présentation ci-joints (Briot/Vincent)]] Simulation
+      de chaine de Markov, et utilisation des processus de vie et de
+      mort. Le nombre d'etat doit être inferieur à 10⁷ pour les
+      calculs numériques. Pour les simulations le cout est
+      linéaire. Le but est de générer beaucoup d'exemples grâce un
+      script de simulation pour ensuite les analyser. Psi3 permet de
+      faire des statistiques sur les réseaux à file finie sur des
+      évènements rare : rejet, blocage, ... avec la garantie
+      d'indépendance entre les traces. La simulation utilises
+      plusieurs coeurs (framework OpenMP cf RICM3). Il y a plusieurs
+      approches pour la simulation :
+      - Space //, Time // et les deux
+
+      - Backward simulation : chaque coeur fait une trace.
+
+      - Forward simulation *??*
+
+      - Peret la //isation des entrées sorties.
+  - [X] CODES : un simulateur [développé par Argonne] un simulateur
                 parallèle d’applications parallèles
-                https://press3.mcs.anl.gov/codes/ basé sur le framework
+                https://press3.mcs.anl.gov/codes/ basé sur le
+    framework ROSS. Ce simulateur a pour but d'augmenter la
+    parallélisation sur du stackage de masse et pour les applications
+    qui utilisent beaucoups de données. Dans le but de tester des
+    architectures Exascale qui n'existe pas encore. Ca permet de tester des
+    algorithmes avec une simulation de réseau faite par ROSS et des
+    simulations d'I/O modélisé par CODE. Avec ce simulateur on peut
+    mettre en évidence des goulots, évaluer la tolérance aux fautes,
+    la mise à l'échelle et les techniques de
+    "recovery". L'architechture TORUS (architecture réseau à plusieurs
+    dimmentions) a été directement ajouté dans CODES et non dans
+    ROSS. On peut donc ajouter nos propres modèles. Voici en
+    attachement 2 articles présentant CODES
+    -[X] [[file:Papiers/P1884.pdf][1]] 
+    - 4.2 - Figure 3 : pas compris les résultats de l'expérience. 
+    -[X] [[file:Papiers/LiuCarothers2012.pdf][2]] Possibilité de s'inspirer de ce papier pour la démarche sur
+    des études
   - [ ] ROSS :  simulateur parallèle, lui-même basé sur le
                 mécanisme Time Warp 
                 http://carothersc.github.io/ROSS/about.html
                 https://github.com/carothersc/ROSS. 
-                Voici en attachement 2 articles présentant CODES
-    -[ ] [[file:Papiers/P1884.pdf][1]]
-    -[ ] [[file:Papiers/LiuCarothers2012.pdf][2]]
+                
   - [ ] Time Warp : Pour Time Warp il y a l’[[file:Papiers/Jefferson87.pdf][article]] de Jefferson et
                     al. qui résume à peu près.
   - [ ] Slide d'Arnaud sur les infrastructures de calcul :
     http://mescal.imag.fr/membres/arnaud.legrand/blog/2015/03/25/intervention_isn-gz.pdf
+    - Tentative de mélanger les calculs et les communication pour
+      réduire les barrières (MUMPS)
 
 
 
