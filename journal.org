@@ -134,12 +134,22 @@ makes its use not as fluid when using other languages than R.
 * 2017
 ** 2017-05 mai
 *** 2017-05-09 mardi
-**** TODO Lecture papiers [0/3]                                   :ATTACH:
+**** TODO Lecture papiers [1/3]                                   :ATTACH:
 :PROPERTIES:
 :Attachments: PDS_fujimoto2015.pdf
 :ID:       a3acf95b-21d5-4621-a955-41bab99b38f6
 :END:
 :LOGBOOK:
+- State "TODO"       from "TODO"       [2017-05-10 mer. 11:06]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 11:06]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 10:40]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 10:38]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 10:35]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 10:35]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 10:35]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 10:33]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 10:18]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 09:40]
 - State "TODO"       from "TODO"       [2017-05-09 mar. 16:49]
 - State "TODO"       from "TODO"       [2017-05-09 mar. 16:49]
 - State "TODO"       from "TODO"       [2017-05-09 mar. 16:49]
@@ -158,10 +168,11 @@ makes its use not as fluid when using other languages than R.
 - State "TODO"       from "TODO"       [2017-05-09 mar. 15:36]
 - State "TODO"       from              [2017-05-09 mar. 15:12]
 :END:
-- [ ] simulation «[[file:Papiers/Timeparallelsimulation.pdf][temps parallèle]]» (extrait du livre de
+- [X] simulation «[[file:Papiers/Timeparallelsimulation.pdf][temps parallèle]]» (extrait du livre de
       Fujimoto, 2000)
   - *Space parallel approch* : C'est la decomposition horizontale d'un
     programme, où chaque process maintient ses variables d'état tout au long de la simulation.
+    - Plus flexible, et plus applicable (dans la plupart des cas).
   - *Time parallel approch* :
     - Propriétés : Parallélisme massif, indépendance des processeurs
       logiques (moins de synchronisation)
@@ -179,19 +190,39 @@ makes its use not as fluid when using other languages than R.
       - *Precomputation of state at specific time division points* : Il
         se peut que dans certains programmes on puisse déterminer des
         points spécifiques (débordement de buffer par exemple) qui
-        vont arriver et donc en faire des états de départ. :TODO: 6.2
+        vont arriver et donc en faire des états de départ. *Exemple* :
+        buffer avec N entrées de capacité 1 et une sortie de capacité C.
+        - Soit il y a overflow
+        - Soit il y a underflow
+        - Du coup chaque processus détermine si il part d'un
+          over/under et effectue sa simulation pour X services. Quand
+          il a fini, il envoie le reste de sa file d'attente au
+          processus d'après qui se charge de simuler l'interval entre
+          l'état d'arrêt du processus précédent, et son postulat de départ.
+        - À la fin, on peut calculer le nombre de service et de perte
+          en additionnant les résultats de chaque processus.
+        - Cependant ca pet échouer car les processus peuvent ne pas
+          atteindre l'objectif (overflow souvent car c'est très
+          rare). Il est donc très difficile d'identifier les points de division.
       - *Parallel prefix computations* :
+        - Utilisation de récurence car il existe de très bon
+          algorithmes pour faire du calcul prefix sur des systèmes parallèles.
+        - Il faut faire attention au ratio nbCalculs/nbProcesseurs. En
+          effet, si ce ratio tend vers 1, il y a des pertes à cause du
+          temps de communication entre les processeurs (qui est du
+          temps de calcul perdu).
+        - /!\ Je n'ai pas compris l'exemple de cette partie (page 9 et 10).
     - Plutôt utilisé pour développer des algo de simulation parallèle
       spécifique.
-
-
-
-
-
+    - Permet de parralléliser des cas où le space parralélisme ne
+      fonctionne pas (ou peu), comme dans les exemples.
+  - Dans certain cas, il est possible de mélanger les deux approches.
 
 - [ ] Et un [[file:Papiers/PDS_fujimoto2015.pdf][autre]] Fujimoto (2015) pour avoir une vision d’ensemble sur la
       simulation parallèle (sauf sur la technique «  temps-parallèle »  qui
       n’est pas mentionnée dans cet article)
+  - Lecture :
+    - PDES : Parallel Discrete Event Simulation.
 - [-] Les outils : 
   - [ ] SimGrid un simulateur d’applications parallèles 
     http://simgrid.gforge.inria.fr (présentation générale http://simgrid.gforge.inria.fr/tutorials/simgrid-101.pdf)
@@ -213,6 +244,9 @@ makes its use not as fluid when using other languages than R.
     -[ ] [[file:Papiers/LiuCarothers2012.pdf][2]]
   - [ ] Time Warp : Pour Time Warp il y a l’[[file:Papiers/Jefferson87.pdf][article]] de Jefferson et
                     al. qui résume à peu près.
+  - [ ] Slide d'Arnaud sur les infrastructures de calcul :
+    http://mescal.imag.fr/membres/arnaud.legrand/blog/2015/03/25/intervention_isn-gz.pdf
+
 
 
 **** Réunion Maxime Chevalier, simulation parallèle
