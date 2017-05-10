@@ -140,6 +140,12 @@ makes its use not as fluid when using other languages than R.
 :ID:       a3acf95b-21d5-4621-a955-41bab99b38f6
 :END:
 :LOGBOOK:
+- State "TODO"       from "TODO"       [2017-05-10 mer. 14:39]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 13:56]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 13:48]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 13:48]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 13:48]
+- State "TODO"       from "TODO"       [2017-05-10 mer. 13:13]
 - State "TODO"       from "TODO"       [2017-05-10 mer. 11:06]
 - State "TODO"       from "TODO"       [2017-05-10 mer. 11:06]
 - State "TODO"       from "TODO"       [2017-05-10 mer. 10:40]
@@ -218,11 +224,93 @@ makes its use not as fluid when using other languages than R.
       fonctionne pas (ou peu), comme dans les exemples.
   - Dans certain cas, il est possible de mélanger les deux approches.
 
-- [ ] Et un [[file:Papiers/PDS_fujimoto2015.pdf][autre]] Fujimoto (2015) pour avoir une vision d’ensemble sur la
+- [-] Et un [[file:Papiers/PDS_fujimoto2015.pdf][autre]] Fujimoto (2015) pour avoir une vision d’ensemble sur la
       simulation parallèle (sauf sur la technique «  temps-parallèle »  qui
       n’est pas mentionnée dans cet article)
   - Lecture :
-    - PDES : Parallel Discrete Event Simulation.
+    - *PDES* : Parallel Discrete Event Simulation. But : accelerer
+      l'execution des simulation. Les "pas" de simulations sont
+      irrégulier. Peut être vu comme une collection d'evenements
+      sequentiels discret, qui interagissent par des messages
+      datés. Un PDES doit fournir les mêmes résutats que le programme
+      en séquentiel (ou parfois aproximativement les mêmes). Le
+      principal problèlme c'est la synchrinisation entre les
+      differents processus.
+
+    - *Simulation distribué* : concerne l'execution de simulation sur
+      des machines séparé "géographiquement", où l'agrégation de
+      simulation pour un environnement de simulation (*exemple*
+      simulateur de vol,...). Synchronisation = time management. De
+      gros efforts ont été fait pour developer des standards
+      d'interconnection de simulation (DIS,HLA) qui, entre autre
+      réduisent le nombre de message envoyé.
+
+    - *Synchronisation conservative* : Permet d'avoir le même résultat
+      qu'une exécution séquentielle sur un processeur monocœur. Cette
+      propriété peut être montré en s'assurant que chaque processus
+      logique traite les messages par leurs dates.
+
+      - Première génération : Pour qu'il y ait du parallèlisme, il
+        faut cependant que certains LP (processus logique) puissent
+        prendre de l'avance. Pour cela il faut s'assurer que l'on ne
+        recevera pas d'event avec un horadatage plus petit que celui
+        qu'on va executer (*ALGO CMB). *Contraintes* : réseau FIFO. Tant qu'il y a
+        des messages dans les buffers le LP à l'information. Si le
+        buffer est vide, il doit se bloquer /!\ il peut y avoir des
+        interblocages. Pour les éviter les LPs envoient des messages
+        nulls qui garantissent les horodatages. Les LP ont aussi un
+        *lookahead* qui defini le temps min avant l'envoie d'un autre
+        message (l'horadatage du prochain evenement doit être bien
+        plus grand que le temps actuel). Cependant, si il est trop petit, de nombreux messages
+        inutiles peuvent être envoyé si il y a blocage (cf exemple
+        fin page 4).
+
+      - Seconde génération : Dans un premiers temps, les nouveaux algo
+        ont tenté de supprimer le problème de lookahead en utilisant
+        le plus petit horadatage d'event dans le système, pour passer
+        directement à la suite. D'autres approche complétement
+        différentes de CMB ont été tenté, avec par exemple YAWNS qui
+        utilise des points globaux de synchronisation (des
+        barrières). *Schéma lookahead* question : Je suis pas sûr de
+        comprendre comment ca marche...
+
+    - *Synchronisation optimiste* : Les events ne sont plus éxécutés
+      strictement dans l'ordre.(*TIME WARP*)contrairement aux algorithmes
+      précédents, les erreurs sont possible, mais un mécanisme de
+      rollback permet de retourner dans un état sain grâce à deu
+      mécanismes :
+
+      - *Mécanisme de control local* : Si un LP recoit un event daté de
+        50 et qu'il en est à 100, il va faire un rollback
+        jusqu'a 50. Cependant, si il y a eu modification des variables
+        d'état, ou envoie de message ca ne peut pas être annulé. Pour
+        les variables d'état il est possible de les sauvegarder avant
+        modification (*copy state saving*) qui a un *cout* en temps de
+        copie et en mémoire) ou faire de *l'incremental state saving*
+        qui sauvegarder seulement les infos qu'on a modifié mais qui
+        nécessite d'avoir les adresses des variables (à
+        modifier/backup). Une autre technique est le *reverse
+        computation* (si un event fait +1, on fait -1) qui est la plus
+        avantageuse des 3, mais ca peut de
+        pas être réalisable. Pour les messages, un système anti
+        message récursif a été mis au point. On r'envoie le message
+        identique avec un marqueur, si il a pasété traité, il est
+        supprimé de la file, sinon il y a rollback pour le LP qui
+        recoit l'anti-message (et ainsi de suite, pouvant conduire à
+        des rollbacks en cascade /!\)
+
+      - *Mécanisme de contrôle global* : GVT : Pas compris. C'est un
+        état global, mais j'ai pas compris comment il est utilisé/ce
+        qui est sauvegardé. Mécanisme de coupe comme vu en algo
+        distribué (RICM4).
+
+        - D'autres pistes sont envisagées, comme limiter dans une
+          fenêtre de temps les LPs (ce qui empêche certains LP d'être
+          trop en avance et de faire beaucoup de rollback). Une autre
+          technique et de retarder les envoies de messages jusqu'a ce
+          que ce soit garantie que l'envoie ne va pas être rollback
+          plus tard.
+
 - [-] Les outils : 
   - [ ] SimGrid un simulateur d’applications parallèles 
     http://simgrid.gforge.inria.fr (présentation générale http://simgrid.gforge.inria.fr/tutorials/simgrid-101.pdf)
