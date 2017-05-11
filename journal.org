@@ -1,7 +1,7 @@
 # -*- mode: org -*-
 # -*- coding: utf-8 -*-
 #+STARTUP: overview indent inlineimages logdrawer
-#+TITLE:       Journal
+#+TITLE:       Journal de bord
 #+AUTHOR:      Maxime Chevalier 
 #+LANGUAGE:    fr
 #+TAGS: LIG(L) SimGrid(S) PSI3(P) CODES(C) ROSS(O) Space(A) Time(T)
@@ -134,12 +134,17 @@ makes its use not as fluid when using other languages than R.
 * 2017
 ** 2017-05 mai
 *** 2017-05-09 mardi
-**** TODO Lecture papiers [1/3]                                   :ATTACH:
+**** DONE Lecture papiers [3/3]                                   :ATTACH:
 :PROPERTIES:
 :Attachments: PDS_fujimoto2015.pdf
 :ID:       a3acf95b-21d5-4621-a955-41bab99b38f6
 :END:
 :LOGBOOK:
+- State "DONE"       from "TODO"       [2017-05-11 jeu. 15:12]
+- State "TODO"       from "TODO"       [2017-05-11 jeu. 14:56]
+- State "TODO"       from "TODO"       [2017-05-11 jeu. 11:23]
+- State "TODO"       from "TODO"       [2017-05-11 jeu. 11:03]
+- State "TODO"       from "TODO"       [2017-05-11 jeu. 09:53]
 - State "TODO"       from "TODO"       [2017-05-10 mer. 17:23]
 - State "TODO"       from "TODO"       [2017-05-10 mer. 16:06]
 - State "TODO"       from "TODO"       [2017-05-10 mer. 16:04]
@@ -238,7 +243,7 @@ makes its use not as fluid when using other languages than R.
       fonctionne pas (ou peu), comme dans les exemples.
   - Dans certain cas, il est possible de mélanger les deux approches.
 
-- [-] Et un [[file:Papiers/PDS_fujimoto2015.pdf][autre]] Fujimoto (2015) pour avoir une vision d’ensemble sur la
+- [X] Et un [[file:Papiers/PDS_fujimoto2015.pdf][autre]] Fujimoto (2015) pour avoir une vision d’ensemble sur la
       simulation parallèle (sauf sur la technique «  temps-parallèle »  qui
       n’est pas mentionnée dans cet article)
   - Lecture :
@@ -286,7 +291,10 @@ makes its use not as fluid when using other languages than R.
         différentes de CMB ont été tenté, avec par exemple YAWNS qui
         utilise des points globaux de synchronisation (des
         barrières). *Schéma lookahead* question : Je suis pas sûr de
-        comprendre comment ca marche...
+        comprendre comment ca marche... *Réponse* : SimGrid ne
+        fonctionne pas sur ce modèle. C'est juste dire aux autres LPs
+        que le LP ne va pas envoyer de message avant T+L, et qu'ils
+        peuvent donc process jusque là.
 
     - *Synchronisation optimiste* : Les events ne sont plus éxécutés
       strictement dans l'ordre.(*TIME WARP*)contrairement aux algorithmes
@@ -316,7 +324,11 @@ makes its use not as fluid when using other languages than R.
       - *Mécanisme de contrôle global* : GVT : Pas compris. C'est un
         état global, mais j'ai pas compris comment il est utilisé/ce
         qui est sauvegardé. Mécanisme de coupe comme vu en algo
-        distribué (RICM4).
+        distribué (RICM4). Ok donc GVT c'est une barrière dans le
+        temps avant laquelle on ne peut pas revenir lors d'un
+        rollback. Du coup, il est possible de libérer les ressources
+        utilisé pour sauvegarder les états avant cette barrière.
+        https://www.acm-sigsim-mskr.org/Courseware/Fujimoto/Slides/FujimotoSlides-12-ComputingGlobalVirtualTime.pdf
 
         - D'autres pistes sont envisagées, comme limiter dans une
           fenêtre de temps les LPs (ce qui empêche certains LP d'être
@@ -325,7 +337,7 @@ makes its use not as fluid when using other languages than R.
           que ce soit garantie que l'envoie ne va pas être rollback
           plus tard.
 
-- [-] Les outils : 
+- [X] Les outils : 
   - [X] SimGrid un simulateur d’applications parallèles 
     http://simgrid.gforge.inria.fr (présentation générale http://simgrid.gforge.inria.fr/tutorials/simgrid-101.pdf)
 
@@ -385,7 +397,7 @@ makes its use not as fluid when using other languages than R.
 
       - Backward simulation : chaque coeur fait une trace.
 
-      - Forward simulation *??*
+      - Forward simulation *?? question*
 
       - Peret la //isation des entrées sorties.
   - [X] CODES : un simulateur [développé par Argonne] un simulateur
@@ -407,17 +419,60 @@ makes its use not as fluid when using other languages than R.
     - 4.2 - Figure 3 : pas compris les résultats de l'expérience. 
     -[X] [[file:Papiers/LiuCarothers2012.pdf][2]] Possibilité de s'inspirer de ce papier pour la démarche sur
     des études
-  - [ ] ROSS :  simulateur parallèle, lui-même basé sur le
+  - [X] ROSS :  simulateur parallèle, lui-même basé sur le
                 mécanisme Time Warp 
-                http://carothersc.github.io/ROSS/about.html
+                http://carothersc.github.io/ROSS/about.html . La
+    simulation est basé sur des LPs, chacun modélisant un composant du
+    système. Pour communiquer, les LPs utilisent des message horodaté.
                 https://github.com/carothersc/ROSS. 
                 
-  - [ ] Time Warp : Pour Time Warp il y a l’[[file:Papiers/Jefferson87.pdf][article]] de Jefferson et
-                    al. qui résume à peu près.
-  - [ ] Slide d'Arnaud sur les infrastructures de calcul :
-    http://mescal.imag.fr/membres/arnaud.legrand/blog/2015/03/25/intervention_isn-gz.pdf
+  - [X] Time Warp : Pour Time Warp il y a l’[[file:Papiers/Jefferson87.pdf][article]] de Jefferson et
+                    al. qui résume à peu près. Utilisation d'un temps
+    virtuel pour la synchronisation (Jefferson, cf Cours AD
+    RICM4). Principe du rollback cité plus haut. Time Warp est à la
+    base un OS, car le faire au dessus d'un autre OS n'ayant pas la
+    même logique doublé tous les éléments (scheduling, I/O, ...). Time
+    Warp est destiné aux applications utilisant un temps logique ou un
+    temps de simulation dans leur modèle. La condition FIFO n'est plus
+    nécessaire même si elle est préférable. Il y a régulierement des
+    sauvegarde globales du système (de type GVT je suppose).
+    - Anti-message : Comme vu plus haut, mais plus détailé. Chaque
+      message envoyé engendre un anti-message dans le "buffer"
+      d'emission qui n'est pas envoyé. Cependant, si il y a un
+      rollback, le LP reprend son exécution et à chaque envoie de
+      message, il compare avec les anti-message : si il y a un même
+      message anti + nouveau, les deux sont supprimé (on a déjà envoyé
+      le message), si il n'y a pas correspondance, un anti-message du
+      nouveau est conservé. Tous les anti-message non représenté
+      durant la réexecution doivent être annulé chez les autres
+      LPs. Ensuite c'est l'algo en cascade.
+
+    - La communication entre les processus ne se fait pas via des
+      pipe,... il n'est donc pas nécéssaire de déclarer quel process
+      communique avec quel process. Il suffi de faire un
+      send. Question : != entre QueryMessage et EventMessage
+
+    - Structure d'un process : cf page 10
+
+    - Les processus s'executent qu'a la réception de message et font
+      le traitement, ils ne font pas de calcul en dehors. Ils peuvent
+      cependant s'envoyer eux-même des messages. Les processus doivent
+      être deterministe (l'execution d'une même entrée doit donner la
+      même sortie pour eviter les rollback en cascade. Pour les nombre
+      aléa jouer avec la seed).
+
+    - Utilisation de beaucoup de mémoire pour le GVT et pour la
+      sauvegarde des anti-messages. Si il y a plus de place, le plus
+      grand message (T dans le système, le plus loin dans le futur) est désenvoyé ce qui cause un rollback quelque
+      part et donc libère de la place. Le méssage sera réenvoyé plus tard.
+
+  - [X] Slide d'Arnaud sur les infrastructures de calcul :
+   http://mescal.imag.fr/membres/arnaud.legrand/blog/2015/03/25/intervention_isn-gz.pdf
     - Tentative de mélanger les calculs et les communication pour
       réduire les barrières (MUMPS)
+
+    - Explication simple d'un calcul de pivot sur une matrice
+      diagonale.
 
 
 
@@ -486,4 +541,23 @@ Table of Contents
 - [X] intégrer le mail
 
 Entered on [2017-05-09 mar. 13:45]
-***** 
+******
+*** 2017-05-11 jeudi
+**** Fin des lectures
+**** Installation CODES/ROSS sur ma machine
+***** STARTED ROSS                                                 :ROSS:
+:LOGBOOK:
+- State "STARTED"    from "TODO"       [2017-05-11 jeu. 17:51]
+- State "TODO"       from              [2017-05-11 jeu. 17:51]
+:END:
+Requirement  : C compiler (C11 prefered but not required)
+Machine : Fedora 25, gcc version 6.3.1, intel core i5
+***** TODO CODES                                                  :CODES:
+:LOGBOOK:
+- State "TODO"       from              [2017-05-11 jeu. 17:51]
+:END:
+Sources : https://press3.mcs.anl.gov/codes/downloads/
+Version : 0.5.2
+
+
+
