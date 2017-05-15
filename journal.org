@@ -545,8 +545,13 @@ Entered on [2017-05-09 mar. 13:45]
 *** 2017-05-11 jeudi
 **** Fin des lectures
 **** Installation CODES/ROSS sur ma machine
-***** STARTED ROSS                                                 :ROSS:
+***** DEFERRED ROSS                                                :ROSS:
 :LOGBOOK:
+- State "DEFERRED"   from              [2017-05-15 lun. 13:35]
+- State "DEFERRED"   from "CANCELLED"  [2017-05-15 lun. 13:35]
+- State "CANCELLED"  from "DONE"       [2017-05-15 lun. 13:35]
+- State "DONE"       from "APPT"       [2017-05-15 lun. 13:35]
+- State "APPT"       from "WAITING"    [2017-05-15 lun. 13:35]
 - State "STARTED"    from "TODO"       [2017-05-11 jeu. 17:51]
 - State "TODO"       from              [2017-05-11 jeu. 17:51]
 :END:
@@ -602,6 +607,14 @@ gedit .bash_profile
 J'y ai cru mais en fait non...
 
 *** 2017-05-15 lundi
+
+**** ROSS                                                           :ROSS:
+Reprise de l'installation, sur un nouvel environnement, Ubuntu cette
+foi-ci.
+On repart du début.
+https://github.com/carothersc/ROSS
+
+
 **** TODO CODES                                                    :CODES:
 :LOGBOOK:
 - State "TODO"       from              [2017-05-11 jeu. 17:51]
@@ -609,3 +622,13 @@ J'y ai cru mais en fait non...
 Sources : https://press3.mcs.anl.gov/codes/downloads/
 Version : 0.5.2
 Entered on [2017-05-15 lun. 09:34]
+**** test de ma configuration
+:LOGBOOK:
+- State "DEFERRED"   from "CANCELLED"  [2017-05-15 lun. 13:33]
+- State "CANCELLED"  from "DONE"       [2017-05-15 lun. 13:32]
+- State "DONE"       from "APPT"       [2017-05-15 lun. 13:32]
+- State "APPT"       from "WAITING"    [2017-05-15 lun. 13:32]
+- State "STARTED"    from "TODO"       [2017-05-15 lun. 13:32]
+- State "TODO"       from              [2017-05-15 lun. 13:32]
+:END:
+Entered on [2017-05-15 lun. 13:32]
