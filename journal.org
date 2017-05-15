@@ -550,14 +550,62 @@ Entered on [2017-05-09 mar. 13:45]
 - State "STARTED"    from "TODO"       [2017-05-11 jeu. 17:51]
 - State "TODO"       from              [2017-05-11 jeu. 17:51]
 :END:
-Requirement  : C compiler (C11 prefered but not required)
-Machine : Fedora 25, gcc version 6.3.1, intel core i5
-***** TODO CODES                                                  :CODES:
+Lien Git : https://github.com/carothersc/ROSS
+Requirement  : 
+- C compiler (C11 prefered but not required)
+- CMake : https://cmake.org (2.8 min) -> 3.6.2
+#+begin_src sh
+sudo yum install cmake
+#+end_src
+- Implémentation MPI : MPICH recommandé -> 3.2
+#+begin_src sh
+sudo yum install mpich
+#+end_src
+Machine : Fedora 25, gcc version 6.3.1, intel core i5, 8Go de RAM
+****** Tentative installation 1
+Ca ne fonctionne pas en suivant les étapes du git, je supprime le
+dossier et je passe par un autre tuto.
+****** Tentative d'installation 2
+https://github.com/carothersc/ROSS/wiki/Installation
+En fait j'ai une erreur dans la configuration de cmake...
+#+BEGIN_EXAMPLE
+CMake Error at /usr/share/cmake/Modules/CMakeDetermineCCompiler.cmake:57 (message):
+  Could not find compiler set in environment variable CC:
+
+  mpicc.
+Call Stack (most recent call first):
+  CMakeLists.txt:1 (PROJECT)
+
+
+CMake Error: CMAKE_C_COMPILER not set, after EnableLanguage
+-- Configuring incomplete, errors occurred!
+See also "/home/chevamax/Documents/ross-build/CMakeFiles/CMakeOutput.log".
+#+END_EXAMPLE
+
+(lundi 15 mai)
+En fait mpich n'était pas dans mon PATH...
+On retante.
+Ca ne marche toujours pas, mais je viens de
+trouver. https://ask.fedoraproject.org/en/question/32864/mpirun-command-not-found/
+Il faut charger le module pour pouvoir l'utiliser. Du coup il faut
+ajouter cette ligne au fichier de conf : 
+
+#+BEGIN_EXAMPLE
+module load mpi/mpich-x86_64 
+#+END_EXAMPLE
+
+#+begin_src
+cd
+gedit .bash_profile
+#+end_src
+
+J'y ai cru mais en fait non...
+
+*** 2017-05-15 lundi
+**** TODO CODES                                                    :CODES:
 :LOGBOOK:
 - State "TODO"       from              [2017-05-11 jeu. 17:51]
 :END:
 Sources : https://press3.mcs.anl.gov/codes/downloads/
 Version : 0.5.2
-
-
-
+Entered on [2017-05-15 lun. 09:34]
