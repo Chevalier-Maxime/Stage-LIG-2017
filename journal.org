@@ -607,28 +607,56 @@ gedit .bash_profile
 J'y ai cru mais en fait non...
 
 *** 2017-05-15 lundi
-
-**** ROSS                                                           :ROSS:
+**** DONE ROSS                                                      :ROSS:
+:LOGBOOK:
+- State "DONE"       from ""       [2017-05-15 lun. 14:35]
+:END:
 Reprise de l'installation, sur un nouvel environnement, Ubuntu cette
-foi-ci.
+foi-ci (17.04)
 On repart du début.
 https://github.com/carothersc/ROSS
+Version gcc : 6.3.0 20170406
+Version cmake : 3.7.2-1
+Version MPICH : 3.2-7
+Version Doxygen 1.8.13
 
+C'est bon tout fonctionne !
+#+BEGIN_EXAMPLE
+git clone -b master --single-branch git@github.com:carothersc/ROSS.git
+mkdir ROSS-build
+cd ROSS-build
+export ARCH=x86_64
+export CC=mpicc
+cmake -DROSS_BUILD_MODELS=ON ../ROSS
+make
+make test
+#+END_EXAMPLE
 
-**** TODO CODES                                                    :CODES:
+Avec ces commandes, on peut tester si tout fonctionne bien (car on a
+des modèles et des tests). Si tout passe c'est OK. Merci ubuntu.
+
+**** DONE CODES                                                    :CODES:
 :LOGBOOK:
+- State "DONE"       from "APPT"       [2017-05-15 lun. 17:17]
+- State "APPT"       from "WAITING"    [2017-05-15 lun. 17:17]
+- State "STARTED"    from "TODO"       [2017-05-15 lun. 17:17]
 - State "TODO"       from              [2017-05-11 jeu. 17:51]
 :END:
 Sources : https://press3.mcs.anl.gov/codes/downloads/
 Version : 0.5.2
 Entered on [2017-05-15 lun. 09:34]
-**** test de ma configuration
-:LOGBOOK:
-- State "DEFERRED"   from "CANCELLED"  [2017-05-15 lun. 13:33]
-- State "CANCELLED"  from "DONE"       [2017-05-15 lun. 13:32]
-- State "DONE"       from "APPT"       [2017-05-15 lun. 13:32]
-- State "APPT"       from "WAITING"    [2017-05-15 lun. 13:32]
-- State "STARTED"    from "TODO"       [2017-05-15 lun. 13:32]
-- State "TODO"       from              [2017-05-15 lun. 13:32]
-:END:
-Entered on [2017-05-15 lun. 13:32]
+Mainenant que ROSS a l'air de fonctionner on passe à CODES.
+
+En fait pour installer les deux il suffi de suivre les consignes dans
+le fichier d'installation de CODES.
+
+**** Traces HPL
+Maintenant que tout est installé et que je commence à comprendre, il
+faut se diriger vers le premier objectif.
+Je lis donc la doc GETTING STARTED, pour comprendre comment se compose
+le logiciel, et avoir un point d'entrée.
+***** Meeting avec Florance
+CODES utilise DUMPI pour les traces. Il faut donc que je génère des
+trâces avec mon PC grace à un logiciel HPL en MPI, que je pourrais
+réinjecter. On tente de voir Arnaud demain.
+
