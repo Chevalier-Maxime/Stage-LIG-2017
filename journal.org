@@ -655,13 +655,39 @@ Maintenant que tout est installé et que je commence à comprendre, il
 faut se diriger vers le premier objectif.
 Je lis donc la doc GETTING STARTED, pour comprendre comment se compose
 le logiciel, et avoir un point d'entrée.
-***** Meeting avec Florance
+***** Meeting avec Florence
 CODES utilise DUMPI pour les traces. Il faut donc que je génère des
 trâces avec mon PC grace à un logiciel HPL en MPI, que je pourrais
 réinjecter. On tente de voir Arnaud demain.
 *** 2017-05-16 mardi
-**** TODO DUPI
+**** TODO DUMPI
 http://sst.sandia.gov/about_dumpi.html
 J'ai l'impression qu'il faut installer tout le simulateur(SST) pour pouvoir
 profiter de DUMPI. Cependant ils parlent le package, alors c'est peut
 être un standalone 
+profiter de DUMPI. 
+**** Meeting avec Florence et Arnaud
+- Les sources de DUMPI sont en fait sur [[https://github.com/sstsimulator/sst-dumpi][github]].
+- D'après la [[https://github.com/sstsimulator/sst-dumpi/blob/master/docs/traceformat.dox][documentation]], c'est un format binaire et je ne suis pas
+  sûr qu'il y ait moyen de générer de telles traces sans passer par
+  leur bibliothèque. Si on veut de grosses traces (pour donner à
+  manger à CODES), ça va être compliqué. Il aurait été pratique de les
+  obtenir avec SimGrid (et le travail de Tom) mais il faudrait que
+  SimGrid puisse générer du DUMPI.
+- Après discussion rapide avec Lucas Schnorr, il est possible que
+  DUMPI fonctionne avec SMPI puisque SMPI implémente PMPI sur lequel
+  DUMPI se branche. Lucas avait réussi avec akypuera
+  (http://github.com/schnorr/akypuera). On verra plus tard de toutes
+  façons, il faut commencer par une petite trace.
+- On n'a aucune idée de comment visualiser ou analyser les traces
+  DUMPI. Je ne sais pas comment les convertir vers un autre
+  format. Une possibilité serait de passer par [[https://github.com/hkustliqi/DUMPI_parser][ce parseur]] mais ça
+  reste un pari.
+
+À faire (sur ta machine pour commencer):
+- Lancer HPL avec 12 processus (par exemple) et une matrice de taille
+  20,000. Ne pas hésiter à aller voir Tom ou Christian si tu veux un
+  fichier d'entrée pour HPL qui correspond à ceci.
+- Suivre les informations de traçage de DUMPI (probablement à base de
+  =LD_PRELOAD= et de =-ldumpi=) pour tracer HPL.
+- Essayer de la rejouer sur ROSS.
