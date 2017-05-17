@@ -787,7 +787,7 @@ existe, je sais pas si elle optimise certain processeurs).
 MPdir = /usr/lib/mpich
 
 En suivant le tuto pour raspberry pi, j'ai un problème (surement de
-configuration). Voici la trace de l'erreur :
+configuration). Voici la trace de l'erreur pour la partie 4 du tuto :
 
 #+BEGIN_EXAMPLE
 make[2] : on entre dans le répertoire « /home/chevamax/Documents/Stage_LIG_2017/hpl-2.2/testing/ptest/linux »
@@ -810,3 +810,6 @@ mpif77 -pthread -o /home/chevamax/Documents/Stage_LIG_2017/hpl-2.2/bin/linux/xhp
 /usr/lib/mpich/lib/libmpich.a(lib_libmpich_la-mpid_nem_ckpt.o) : Dans la fonction « MPIDI_nem_ckpt_init » :
 (.text+0xca5) : référence indéfinie vers « cr_init »
 #+END_EXAMPLE
+
+Je sais pas du tout qu'est ce qui manque. Est-ce que ça a un lien avec
+BLCR ? Si oui il va falloir que je me lance dans l'installation.
