@@ -721,7 +721,7 @@ effet, les signatures entre les .h de mpi et l'implémentation de DUMPI
 diffèrent. Je vais donc voir si je dois prendre une version moins
 récente de MPICH.
 *** 2017-05-17 mardi
-**** Installation de MPICH
+**** DONE Installation de MPICH                                    :CODES:
 En reregardant la doc de CODES, il y a justement un avertissement sur
 DUMPI. 
 "To enable network tracing with dumpi
@@ -744,6 +744,8 @@ make
 make install
 make doc
 #+end_src
+EDIT : il faut ensuite ajouter le chemin vers ~/dumpi-inst/lib dans le
+fichier /etc/ld.so.conf et faire un ldconfig
 
 Du coup il faut que je réinstalle CODES avec les le chemin vers dumpi.
 
@@ -759,4 +761,52 @@ make && make install
 make tests && make check
 #+end_src
 
+Maintenant les tests ne passent plus ...
+#+BEGIN_EXAMPLE
+tests/workload/codes-workload-test: error while loading shared libraries: libundumpi.so.3: cannot open shared object file: No such file or directory
+FAIL tests/workload/codes-workload-test.sh (exit status: 127)
+#+END_EXAMPLE
 
+J'ai du louper une étape.
+En cherchant sur internet j'ai vu qu'on pouvait ajouter des librairies
+dans le fichier /etc/ld.so.conf En ajoutant le chemin vers la
+librairie dumpi ca fonctionne.
+
+**** Installation de HPL
+lien : http://www.netlib.org/benchmark/hpl/software.html
+inspiration de : [[https://www.howtoforge.com/tutorial/hpl-high-performance-linpack-benchmark-raspberry-pi/][installation raspberry pi]] [[http://www.crc.nd.edu/~rich/CRC_Summer_Scholars_2014/HPL-HowTo.pdf][How to sur cluster]]
+
+#+begin_src sh
+sudo apt-get install libatlas-base-dev libmpich2-dev gfortran
+#+end_src
+
+le paquet libmpich2-dev n'existe plus dans les repos, j'ai donc pris
+libmpich-dev qui la remplace (il y a cependant une version :i386 qui
+existe, je sais pas si elle optimise certain processeurs).
+
+MPdir = /usr/lib/mpich
+
+En suivant le tuto pour raspberry pi, j'ai un problème (surement de
+configuration). Voici la trace de l'erreur :
+
+#+BEGIN_EXAMPLE
+make[2] : on entre dans le répertoire « /home/chevamax/Documents/Stage_LIG_2017/hpl-2.2/testing/ptest/linux »
+mpif77  -o /home/chevamax/Documents/Stage_LIG_2017/hpl-2.2/bin/linux/xhpl HPL_pddriver.o         HPL_pdinfo.o           HPL_pdtest.o /home/chevamax/Documents/Stage_LIG_2017/hpl-2.2/lib/linux/libhpl.a  /usr/lib/atlas-base/libf77blas.a /usr/lib/atlas-base/libatlas.a -lblas /usr/lib/mpich/lib/libmpich.a
+/usr/lib/mpich/lib/libmpich.a(lib_libmpich_la-initthread.o) : Dans la fonction « MPIR_Init_thread » :
+(.text+0xb8) : référence indéfinie vers « pthread_mutexattr_init »
+/usr/lib/mpich/lib/libmpich.a(lib_libmpich_la-initthread.o) : Dans la
+fonction « MPIR_Init_thread » :
+#+END_EXAMPLE
+
+En ajoutant -pthread dans les flag on arrive à compiler.
+
+Maintenant nouveau problème : 
+#+Begin_Example
+mpif77 -pthread -o /home/chevamax/Documents/Stage_LIG_2017/hpl-2.2/bin/linux/xhpl HPL_pddriver.o         HPL_pdinfo.o           HPL_pdtest.o /home/chevamax/Documents/Stage_LIG_2017/hpl-2.2/lib/linux/libhpl.a  /usr/lib/atlas-base/libf77blas.a /usr/lib/atlas-base/libatlas.a -lblas /usr/lib/mpich/lib/libmpich.a
+/usr/lib/mpich/lib/libmpich.a(lib_libmpich_la-mpid_nem_ckpt.o) : Dans la fonction « ckpt_cb » :
+(.text+0x342) : référence indéfinie vers « cr_checkpoint »
+/usr/lib/mpich/lib/libmpich.a(lib_libmpich_la-mpid_nem_ckpt.o) : Dans la fonction « ckpt_cb » :
+(.text+0x3e3) : référence indéfinie vers « cr_get_restart_info »
+/usr/lib/mpich/lib/libmpich.a(lib_libmpich_la-mpid_nem_ckpt.o) : Dans la fonction « MPIDI_nem_ckpt_init » :
+(.text+0xca5) : référence indéfinie vers « cr_init »
+#+END_EXAMPLE
