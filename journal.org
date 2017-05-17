@@ -663,4 +663,5 @@ réinjecter. On tente de voir Arnaud demain.
 **** TODO DUPI
 http://sst.sandia.gov/about_dumpi.html
 J'ai l'impression qu'il faut installer tout le simulateur(SST) pour pouvoir
-profiter de DUMPI. 
+profiter de DUMPI. Cependant ils parlent le package, alors c'est peut
+être un standalone 
