@@ -5,7 +5,7 @@
 #+AUTHOR:      Maxime Chevalier 
 #+LANGUAGE:    fr
 #+TAGS: LIG(L) SimGrid(S) PSI3(P) CODES(C) ROSS(O) Space(A) Time(T)
-#+TAGS: R(R) OrgMode(M)
+#+TAGS: R(R) OrgMode(M) Deprecated(D)
 #+EXPORT_SELECT_TAGS: Blog
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
@@ -683,6 +683,15 @@ profiter de DUMPI.
   DUMPI. Je ne sais pas comment les convertir vers un autre
   format. Une possibilité serait de passer par [[https://github.com/hkustliqi/DUMPI_parser][ce parseur]] mais ça
   reste un pari.
+- Il existe deux types de trâces, profiling (info de bases) ou une
+  trâce complète (avec des outils comme DUMPI, EXTRAE, TAU/SCALASCA,
+  OTF2 (format vers lequel tout le monde tend mais encore incomplet),
+  POTI, ...
+- DUMPI fait parti du projet SST, qui rassemble plusieurs projets
+  - SST-MACRO : ressemble à SimGrid mais fonctionne en C++, et a des
+    contraintes différentes. Il est encore en activité.
+  - SST-Micro : pour simuler des tous petits systèmes de manière très
+    détaillée.
 
 À faire (sur ta machine pour commencer):
 - Lancer HPL avec 12 processus (par exemple) et une matrice de taille
@@ -691,3 +700,63 @@ profiter de DUMPI.
 - Suivre les informations de traçage de DUMPI (probablement à base de
   =LD_PRELOAD= et de =-ldumpi=) pour tracer HPL.
 - Essayer de la rejouer sur ROSS.
+**** Instalation DUMPI                                        :Deprecated:
+Après le clonage du repo, il faut s'assurer d'avoir les bons outils :
+- libtool
+- m4
+- automake
+- autoconf
+Une foi dans le dossier, il faut faire les commandes suivantes :
+#+begin_src sh
+./bootstrap.sh
+mkdir build
+cd build
+../configure --enable-libdumpi --enable-test --prefix=$HOME/dumpi_inst CC=mpicc CXX=mpiCC
+make
+make install
+make doc
+#+end_src
+J'ai cependant un problème, de nombreuses erreurs surviennent. En
+effet, les signatures entre les .h de mpi et l'implémentation de DUMPI
+diffèrent. Je vais donc voir si je dois prendre une version moins
+récente de MPICH.
+*** 2017-05-17 mardi
+**** Installation de MPICH
+En reregardant la doc de CODES, il y a justement un avertissement sur
+DUMPI. 
+"To enable network tracing with dumpi
+    (http://sst.sandia.gov/about_dumpi.html), use the option
+    --with-dumpi=/path/to/dumpi/install with configure.
+
+    NOTE: we only require libundumpi for trace processing. Hence, if building
+    dumpi from source you may configure with --disable-libdumpi and
+    --enable-libundumpi (this is especially useful if you have mpich3, which
+    breaks libdumpi's function wrappers through const'ifying the MPI
+    interface)."
+
+Du coup pour l'installation ca donne ca :
+#+begin_src sh
+./bootstrap.sh
+mkdir build
+cd build
+../configure --disable-libdumpi --enable-libundumpi --prefix=/home/chevamax/Documents/Stage_LIG_2017/sst-dumpi/dumpi_inst CC=mpicc CXX=mpiCC
+make
+make install
+make doc
+#+end_src
+
+Du coup il faut que je réinstalle CODES avec les le chemin vers dumpi.
+
+#+begin_src sh
+./prepare.sh
+mkdir build
+cd build
+apt-get install flex
+apt-get install bison
+apt-get install pkg-config
+../configure --with-dumpi=/home/chevamax/Documents/Stage_LIG_2017/sst-dumpi/dumpi_inst --prefix=/home/chevamax/Documents/Stage_LIG_2017/CODES/install CC=mpicc PKG_CONFIG_PATH=../../ROSS/install/lib/pkgconfig
+make && make install
+make tests && make check
+#+end_src
+
+
