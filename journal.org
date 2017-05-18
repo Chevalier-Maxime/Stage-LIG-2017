@@ -649,7 +649,7 @@ Mainenant que ROSS a l'air de fonctionner on passe à CODES.
 
 En fait pour installer les deux il suffi de suivre les consignes dans
 le fichier d'installation de CODES.
-
+/!\ insallation dumpi
 **** Traces HPL
 Maintenant que tout est installé et que je commence à comprendre, il
 faut se diriger vers le premier objectif.
@@ -660,7 +660,7 @@ CODES utilise DUMPI pour les traces. Il faut donc que je génère des
 trâces avec mon PC grace à un logiciel HPL en MPI, que je pourrais
 réinjecter. On tente de voir Arnaud demain.
 *** 2017-05-16 mardi
-**** TODO DUMPI
+**** DONE DUMPI
 http://sst.sandia.gov/about_dumpi.html
 J'ai l'impression qu'il faut installer tout le simulateur(SST) pour pouvoir
 profiter de DUMPI. Cependant ils parlent le package, alors c'est peut
@@ -720,7 +720,7 @@ J'ai cependant un problème, de nombreuses erreurs surviennent. En
 effet, les signatures entre les .h de mpi et l'implémentation de DUMPI
 diffèrent. Je vais donc voir si je dois prendre une version moins
 récente de MPICH.
-*** 2017-05-17 mardi
+*** 2017-05-17 mercredi
 **** DONE Installation de MPICH                                    :CODES:
 En reregardant la doc de CODES, il y a justement un avertissement sur
 DUMPI. 
@@ -813,3 +813,38 @@ mpif77 -pthread -o /home/chevamax/Documents/Stage_LIG_2017/hpl-2.2/bin/linux/xhp
 
 Je sais pas du tout qu'est ce qui manque. Est-ce que ça a un lien avec
 BLCR ? Si oui il va falloir que je me lance dans l'installation.
+
+*** 2017-05-18 jeudi
+
+**** Mail Arnaud
+
+1. Quand tu indiques "J'ai cependant un problème, de nombreuses
+   erreurs surviennent. En effet, les signatures entre les .h de mpi
+   et l'implémentation de DUMPI diffèrent. Je vais donc voir si je
+   dois prendre une version moins récente de MPICH." Ça vaut le coup
+   que tu indiques les erreurs (au moins les premières) dans une
+   balise #+BEGIN_EXAMPLE   #+END_EXAMPLE
+2. À propos de
+   #+BEGIN_EXAMPLE
+   tests/workload/codes-workload-test: error while loading shared
+libraries: libundumpi.so.3:
+   cannot open shared object file: No such file or directory FAIL
+tests/workload/codes-workload-test.sh (exit status: 127)
+   #+END_EXAMPLE
+   Mettons que tu ais installé DUMPI dans /home/maxime/toto/lib (i.e.,
+   le libundumpi.so est dans ce répertoire là).
+   #+BEGIN_EXAMPLE
+   export LD_LIBRARY_PATH=/home/maxime/toto/lib:$LD_LIBRARY_PATH
+   #+END_EXAMPLE
+   Ça devrait permettre au linker de trouver la bibliothèque. Modifier
+   /etc/ld/so.conf me parait une mauvaise idée...
+3. "Est-ce que ça a un lien avec BLCR ?" Ouh là, non, tu n'as pas
+   besoin de ça. C'est une librairie de checkpoint qui permet de
+   redémarer le code même quand on perd un noeud. Je ne sais pas d'où
+   ça sort c'est anormal, tu ne devrais pas en avoir besoin.
+
+**** Reprise installation HPL
+En regardant sur internet, je vois que les fonctions font parties d'un
+package blcr-util. Je tente donc de l'installer pour voir.
+Effectivement ca ne résoud pas le soucis...
+Et mpiexec prend en charge bclr c'est étrange.
