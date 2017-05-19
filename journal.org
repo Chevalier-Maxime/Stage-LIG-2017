@@ -5,7 +5,7 @@
 #+AUTHOR:      Maxime Chevalier 
 #+LANGUAGE:    fr
 #+TAGS: LIG(L) SimGrid(S) PSI3(P) CODES(C) ROSS(O) Space(A) Time(T)
-#+TAGS: R(R) OrgMode(M) Deprecated(D)
+#+TAGS: R(R) OrgMode(M) Deprecated(D) DUMPI(U)
 #+EXPORT_SELECT_TAGS: Blog
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
@@ -1272,5 +1272,81 @@ de faire le lien avec DUMPI.
 
 
 **** Lien avec DUMPI
+Il semblerais que j'ai installé seulement undumpi, vu que dumpi ne
+fonctionne pas avec les dernières version de mpich...
+J'ai peut être trouvé un moyen : [[https://xgitlab.cels.anl.gov/codes/codes/blob/db787d9f77786b8682ab8746942e3e6037cacfd7/doc/BUILD_STEPS][ici]]
+- DUMPI :
+Je décide de l'installer sur ma machine virtuelle (vu que mon dumpi
+est installé seulement avec undumpi sur ma machine et qu'il est lié à CODES).
+
+#+begin_src sh
+../configure --enable-libdumpi --prefix=/home/chevamax/sst-dumpi/install CC=mpicc CXX=mpiCC CFLAGS="-DMPICH_SUPPRESS_PROTOTYPES=1 -DHAVE_PRAGMA_HP_SEC_DEF=1"
+#+end_src
+Permet de passe le make
+
+TODO : faire un test avec mpi tuto helloworld.
+#+BEGIN_EXAMPLE
+Linking with C/C++
+
+We can use libdumpi that we generated above:
+
+user@machine:~/play/mpi$ mpicc hello.c -c
+user@machine:~/play/mpi$ mpicc hello.o -L$HOME/dumpi_inst/lib -ldumpi -o hello
+user@machine:~/play/mpi$ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/dumpi_inst/lib ./hello 
+Hello!
+user@machine:~/play/mpi$ ls
+dumpi-2011.01.25.15.46.10-0000.bin  hello    hello.o
+dumpi-2011.01.25.15.46.10.meta      hello.c
+
+In this instance there is a single MPI rank created. There are two files created: a metafile and a file for our MPI rank zero. The date and time are encoded into the filename to prevent accidental overwrite of DUMPI trace files.
+
+We can print the trace file using dumpi2ascii to verify a simple 'hello world' that does, an init, comm_rank, comm_size, and a finalize as its only MPI calls:
+
+user@machine:~/play/mpi$ $HOME/dumpi_inst/bin/dumpi2ascii dumpi-2011.01.25.15.46.10-0000.bin 
+MPI_Init entering at walltime 20120.589738643, cputime 0.023382031 seconds in thread 0.
+int argc=1
+string argv[1]=["./hello"]
+MPI_Init returning at walltime 20120.589752472, cputime 0.023385336 seconds in thread 0.
+MPI_Comm_rank entering at walltime 20120.589793260, cputime 0.023437127 seconds in thread 0.
+MPI_Comm comm=2 (MPI_COMM_WORLD)
+int rank=0
+MPI_Comm_rank returning at walltime 20120.589796683, cputime 0.023440692 seconds in thread 0.
+MPI_Comm_size entering at walltime 20120.589810022, cputime 0.023453983 seconds in thread 0.
+MPI_Comm comm=2 (MPI_COMM_WORLD)
+int size=1
+MPI_Comm_size returning at walltime 20120.589813095, cputime 0.023457038 seconds in thread 0.
+MPI_Finalize entering at walltime 20120.589841172, cputime 0.023484981 seconds in thread 0.
+MPI_Finalize returning at walltime 20120.590067322, cputime 0.023710703 seconds in thread 0.
+
+Libdumpi uses the PMPI interface, so you shouldn't have to use any included header files, or make any subroutine/function calls to DUMPI for most use cases of DUMPI. Of course, when you use libdumpi, you can't use or link against any other tools that use the PMPI interface in the same executable.
+
+By default, DUMPI will emit trace information for every MPI call, with a timestamp for entry and exit to each routine.
+#+END_EXAMPLE
+
+En suivant la méthode du dessus, j'ai été capable de générer des
+traces dumpi pour un programme helloWorld disponible [[http://mpitutorial.com/tutorials/mpi-hello-world/][ici]].
+
+***** HPL + DUMPI
+En ajoutant ~-L path/to/dumpi_inst/lib -ldumpi~ à la fin de la ligne
+MPlib dans le Make.linux de HPL, j'ai réussi à générer une trâce!
+/!\ Ca ne fonctionne pas si on met cette ligne sur *HPL_LIBS* ou sur le *LINKFLAGS*
+
+Je n'ai pas encore compris comment on utilise =LD_PRELOAD= j'ai donc
+compilé directement HPL avec le lien DUMPI. Je pense donc installer
+deux versions, une avec les TRACES et l'autre sans. Christian m'a dit
+de faire un lien entre les deux dossiers pour s'assurer que le HPL.dat
+soit toujours le même.
+***** Rencontre avec Christian
+Florence m'a présenté Christian aujourd'hui qui travail sur
+SimGrid. Il est très intéréssé par l'objectif de mon stage et aimerait
+ajouter SST à la comparaison. En effet, il a écrit un papier sur ses
+traveaux et on lui a reproché de ne pas avoir de comparaison avec
+SST. J'espère avancer vite pour qu'il puisse se servir de mon travail!
+
+***** Recherche
+En faisant des recherche pour installer dumpi, j'ai vu qu'il y a un
+convertisseur vers l'ASCII, mais aussi un convertisseur (experimental)
+vers du DOT.
+
 
 
