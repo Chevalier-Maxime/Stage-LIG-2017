@@ -139,60 +139,6 @@ makes its use not as fluid when using other languages than R.
 :Attachments: PDS_fujimoto2015.pdf
 :ID:       a3acf95b-21d5-4621-a955-41bab99b38f6
 :END:
-:LOGBOOK:
-- State "DONE"       from "TODO"       [2017-05-11 jeu. 15:12]
-- State "TODO"       from "TODO"       [2017-05-11 jeu. 14:56]
-- State "TODO"       from "TODO"       [2017-05-11 jeu. 11:23]
-- State "TODO"       from "TODO"       [2017-05-11 jeu. 11:03]
-- State "TODO"       from "TODO"       [2017-05-11 jeu. 09:53]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 17:23]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 16:06]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 16:04]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 16:04]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 16:04]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 16:03]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 15:56]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 15:32]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 15:27]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 15:15]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 15:11]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 15:11]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 15:11]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 15:11]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 14:39]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 13:56]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 13:48]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 13:48]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 13:48]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 13:13]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 11:06]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 11:06]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 10:40]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 10:38]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 10:35]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 10:35]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 10:35]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 10:33]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 10:18]
-- State "TODO"       from "TODO"       [2017-05-10 mer. 09:40]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 16:49]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 16:49]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 16:49]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 16:30]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 16:27]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 16:15]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 16:15]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 16:15]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 15:54]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 15:54]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 15:36]
-- State "TODO"       from "DONE"       [2017-05-09 mar. 15:36]
-- State "DONE"       from "TODO"       [2017-05-09 mar. 15:36]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 15:36]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 15:36]
-- State "TODO"       from "TODO"       [2017-05-09 mar. 15:36]
-- State "TODO"       from              [2017-05-09 mar. 15:12]
-:END:
 - [X] simulation «[[file:Papiers/Timeparallelsimulation.pdf][temps parallèle]]» (extrait du livre de
       Fujimoto, 2000)
   - *Space parallel approch* : C'est la decomposition horizontale d'un
@@ -3427,7 +3373,7 @@ End of Tests.
 
 ***** 16 noeuds
 - Fichier HPL.dat
-
+  
 ***** Visualisation
 Il existe CommGram pour visualiser :
 http://digitalcommons.unl.edu/cgi/viewcontent.cgi?article=1101&context=computerscidiss
@@ -3453,6 +3399,73 @@ https://calccrypto.github.io/sst-macro/page_DumpiTutorial.html
 pour le convertisseur otf de dumpi, il faut la libotf (et reinstaller
 dumpi). On peut aussi générer des tests pour DUMPI (je sais pas si
 c'est utile).
+
+De base avec DUMPI on a accès à ca : 
+#+begin_example
+dumpistats --help
+dumpistats:  Extract statistics from DUMPI trace files
+Options:
+   (-h|--help)                Print help screen and exit
+   (-v|--verbose)             Verbose status output
+   (-b|--bin)      timerange  Define a collection time range
+   (-m|--mark)     /crt/end/  Create/end a bin at annotations
+   (-g|--gather)   /crt/end/  Accumulate to an annotated bin
+   (-c|--count)    funcname   Count entries into a function
+   (-t|--time)     funcname   Accumulate time in a function
+   (-s|--sent)     funcname   Count bytes sent by a function
+   (-r|--recvd)    funcname   Count bytes recvd by function
+   (-x|--exchange) funcname   Full send/recv exchange info
+   (-l|--lump)     funcname   Lump (bin) messages by size
+   (-p|--perfctr)  funcname   PAPI perfcounter info
+   (-i|--in)       metafile   DUMPI metafile (required)
+   (-o|--out)      fileroot   Output file root (required)
+
+The timerange has the form:
+  (all | mpi | BOUND to BOUND) [by TIME]
+    where BOUND the form:
+      (IDENTITY | TIME) [(+|-) TIME]
+    and IDENTITY is:
+      start | end | init | finalize | TIME
+    and TIME is:
+      (hh:)?(mm:)?[0-9]0-9+(.[0-9]*)?
+
+The funcname has the form:
+  all | mpi | non-mpi | sends | recvs | coll | wait | io | RE
+    where RE is a case-insensitive regular expression
+    (e.g. "MPI_Wait.*" or "mpio?_(wait.*|test.*))"
+  All regular expressions are implicitly flanked by ^ and $,
+  so "mpi_.?send" does not match MPI_Sendrecv
+
+The annotated bins (-m and -g) use regular expressions
+with a format similar to sed basic regular expressions, so:    -m '/begin bin/end bin/'
+    -m '!begin bin!end bin!i'
+    -g '| +start loop [0-9]+ *$|end loop [0-9]+$|'
+are all valid annotations (note that backreferences are 
+not allowed).  Escaped characters other than the delimiter
+are passed directly to the regular expression parser.
+
+Example 1:
+  dumpistats --bin=all --time=mpi --time=other \
+        -i dumpi.meta -o stats
+     Writes a file called stats-0.dat with three columns:
+       1:  The rank of each MPI node
+       2:  Aggregate time spent in MPI calls
+       3:  Aggregate time spent outside MPI calls
+
+Example 2
+  dumpistats --bin='init to finalize by 1:00' \ 
+        --count=mpi_.*send -i dumpi.meta -o stats
+     Writes files with send counts binned into 1 minute
+     intervals.
+
+Example 3
+  dumpistats  --bin='begin+10 to end-10' -s all -r all \
+         -i dumpi.meta -o stats \
+      Writes a new file containing bytes sent and received
+      starting 10 seconds after first and ending 10 seconds
+      before last simulation timestamp
+chevamax@Black-Pearl-2:~/Documents/Stag
+#+end_example
 *** 2017-05-23 mardi
 **** Exemple de trace
 ***** ASCII
@@ -3712,11 +3725,15 @@ sections), but currently consists of:
 
 ***** TODO OTF2
 
-**** Tentative replay CODES
+**** Tentative replay exemple sur CODES
 
-CODES a l'air de pouvoir utiliser des trace ScalaTrace pour les
+CODES a l'air de pouvoir utiliser des trace *ScalaTrace* pour les
 rejouer (cf =./model-net-dumpi-traces-dump --help= ). Je sais pas si
 c'est mieux que DUMPI.
+
+Via le fichier =README_traces.txt=, dans le dossier
+CODES/src/network-worloads, ce [[http://portal.nersc.gov/project/CAL/designforward.ht][lien]] ainsi que ce [[https://xgitlab.cels.anl.gov/codes/codes/blob/c4cba873cf9d5621dd1115a01e1982c8d0e8b31e/src/models/mpi-trace-replay/conf/modelnet-mpi-test-dragonfly.conf][fichier]] j'ai réussi à
+faire tourner l'exemple ci dessous (trace dumpi sur CODES).
 
 #+BEGIN_EXAMPLE
 ./model-net-mpi-replay --sync=1 --num_net_traces=216 --workload_file=/home/chevamax/Documents/Stage_LIG_2017/logiciels/test/df_AMG_n216_dumpi/dumpi-2014.03.03.14.55.23- --workload_type="dumpi" --lp-io-dir=amg-216-trace --lp-io-use-suffix=1 -- ../../src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf
@@ -4069,6 +4086,260 @@ créé.
 -rw-r--r-- 1 chevamax chevamax      991 mai   23 11:12 ross.csv
 #+END_EXAMPLE
 
+**** Tentative replay HPL sur CODES
+Il faut maintenant que je trouve comment faire le fichier .conf pour
+qu'il corresponde à ma machine.
 
-**** Mail CODES
+D'après les informations obtenues avec la commande dumpistats ci
+dessous, mes noeuds ont communiqué 2 à 2 (pour la configuration à
+4). A 16, c'est différent.
+#+BEGIN_EXAMPLE
+dumpistats --bin'begin+10 to end-10' -x all -i dumpi-2017.05.22.11.02.24.meta -o statsT
+#+END_EXAMPLE
+
+Utilisation d'une configuration de base :
+#+BEGIN_EXAMPLE
+LPGROUPS
+{
+   MODELNET_GRP
+   {
+      repetitions="1";
+      modelnet_simplenet="1";
+      nw-lp="4";
+   }
+}
+PARAMS
+{
+   packet_size="512";
+   message_size="784";
+   modelnet_order=( "simplenet" );
+   # scheduler options
+   modelnet_scheduler="fcfs";
+   net_startup_ns="1.5";
+   net_bw_mbps="20000";
+}
+#+END_EXAMPLE
+
+en tentant avec ca :
+
+#+begin_src sh :results output :exports both
+./model-net-mpi-replay --sync=1 --num_net_traces=1 --workload_file=/home/chevamax/Documents/Stage_LIG_2017/simulation/hpl/4/dumpi-2017.05.22.11.02.24- --workload_type="dumpi" --lp-io-dir=hpl-trace --lp-io-use-suffix=1 -- /home/chevamax/Documents/Stage_LIG_2017/logiciels/CODES/src/network-workloads/conf/modelnet-mpi-test-hpl.conf
+#+end_src
+
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Tue May 23 14:50:03 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                    5
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              1281
+	Network events                                           50000
+	Total events                                             51280
+
+
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type 
+ Undefined data type *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 1 unmatched sends 0 Total sends 0 receives 1 collectives 0 delays 7 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+	: Running Time = 0.0000 seconds
+
+TW Library Statistics:
+	Total Events Processed                                       8
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                         8
+	Event Rate (events/sec)                               307692.3
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         51281
+	Memory Allocated                                         51168
+	Memory Wasted                                              720
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.0001
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 0 recvd 4 
+ max runtime 0.000000 ns avg runtime 0.000000 
+ max comm time 0.000000 avg comm time -66232.000000 
+ max send time 0.000000 avg send time 0.000000 
+ max recv time 0.000000 avg recv time 0.000000 
+ max wait time 0.000000 avg wait time 0.000000 
+LP-IO: writing output to hpl-trace-25282-1495543803/
+LP-IO: data files:
+   hpl-trace-25282-1495543803/mpi-replay-stats
+   hpl-trace-25282-1495543803/model-net-category-all
+#+END_EXAMPLE
+
+Ca à pas l'air de fonctionner...
+
+
+**** WAITING Mail CODES
 Pour avoir plus d'information 
