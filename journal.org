@@ -5,7 +5,7 @@
 #+AUTHOR:      Maxime Chevalier 
 #+LANGUAGE:    fr
 #+TAGS: LIG(L) SimGrid(S) PSI3(P) CODES(C) ROSS(O) Space(A) Time(T)
-#+TAGS: R(R) OrgMode(M) Deprecated(D) DUMPI(U)
+#+TAGS: R(R) OrgMode(M) Deprecated(D) DUMPI(U) HPL(H)
 #+EXPORT_SELECT_TAGS: Blog
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
@@ -598,7 +598,7 @@ Mainenant que ROSS a l'air de fonctionner on passe à CODES.
 En fait pour installer les deux il suffi de suivre les consignes dans
 le fichier d'installation de CODES.
 /!\ insallation dumpi
-**** Traces HPL
+**** Traces HPL                                                      :HPL:
 Maintenant que tout est installé et que je commence à comprendre, il
 faut se diriger vers le premier objectif.
 Je lis donc la doc GETTING STARTED, pour comprendre comment se compose
@@ -608,7 +608,7 @@ CODES utilise DUMPI pour les traces. Il faut donc que je génère des
 trâces avec mon PC grace à un logiciel HPL en MPI, que je pourrais
 réinjecter. On tente de voir Arnaud demain.
 *** 2017-05-16 mardi
-**** DONE DUMPI
+**** DONE DUMPI                                         :Deprecated:DUMPI:
 http://sst.sandia.gov/about_dumpi.html
 J'ai l'impression qu'il faut installer tout le simulateur(SST) pour pouvoir
 profiter de DUMPI. Cependant ils parlent le package, alors c'est peut
@@ -669,7 +669,7 @@ effet, les signatures entre les .h de mpi et l'implémentation de DUMPI
 diffèrent. Je vais donc voir si je dois prendre une version moins
 récente de MPICH.
 *** 2017-05-17 mercredi
-**** DONE Installation de DUMPI/CODES                              :CODES:
+**** DONE Installation de DUMPI/CODES             :CODES:Deprecated:DUMPI:
 En reregardant la doc de CODES, il y a justement un avertissement sur
 DUMPI. 
 "To enable network tracing with dumpi
@@ -720,7 +720,7 @@ En cherchant sur internet j'ai vu qu'on pouvait ajouter des librairies
 dans le fichier /etc/ld.so.conf En ajoutant le chemin vers la
 librairie dumpi ca fonctionne.
 
-**** Installation de HPL
+**** Installation de HPL                                  :Deprecated:HPL:
 lien : http://www.netlib.org/benchmark/hpl/software.html
 inspiration de : [[https://www.howtoforge.com/tutorial/hpl-high-performance-linpack-benchmark-raspberry-pi/][installation raspberry pi]] [[http://www.crc.nd.edu/~rich/CRC_Summer_Scholars_2014/HPL-HowTo.pdf][How to sur cluster]]
 
@@ -791,7 +791,7 @@ tests/workload/codes-workload-test.sh (exit status: 127)
    redémarer le code même quand on perd un noeud. Je ne sais pas d'où
    ça sort c'est anormal, tu ne devrais pas en avoir besoin.
 
-**** Reprise installation HPL
+**** Reprise installation HPL                             :Deprecated:HPL:
 En regardant sur internet, je vois que les fonctions font parties d'un
 package blcr-util. Je tente donc de l'installer pour voir.
 Effectivement ca ne résoud pas le soucis...
@@ -997,7 +997,7 @@ effet, dans tous les exemple vu c'était de la sorte :
 ~$(MPdir)/lib/libmpich.a~ hors en le changeant en ~MPlib= -L $(MPdir)/lib~
 l'erreur disparait et le programme tourne.
 
-**** Lancement de HPL
+**** Lancement de HPL                                                :HPL:
 Je vais utiliser ce [[http://www.advancedclustering.com/act_kb/tune-hpl-dat-file/][site]] pour m'aider à faire les paramètres sur
 ma machine.
 
@@ -1217,7 +1217,7 @@ Je pense qu'il est possible d'augmenter encoreun peu, mais le but est
 de faire le lien avec DUMPI.
 
 
-**** Lien avec DUMPI
+**** Lien avec DUMPI                                               :DUMPI:
 Il semblerais que j'ai installé seulement undumpi, vu que dumpi ne
 fonctionne pas avec les dernières version de mpich...
 J'ai peut être trouvé un moyen : [[https://xgitlab.cels.anl.gov/codes/codes/blob/db787d9f77786b8682ab8746942e3e6037cacfd7/doc/BUILD_STEPS][ici]]
@@ -1321,7 +1321,7 @@ le reste. Let's start again !
 - blcr-util => 0.8.5-2.3 (ce dernier et peut-être inutile, mais
   présent sur ma machine lors de l'installation)
 
-***** DUMPI
+***** DUMPI                                                       :DUMPI:
 
 #+begin_src sh :session foo
 mkdir logiciels
@@ -2428,7 +2428,7 @@ finished...
 Il faut ensuite ajouter le chemin de la librairie dans
 =LD_LIBRARY_PATH=.
 
-***** HPL
+***** HPL                                                           :HPL:
 
 Téléchargez le programme [[http://www.netlib.org/benchmark/hpl/hpl-2.2.tar.gz][ici]], ou en ligne de commande
 #+begin_src sh :session foo
@@ -3226,7 +3226,7 @@ On voit ensuite les fichiers dumpi dans le répertoire.
 On peut les convertirs en texte via cette commande
 =/path/to/dumpi/bin/dumpi2ascii <nomfichier.bin>=
 
-***** ROSS
+***** ROSS                                                         :ROSS:
 #+begin_src sh :session foo :results output :exports both 
 cd ~/Documents/Stage_LIG_2017/logiciels
 git clone -b master --single-branch git@github.com:carothersc/ROSS.git
@@ -3238,7 +3238,7 @@ make -j 3
 make install
 #+end_src
 
-***** CODES
+***** CODES                                                       :CODES:
 #+begin_src sh :session foo
 cd ~/Documents/Stage_LIG_2017/logiciels
 wget ftp://ftp.mcs.anl.gov/pub/CODES/releases/codes-0.5.2.tar.gz
@@ -3725,7 +3725,7 @@ sections), but currently consists of:
 
 ***** TODO OTF2
 
-**** Tentative replay exemple sur CODES
+**** Tentative replay exemple sur CODES                            :CODES:
 
 CODES a l'air de pouvoir utiliser des trace *ScalaTrace* pour les
 rejouer (cf =./model-net-dumpi-traces-dump --help= ). Je sais pas si
@@ -4086,7 +4086,7 @@ créé.
 -rw-r--r-- 1 chevamax chevamax      991 mai   23 11:12 ross.csv
 #+END_EXAMPLE
 
-**** Tentative replay HPL sur CODES
+**** Tentative replay HPL sur CODES                            :CODES:HPL:
 Il faut maintenant que je trouve comment faire le fichier .conf pour
 qu'il corresponde à ma machine.
 
@@ -4340,6 +4340,7 @@ LP-IO: data files:
 
 Ca à pas l'air de fonctionner...
 
+**** Meeting Florence
 
 Topologie de ma machine pour les experiences HPL (4/16 noeuds)
 .conf Réalisation d'un .conf correct (via documentation)
@@ -4352,3 +4353,439 @@ l'executant sur ma machine pour faire des traces.
 
 **** WAITING Mail CODES
 Pour avoir plus d'information 
+
+*** 2017-05-24 mercredi
+
+**** Meeting Florence
+- Continuer sur les fichiers de configuration
+- Si pas de solution, utiliser la mailing list de CODES https://lists.mcs.anl.gov/mailman/listinfo/codes-ross-users
+- Tenter la conversion OTF2
+- Hpl semble être une topologie en anneau virtuel (demander
+  confirmation à Christian/Tom)
+- Lire Chapitre 3 (début sur les topologies) et 4 du livre d'Arnaud.
+
+**** Recherche utilisation DUMPI                             :CODES:DUMPI:
+Le site https://xgitlab.cels.anl.gov/codes/codes/tree/master est plus
+à jour que les version téléchargeables. Il y a en effet tous les
+fichiers link par la documentation.
+
+***** Wiki                                                        :CODES:
+https://xgitlab.cels.anl.gov/codes/codes/wikis/home
+
+***** AMG 2x2x2
+#+BEGIN_EXAMPLE
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2014.03.03.14.12.46- --workload_type=dumpi --lp-io-dir=amg-8-trace --lp-io-use-suffix=1 -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf 
+
+Wed May 24 11:27:03 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ Total nodes 1056 routers 264 groups 33 radix 16 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                 2376
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            608257
+	Network events                                           50000
+	Total events                                            658256
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 0 unmatched irecvs 0 unmatched sends 0 Total sends 306 receives 306 collectives 0 delays 814 wait alls 52 waits 0 send time 454987.043399 wait 5480162.099075
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 302 receives 302 collectives 0 delays 806 wait alls 52 waits 0 send time 437452.653750 wait 5509041.914856
+ LP 2 unmatched irecvs 0 unmatched sends 0 Total sends 286 receives 286 collectives 0 delays 774 wait alls 52 waits 0 send time 417481.542902 wait 5617532.521296
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 302 receives 302 collectives 0 delays 806 wait alls 52 waits 0 send time 454267.648339 wait 211396.551050
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 300 receives 300 collectives 0 delays 802 wait alls 52 waits 0 send time 432114.409959 wait 5616206.186374
+ LP 10 unmatched irecvs 0 unmatched sends 0 Total sends 288 receives 288 collectives 0 delays 778 wait alls 52 waits 0 send time 412936.417664 wait 4086486.198338
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 314 receives 314 collectives 0 delays 830 wait alls 52 waits 0 send time 443263.126450 wait 5487746.164523
+ LP 12 unmatched irecvs 0 unmatched sends 0 Total sends 306 receives 306 collectives 0 delays 814 wait alls 52 waits 0 send time 451719.941103 wait 3100534.023560
+	: Running Time = 0.0817 seconds
+
+TW Library Statistics:
+	Total Events Processed                                  133778
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                    133778
+	Event Rate (events/sec)                              1637048.9
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        658257
+	Memory Allocated                                        469247
+	Memory Wasted                                               28
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             64
+	LP RNGs                                                     80
+	Total LP                                                   272
+	Event struct                                               144
+	Event struct with Model                                    720
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.1957
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 2995472 recvd 2995472 
+ max runtime 204724201.764873 ns avg runtime 204720205.039492 
+ max comm time 5624775.444477 avg comm time 4396023.664492 
+ max send time 454987.043399 avg send time 438027.847946 
+ max recv time 27624654.204193 avg recv time 12025780.130547 
+ max wait time 5617532.521296 avg wait time 4388638.207384 
+LP-IO: writing output to amg-8-trace-3127-1495618023/
+LP-IO: data files:
+   amg-8-trace-3127-1495618023/dragonfly-router-traffic
+   amg-8-trace-3127-1495618023/dragonfly-router-stats
+   amg-8-trace-3127-1495618023/dragonfly-msg-stats
+   amg-8-trace-3127-1495618023/model-net-category-all
+   amg-8-trace-3127-1495618023/model-net-category-test
+   amg-8-trace-3127-1495618023/mpi-replay-stats
+ Average number of hops traversed 1.370578 average chunk latency 2.238281 us maximum chunk latency 17.937647 us avg message size 1246.036621 bytes finished messages 2404 finished chunks 13174 
+
+ ADAPTIVE ROUTING STATS: 13174 chunks routed minimally 0 chunks routed non-minimally completed packets 13174 
+
+ Total packets generated 7564 finished 7564 
+
+#+END_EXAMPLE
+
+Maintenant je vais générer les traces dumpi.
+D'apres les traces dumpi, le logiciel a été lancer avec les parametres
+suivants : =../../test/amg2013.dumpi", "-laplace", "-n", "40",
+"40","40", "-P", "2", "2", "2"= 
+
+****** Compilation AMG
+Changement du makefile dans le sous dossier test pour ajouter le lien
+vers la librairie dumpi
+=-L/home/chevamax/Documents/Stage_LIG_2017/logiciels/sst-dumpi/install/lib
+-ldumpi\= dans LFLAGS.
+
+****** Lancement d'AMG
+#+begin_src sh :results output :exports both
+mpirun -np 8 ./amg2013 -laplace -n 40 40 40 -P 2 2 2
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+  3D 7-point Laplace problem on a cube
+  (nx_global, ny_global, nz_global) = (80, 80, 80)
+  (Px, Py, Pz) = (2, 2, 2)
+  (cx, cy, cz) = (1.000000, 1.000000, 1.000000)
+
+=============================================
+Setup matrix and rhs:
+=============================================
+Setup matrix and rhs:
+Setup matrix and rhs  wall clock time = 0.060024 seconds
+Setup matrix and rhs  cpu clock time  = 0.015629 seconds
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+PCG Setup  wall clock time = 5.858475 seconds
+PCG Setup  cpu clock time  = 2.916854 seconds
+
+System Size / Setup Phase Time: 8.739475e+04
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+PCG Solve  wall clock time = 7.226493 seconds
+PCG Solve  cpu clock time  = 3.576355 seconds
+
+AMG2013 Benchmark version 1.0
+Iterations = 12
+Final Relative Residual Norm = 3.236117e-07
+
+System Size * Iterations / Solve Phase Time: 8.502050e+05
+#+END_EXAMPLE
+
+****** Rejouer les traces 
+#+begin_src sh
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.05.24.13.06.01- --workload_type=dumpi --lp-io-dir=amg-8-trace --lp-io-use-suffix=1 -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed May 24 13:09:07 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ Total nodes 1056 routers 264 groups 33 radix 16 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                 2376
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            608257
+	Network events                                           50000
+	Total events                                            658256
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 0 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 7627778.443787 wait 667432446.994742
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 7059958.455029 wait 678810251.070519
+ LP 2 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 7500539.710242 wait 663184169.518037
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 7407161.176370 wait 735409722.753113
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 8326637.819773 wait 772007202.073255
+ LP 10 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 7644843.716817 wait 674714897.711984
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 8007634.995992 wait 631998280.891059
+ LP 12 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 7420675.017480 wait 621048688.444790
+	: Running Time = 1.2770 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 2202661
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                   2202661
+	Event Rate (events/sec)                              1724837.8
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        658257
+	Memory Allocated                                        469247
+	Memory Wasted                                               28
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             64
+	LP RNGs                                                     80
+	Total LP                                                   272
+	Event struct                                               144
+	Event struct with Model                                    720
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      3.0578
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 56024028 recvd 56024028 
+ max runtime 1776257220.685390 ns avg runtime 1771414870.410956 
+ max comm time 772087959.012618 avg comm time 680658436.910956 
+ max send time 8326637.819773 avg send time 7624403.666936 
+ max recv time 1612631904.903633 avg recv time 1503182135.896835 
+ max wait time 772007202.073255 avg wait time 680575707.432187 
+LP-IO: writing output to amg-8-trace-17411-1495624147/
+LP-IO: data files:
+   amg-8-trace-17411-1495624147/dragonfly-router-traffic
+   amg-8-trace-17411-1495624147/dragonfly-router-stats
+   amg-8-trace-17411-1495624147/dragonfly-msg-stats
+   amg-8-trace-17411-1495624147/model-net-category-all
+   amg-8-trace-17411-1495624147/model-net-category-test
+   amg-8-trace-17411-1495624147/mpi-replay-stats
+ Average number of hops traversed 1.364874 average chunk latency 4.296207 us maximum chunk latency 94.070031 us avg message size 2141.427490 bytes finished messages 26162 finished chunks 234149 
+
+ ADAPTIVE ROUTING STATS: 234149 chunks routed minimally 0 chunks routed non-minimally completed packets 234149 
+
+ Total packets generated 127075 finished 127075 
+
+#+END_EXAMPLE
+Ca fonctionne donc normalement. J'ai rejoué les traces sur le fichier
+de configuration dfly216 et ca à donc bien fonctionné.
+
+**** DUMPI + OTF2
+https://github.com/sstsimulator/sst-dumpi/blob/master/docs/tools.dox
+Lien libotf utilisé :
+http://download.savannah.gnu.org/releases/m17n/libotf-0.9.13.tar.gz
+Dependance installée :
+http://download.savannah.gnu.org/releases/freetype/freetype-2.8.tar.gz
+
+
+installation de libotf-dev
+
+Cependant le configure ne trouve pas la librairie...
+C'est dans la partie suivante du Makefile que ca se joue :
+#+BEGIN_EXAMPLE
+# If we are building binary utlities, test wheter we can build the
+# dumpi-to-otf converter.
+if test "$disable_bin" != "yes"; then
+   oldlibs="$LIBS"
+   LIBS="$LIBS -lotf -lz"
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking wheter OTF library and header file can be found" >&5
+$as_echo_n "checking wheter OTF library and header file can be found... " >&6; }
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+	  #include <otf.h>
+	  #include <stdlib.h>
+
+int
+main ()
+{
+
+	  OTF_FileManager *mgr = NULL;
+	  mgr = OTF_FileManager_open(10);
+	  if(!mgr) {
+	    return EXIT_FAILURE;
+	  }
+	  OTF_FileManager_close(mgr);
+	  return EXIT_SUCCESS;
+
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	enable_otf="yes"
+
+else
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	LIBS="$oldlibs"
+
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+
+ if test "$disable_bin" != "yes"; then
+  WITH_BIN_TRUE=
+  WITH_BIN_FALSE='#'
+else
+  WITH_BIN_TRUE='#'
+  WITH_BIN_FALSE=
+fi
+
+ if test "$enable_test" = "yes"; then
+  WITH_TEST_TRUE=
+  WITH_TEST_FALSE='#'
+else
+  WITH_TEST_TRUE='#'
+  WITH_TEST_FALSE=
+fi
+
+ if test "$enable_libdumpi" = "yes"; then
+  WITH_LIBDUMPI_TRUE=
+  WITH_LIBDUMPI_FALSE='#'
+else
+  WITH_LIBDUMPI_TRUE='#'
+  WITH_LIBDUMPI_FALSE=
+fi
+
+ if test "$disable_libundumpi" != "yes"; then
+  WITH_LIBUNDUMPI_TRUE=
+  WITH_LIBUNDUMPI_FALSE='#'
+else
+  WITH_LIBUNDUMPI_TRUE='#'
+  WITH_LIBUNDUMPI_FALSE=
+fi
+
+ if test "$enable_otf" = "yes"; then
+  WITH_OTF_TRUE=
+  WITH_OTF_FALSE='#'
+else
+  WITH_OTF_TRUE='#'
+  WITH_OTF_FALSE=
+fi
+#+END_EXAMPLE
+Pourtant j'ai bien la librairie dans =/usr/lib/x84_64-linux-gnu/= pour
+le package libotf-dev et dans =/usr/local/lib= pour celui installé à la
+main.
+J'ai également trois fichiers otf.h :
+- =./home/chevamax/Documents/Stage_LIG_2017/logiciels/libotf-0.9.13/src/otf.h=
+- =./usr/local/include/otf.h=
+- =./usr/include/otf.h=
