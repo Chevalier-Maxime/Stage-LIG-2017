@@ -4341,5 +4341,14 @@ LP-IO: data files:
 Ca à pas l'air de fonctionner...
 
 
+Topologie de ma machine pour les experiences HPL (4/16 noeuds)
+.conf Réalisation d'un .conf correct (via documentation)
+dumpi: Y a t'il un soucis avec ma configuration DUMPI, qui a des
+soucis avec les versions récentes de MPICH. (Utilisation de OpenMPI ?)
+
+code source AMG : peut permettre d'aider en le compilant et
+l'executant sur ma machine pour faire des traces.
+
+
 **** WAITING Mail CODES
 Pour avoir plus d'information 
