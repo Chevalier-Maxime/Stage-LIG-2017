@@ -7286,9 +7286,55 @@ fichier =otf.h= . La librairie est elle dans =/usr/local/lib/libotf.a=
 
 Je lance le configure via :
 #+BEGIN_EXAMPLE
- ../configure --enable-libdumpi --enable-test --prefix=/home/chevamax/Documents/Stage_LIG_2017/logiciels/dumpiOTF/sst-dumpi/install CC=mpicc CXX=mpiCC CFLAGS="-DMPICH_SUPPRESS_PROTOTYPES=1 -DHAVE_PRAGMA_HP_SEC_DEF=1 -pthread  -I/usr/local/include -L/usr/local/lib -lotf"
+ ../configure --enable-libdumpi --enable-test --prefix=/home/chevamax/Documents/Stage_LIG_2017/logiciels/dumpiOTF/sst-dumpi/install CC=mpicc CXX=mpiCC CFLAGS="-DMPICH_SUPPRESS_PROTOTYPES=1 -DHAVE_PRAGMA_HP_SEC_DEF=1 -pthread  -I/usr/local/include -L/usr/local/lib"
 #+END_EXAMPLE
 
+J'ai réussi à installer correctement la lib sur ma machine virtuelle
+(qui est clean), et a faire fonctionner le petit exemple. 
+
+Après avoir clean mon pc par rapport à OTF et OTF2, j'ai réinstallé la
+lib et fait tourné l'exemple.
+
+En lancant la meme commande, c'est OK.
+
+J'ai pus convertir les traces dumpi en otf. Maintenant faut voir si on
+peut les utiliser.
+
+Je vais tenter avec l'outil Visual Trace Explorer.
+Ca fonctionne pas avec cet outil :
+#+BEGIN_EXAMPLE
+...
+0 : DefCollOp definition is actually not handled in ViTE
+0 : DefCollOp definition is actually not handled in ViTE
+0 : DefCollOp definition is actually not handled in ViTE
+0 : DefCollOp definition is actually not handled in ViTE
+0 : DefCollOp definition is actually not handled in ViTE
+0 : DefCollOp definition is actually not handled in ViTE
+0 : DefCollOp definition is actually not handled in ViTE
+0 : DefCollOp definition is actually not handled in ViTE
+0 : DefCollOp definition is actually not handled in ViTE
+0 : DefCollOp definition is actually not handled in ViTE
+0 : DefCollOp definition is actually not handled in ViTE
+0 : DefCollOp definition is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+0 : CollOp event is actually not handled in ViTE
+...
+#+END_EXAMPLE
+Deux options : 
+- soit le parser fonctionne pas.
+- soit la version OTF n'est pas prise en charge par VITE (mais j'en
+  doute)
 
 **** Replay sur CODES                                              :CODES:
 ***** Premier replay --synch=4
@@ -7798,3 +7844,5 @@ rollback.
 Je remarque une différence en nombre d'event du model entre les
 version synch=3, synch=1 et selon le nombre de np. Je comprend pas
 encore pourquoi ca change, mais je vais regarder ca.
+
+
