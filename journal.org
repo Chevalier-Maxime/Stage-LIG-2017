@@ -7189,3 +7189,612 @@ for(pe = NULL; (pe = tw_pe_next(pe));)
 		s->s_max_run_time = ROSS_MAX(s->s_max_run_time, tw_wall_to_double(&rt));
 ...
 #+END_EXAMPLE
+
+*** 2017-05-30 mardi
+**** Mail Arnaud
+***** Content
+Salut,
+
+  my two cents of the day.
+
+> Je pense que j'y suis presque, mais je n'arrive pas à linker la
+> librairie...
+
+#+BEGIN_EXAMPLE
+configure:17252: checking wheter OTF library and header file can be found
+configure:17277: mpicc -o conftest -DMPICH_SUPPRESS_PROTOTYPES=1
+-DHAVE_PRAGMA_HP_SEC_DEF=1 -pthread -I/usr/local/include/freetype2
+-I/usr/include  -L/usr/local/lib -lfreetype -L/usr/lib/x86_64-linux-gnu
+-lotf conftest.c  -lotf -lz >&5
+conftest.c: In function 'main':
+conftest.c:35:4: error: unknown type name 'OTF_FileManager'
+    OTF_FileManager *mgr = NULL;
+    ^~~~~~~~~~~~~~~
+#+END_EXAMPLE
+
+Ça, c'est un problème d'include, pas un problème de link. Ce
+"conftest.c" généré par configure fait un #include <otf.h> (d'après ce
+que je peux lire dans ton extrait du configure de mercredi dernier) et
+ton mpicc le cherche dans =/usr/local/lib= et dans
+=/usr/lib/x86_64-linux-gnu=. Est-ce qu'il y a un tel fichier otf.h dans
+ces chemins là ? Est-ce que quand tu l'ouvres tu y trouves traces de
+=OTF_FileManager= ?
+
+> C'est donc de l'ordre de 15-20 secondes. Il se peut que lors de la
+> première execution, des données aient été transféré sur le swap (qui
+> est particulièrement lent sur mon ordinateur). 
+
+Oui, une minute 45 seconde d'exécution, par rapport à 20 secondes,
+c'est un truc de fou. Je ne sais pas ce qu'il s'est passé mais je ne
+pense pas que ça soit le swap. time t'indique "0swaps". C'est assez
+pénible de connaître le consommation mémoire réelle des processus, je
+t'expliquerai à mon retour comment faire s'il y a besoin. En
+attendant, je te suggère de surveiller ton occupation mémoire pendant
+les exécutions en lançant htop. Si tu swappes, tu le verras tout de
+suite.
+
+Tu verras aussi si tu utilises plusieurs coeurs... Là, time t'indique
+un %CPU inférieur à 100, ce qui signifie qu'il n'arrive pas à utiliser
+un coeur 100% du temps. Alors, parfois, c'est compliqué à mesurer si
+tu fais time toto et que toto lance des processus qui occupent le CPU
+et que toto attends gentiment qu'ils aient fini, time va passer
+complètement à côté. Mais là, visiblement, ça model-net-mpi-replay
+bosse. Mais avec un seul coeur à mon avis, d'où une efficacité
+annoncée de 100%... :) Tu devrais essayer de changer ce "--sync=1" en
+"--sync=4" pour voir.
+
+> Mais le *running time* est toujours inferieur. Je pense donc que c'est
+> le temps d'execution de la simulation, et qu'ensuite, les
+> statistiques sont extraites des buffer/fichier.bin.
+
+Sinon, c'est bien d'avoir regardé le code pour comprendre ce qu'il
+affichait exactement.
+
+A+
+    Arnaud
+***** Talk to me
+Ok, je vais regarder pour OTF, mais le fichier =otf.h= se trouve :
+- =./home/chevamax/Documents/Stage_LIG_2017/logiciels/libotf-0.9.13/src/otf.h=
+- =./usr/local/include/otf.h=
+- =./usr/include/otf.h=
+D'où mon rajout de l'option -I/usr/include
+
+En effet, pour le swap je me suis mal exprimé, je pense que se sont
+mes autres applications ouvertent qui sont passé dans le swap pour
+libérer de la RAM (j'ai observé une augmentation du swap sur le
+moniteur system). Je vais donc également observer avec HTOP.
+**** OTF
+Effectivement le fichier otf.h ne contient pas la definition vers ce
+type. J'ai du installer une autre librairie...
+J'ai donc installé OTF, mais le deuxieme du nom, qui n'est donc pas
+compatible avec DUMPI. Je tente avec la version 1.2.18. http://www.paratools.com/otf/
+Tout est installé est c'est de la bonne forme (otf.h et pas otf2.h).
+Lien de téléchargement : 
+Cependant, j'ai maintenant l'erreur suivante :
+#+BEGIN_EXAMPLE
+configure:17252: checking wheter OTF library and header file can be found
+configure:17277: mpicc -o conftest -DMPICH_SUPPRESS_PROTOTYPES=1 -DHAVE_PRAGMA_HP_SEC_DEF=1 -pthread  -I/usr/local/include -L/usr/local/lib   conftest.c  -lotf -lz >&5
+/tmp/ccRnDXS4.o: In function `main':
+conftest.c:(.text+0x16): undefined reference to `OTF_FileManager_open'
+conftest.c:(.text+0x34): undefined reference to `OTF_FileManager_close'
+collect2: error: ld returned 1 exit status
+#+END_EXAMPLE
+
+Or ces fonction sont définie dans des fichiers .h au niveau
+=/usr/local/include= qui sont appelé par des includes successifs via le
+fichier =otf.h= . La librairie est elle dans =/usr/local/lib/libotf.a=
+
+Je lance le configure via :
+#+BEGIN_EXAMPLE
+ ../configure --enable-libdumpi --enable-test --prefix=/home/chevamax/Documents/Stage_LIG_2017/logiciels/dumpiOTF/sst-dumpi/install CC=mpicc CXX=mpiCC CFLAGS="-DMPICH_SUPPRESS_PROTOTYPES=1 -DHAVE_PRAGMA_HP_SEC_DEF=1 -pthread  -I/usr/local/include -L/usr/local/lib -lotf"
+#+END_EXAMPLE
+
+
+**** Replay sur CODES                                              :CODES:
+***** Premier replay --synch=4
+
+#+begin_src sh :results output :exports both
+/usr/bin/time model-net-mpi-replay --sync=4 --num_net_traces=16 --workload_file=dumpi-2017.05.29.15.00.43- --workload_type=dumpi --lp-io-dir=amg-16-par-debug --lp-io-use-suffix=1 -- ../../logiciels/CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+model-net-mpi-replay --sync=4 --num_net_traces=16 --workload_file=dumpi-2017.05.29.15.00.43- --workload_type=dumpi --lp-io-dir=amg-16-par-debug --lp-io-use-suffix=1 -- ../../logiciels/CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf 
+
+Tue May 30 10:51:29 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ Total nodes 1056 routers 264 groups 33 radix 16 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (1)] 1
+	Total LPs                                                 2376
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            608257
+	Network events                                           50000
+	Total events                                            658256
+
+/***************************************************************************/
+/***** WARNING: Starting Optimistic Debug Scheduler!! **********************/
+This schedule assumes the following: 
+ 1) One 1 Processor/Core is used.
+ 2) One 1 KP is used.
+    NOTE: use the --nkp=1 argument to the simulation to ensure that
+          it only uses 1 KP.
+ 3) Events ARE NEVER RECLAIMED (LP Commit Functions are not called).
+ 4) Executes til out of memory (16 events left) and 
+    injects rollback to first before primodal init event.
+ 5) g_tw_rollback_time = 0.000000001000 
+/***************************************************************************/
+/******************* Starting Rollback Phase ******************************/
+/******************* Completed Rollback Phase ******************************/
+ *** END SIMULATION ***
+
+
+ LP 0 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 2 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 10 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 12 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 18 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 19 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 20 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 21 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 27 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 28 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 29 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 30 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 0 collectives 0 delays 0 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+	: Running Time = 0.6377 seconds
+
+TW Library Statistics:
+	Total Events Processed                                  657157
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                      657157
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                                -inf %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     -nan %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     -nan %
+
+	Total Roll Backs                                             1
+	Primary Roll Backs                                           1
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                         0
+	Event Rate (events/sec)                                    0.0
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        658257
+	Memory Allocated                                        479985
+	Memory Wasted                                               43
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             64
+	LP RNGs                                                     80
+	Total LP                                                   272
+	Event struct                                               144
+	Event struct with Model                                    720
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.0000
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 0 recvd 0 
+ max runtime 0.000000 ns avg runtime 0.000000 
+ max comm time 0.000000 avg comm time 0.000000 
+ max send time 0.000000 avg send time 0.000000 
+ max recv time 0.000000 avg recv time 0.000000 
+ max wait time 0.000000 avg wait time 0.000000 
+LP-IO: writing output to amg-16-par-debug-4472-1496134289/
+LP-IO: data files:
+   amg-16-par-debug-4472-1496134289/dragonfly-router-traffic
+   amg-16-par-debug-4472-1496134289/dragonfly-router-stats
+   amg-16-par-debug-4472-1496134289/dragonfly-msg-stats
+   amg-16-par-debug-4472-1496134289/model-net-category-all
+   amg-16-par-debug-4472-1496134289/model-net-category-test
+   amg-16-par-debug-4472-1496134289/mpi-replay-stats
+ Average number of hops traversed -nan average chunk latency -nan us maximum chunk latency 0.000000 us avg message size -nan bytes finished messages 0 finished chunks 0 
+
+ ADAPTIVE ROUTING STATS: 0 chunks routed minimally 0 chunks routed non-minimally completed packets 0 
+
+ Total packets generated 0 finished 0 
+1.41user 1.34system 0:02.82elapsed 97%CPU (0avgtext+0avgdata 5082308maxresident)k
+0inputs+11112outputs (0major+1138863minor)pagefaults 0swaps
+#+END_EXAMPLE
+****** Commentaires
+Bon et bien ca ne fonctionne pas. Dans la documentation de CODES, ils
+ne parlent que des =sync=3= et =sync=1=  
+***** Second replay --synch=3
+#+begin_src sh :results output :exports both
+/usr/bin/time mpirun -np 4 model-net-mpi-replay --sync=3 --num_net_traces=16 --workload_file=dumpi-2017.05.29.15.00.43- --workload_type=dumpi -- ../../logiciels/CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Tue May 30 11:07:41 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 4 
+
+ Total nodes 1056 routers 264 groups 33 radix 16 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                 2376
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            152065
+	Network events                                           50000
+	Total events                                            202064
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #269: simulation 1% complete, max event queue size 136 (GVT = 3001388599.2208).
+AVL tree size: 0
+GVT #5003: simulation 2% complete, max event queue size 402 (GVT = 6088586397.1089).
+AVL tree size: 0
+GVT #13886: simulation 3% complete, max event queue size 688 (GVT = 11483170310.2218).
+AVL tree size: 0
+GVT #13924: simulation 4% complete, max event queue size 688 (GVT = 12009128760.0480).
+AVL tree size: 0
+GVT #27424: simulation 5% complete, max event queue size 755 (GVT = 15073084855.9814).
+AVL tree size: 0
+GVT #39200: simulation 6% complete, max event queue size 755 (GVT = 18002545337.9855).
+AVL tree size: 0
+GVT #45757: simulation 7% complete, max event queue size 755 (GVT = 21003132908.7307).
+AVL tree size: 0
+GVT #52120: simulation 8% complete, max event queue size 755 (GVT = 24001513016.8279).
+AVL tree size: 0
+GVT #58486: simulation 9% complete, max event queue size 755 (GVT = 27016203755.9683).
+AVL tree size: 0
+GVT #64968: simulation 10% complete, max event queue size 755 (GVT = 30005142406.1074).
+AVL tree size: 0
+GVT #69938: simulation 11% complete, max event queue size 755 (GVT = 33023577444.8782).
+AVL tree size: 0
+GVT #75505: simulation 12% complete, max event queue size 755 (GVT = 36000754131.1067).
+AVL tree size: 0
+GVT #79052: simulation 100% complete, max event queue size 755 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+
+ LP 0 unmatched irecvs 0 unmatched sends 0 Total sends 5195 receives 5196 collectives 165 delays 13765 wait alls 818 waits 0 send time 31049590.884462 wait 6896811063.124624
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 5320 receives 5320 collectives 165 delays 14014 wait alls 818 waits 0 send time 27406535.422290 wait 4902476557.148384
+ LP 2 unmatched irecvs 0 unmatched sends 0 Total sends 7528 receives 7578 collectives 165 delays 18495 wait alls 833 waits 0 send time 48394690.382042 wait 7307331091.361316
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 7513 receives 7497 collectives 165 delays 18384 wait alls 818 waits 0 send time 52232192.354479 wait 4480098136.370174
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 7725 receives 7733 collectives 165 delays 18832 wait alls 818 waits 0 send time 55760528.873564 wait 4495196328.271902
+ LP 10 unmatched irecvs 0 unmatched sends 0 Total sends 7224 receives 7206 collectives 165 delays 17804 wait alls 818 waits 0 send time 55449250.169176 wait 6989604606.631558
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 5134 receives 5124 collectives 165 delays 13593 wait alls 786 waits 0 send time 25451387.954232 wait 8660401684.884769
+ LP 12 unmatched irecvs 0 unmatched sends 0 Total sends 5011 receives 4998 collectives 165 delays 13383 wait alls 818 waits 0 send time 23487805.313354 wait 7571367496.128121
+ LP 18 unmatched irecvs 0 unmatched sends 0 Total sends 4971 receives 4971 collectives 165 delays 13277 wait alls 786 waits 0 send time 27980908.753104 wait 5488817203.298100
+ LP 19 unmatched irecvs 0 unmatched sends 0 Total sends 5156 receives 5146 collectives 165 delays 13676 wait alls 818 waits 0 send time 24128321.802325 wait 7623737540.569324
+ LP 20 unmatched irecvs 0 unmatched sends 0 Total sends 6995 receives 6951 collectives 165 delays 17281 wait alls 786 waits 0 send time 46167576.805130 wait 4851373601.992508
+ LP 21 unmatched irecvs 0 unmatched sends 0 Total sends 7635 receives 7685 collectives 165 delays 18709 wait alls 833 waits 0 send time 44505846.432115 wait 4975400608.077621
+ LP 27 unmatched irecvs 0 unmatched sends 0 Total sends 7405 receives 7377 collectives 165 delays 18156 wait alls 818 waits 0 send time 47102605.814613 wait 4562468563.792100
+ LP 28 unmatched irecvs 0 unmatched sends 0 Total sends 7655 receives 7700 collectives 165 delays 18744 wait alls 833 waits 0 send time 43722919.167827 wait 4438655118.330465
+ LP 29 unmatched irecvs 0 unmatched sends 0 Total sends 5338 receives 5335 collectives 165 delays 14047 wait alls 818 waits 0 send time 28659629.223436 wait 7415602451.839598
+ LP 30 unmatched irecvs 0 unmatched sends 0 Total sends 4415 receives 4403 collectives 165 delays 12090 wait alls 723 waits 0 send time 24836982.610907 wait 8429789123.096380
+	: Running Time = 24.7522 seconds
+
+TW Library Statistics:
+	Total Events Processed                                20237447
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             6
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                 316212
+	Total GVT Computations                                   79053
+
+	Net Events Processed                                  20237447
+	Event Rate (events/sec)                               817602.4
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        202065
+	Memory Allocated                                        165437
+	Memory Wasted                                              486
+
+TW Network Statistics:
+	Remote sends                                                 0
+	Remote recvs                                                 0
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             64
+	LP RNGs                                                     80
+	Total LP                                                   272
+	Event struct                                               144
+	Event struct with Model                                    720
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                2.3156
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                       44.7163
+	Event Cancel                                            0.0440
+	Event Abort                                             0.0000
+
+	GVT                                                    59.0665
+	Fossil Collect                                          1.8686
+	Primary Rollbacks                                       0.0000
+	Network Read                                            1.9920
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)     59.2676
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                   79053
+	Total All Reduce Calls                                  158106
+	Average Reduction / GVT                                   2.00
+
+ Total bytes sent 564713492 recvd 564713492 
+ max runtime 38171957179.288765 ns avg runtime 38076505282.498756 
+ max comm time 8660526284.320320 avg comm time 6193220647.686256 
+ max send time 55760528.873564 avg send time 37896048.247691 
+ max recv time 36342589195.592293 avg recv time 21138164904.627800 
+ max wait time 8660401684.884769 avg wait time 6193070698.432308 
+ Average number of hops traversed 1.447529 average chunk latency 8.990396 us maximum chunk latency 129.941465 us avg message size 5634.738281 bytes finished messages 100220 finished chunks 2265893 
+
+ ADAPTIVE ROUTING STATS: 2265893 chunks routed minimally 0 chunks routed non-minimally completed packets 2265893 
+
+ Total packets generated 1168810 finished 1168810 
+98.50user 4.24system 0:26.56elapsed 386%CPU (0avgtext+0avgdata 1401848maxresident)k
+0inputs+17256outputs (0major+1196539minor)pagefaults 0swaps
+
+#+END_EXAMPLE
+
+****** Commentaires
+J'ai un apriori sur le déroulement de la simulation. Je trouve étrange
+que GTV annonce qu'il est à 12 %, avancant de % en %, et qu'il saute à 100%.
+
+Pour l'efficacité à 100% je sais toujours pas le calcul, je vais aller
+voir dans le code.
+
+J'ai également remarqué qu'avec un nombre de process supérieur à mon
+nombre de coeurs, la simulation devient très lente (dès mpirun -np
+5 ...).
+
+***** Troisieme replay --synch=3
+#+begin_src sh :results output :exports both
+/usr/bin/time mpirun -np 5 model-net-mpi-replay --sync=3 --num_net_traces=16 --workload_file=dumpi-2017.05.29.15.00.43- --workload_type=dumpi -- ../../logiciels/CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Tue May 30 11:38:38 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 5 
+
+ Total nodes 1056 routers 264 groups 33 radix 16 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  5
+	Total Processors                                   [Nodes (5) x PE_per_Node (1)] 5
+	Total KPs                                          [Nodes (5) x KPs (16)] 80
+	Total LPs                                                 2380
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            121857
+	Network events                                           50000
+	Total events                                            171856
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #269: simulation 1% complete, max event queue size 136 (GVT = 3001388599.2208).
+AVL tree size: 0
+GVT #5003: simulation 2% complete, max event queue size 402 (GVT = 6088586397.1089).
+AVL tree size: 0
+GVT #13886: simulation 3% complete, max event queue size 688 (GVT = 11483170310.2218).
+AVL tree size: 0
+GVT #13924: simulation 4% complete, max event queue size 688 (GVT = 12009128760.0480).
+AVL tree size: 0
+GVT #27424: simulation 5% complete, max event queue size 755 (GVT = 15073084855.9814).
+AVL tree size: 0
+GVT #39200: simulation 6% complete, max event queue size 755 (GVT = 18002545337.9855).
+AVL tree size: 0
+GVT #45757: simulation 7% complete, max event queue size 755 (GVT = 21003132908.7307).
+AVL tree size: 0
+GVT #52120: simulation 8% complete, max event queue size 755 (GVT = 24001513016.8279).
+AVL tree size: 0
+GVT #58486: simulation 9% complete, max event queue size 755 (GVT = 27016203755.9683).
+AVL tree size: 0
+GVT #64968: simulation 10% complete, max event queue size 755 (GVT = 30005142406.1074).
+AVL tree size: 0
+GVT #69938: simulation 11% complete, max event queue size 755 (GVT = 33023577444.8782).
+AVL tree size: 0
+GVT #75505: simulation 12% complete, max event queue size 755 (GVT = 36000754131.1067).
+AVL tree size: 0
+GVT #79052: simulation 100% complete, max event queue size 755 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+
+ LP 0 unmatched irecvs 0 unmatched sends 0 Total sends 5195 receives 5196 collectives 165 delays 13765 wait alls 818 waits 0 send time 31049590.884462 wait 6896811063.124624
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 5320 receives 5320 collectives 165 delays 14014 wait alls 818 waits 0 send time 27406535.422290 wait 4902476557.148384
+ LP 2 unmatched irecvs 0 unmatched sends 0 Total sends 7528 receives 7578 collectives 165 delays 18495 wait alls 833 waits 0 send time 48394690.382042 wait 7307331091.361316
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 7513 receives 7497 collectives 165 delays 18384 wait alls 818 waits 0 send time 52232192.354479 wait 4480098136.370174
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 7725 receives 7733 collectives 165 delays 18832 wait alls 818 waits 0 send time 55760528.873564 wait 4495196328.271902
+ LP 10 unmatched irecvs 0 unmatched sends 0 Total sends 7224 receives 7206 collectives 165 delays 17804 wait alls 818 waits 0 send time 55449250.169176 wait 6989604606.631558
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 5134 receives 5124 collectives 165 delays 13593 wait alls 786 waits 0 send time 25451387.954232 wait 8660401684.884769
+ LP 12 unmatched irecvs 0 unmatched sends 0 Total sends 5011 receives 4998 collectives 165 delays 13383 wait alls 818 waits 0 send time 23487805.313354 wait 7571367496.128121
+ LP 18 unmatched irecvs 0 unmatched sends 0 Total sends 4971 receives 4971 collectives 165 delays 13277 wait alls 786 waits 0 send time 27980908.753104 wait 5488817203.298100
+ LP 19 unmatched irecvs 0 unmatched sends 0 Total sends 5156 receives 5146 collectives 165 delays 13676 wait alls 818 waits 0 send time 24128321.802325 wait 7623737540.569324
+ LP 20 unmatched irecvs 0 unmatched sends 0 Total sends 6995 receives 6951 collectives 165 delays 17281 wait alls 786 waits 0 send time 46167576.805130 wait 4851373601.992508
+ LP 21 unmatched irecvs 0 unmatched sends 0 Total sends 7635 receives 7685 collectives 165 delays 18709 wait alls 833 waits 0 send time 44505846.432115 wait 4975400608.077621
+ LP 27 unmatched irecvs 0 unmatched sends 0 Total sends 7405 receives 7377 collectives 165 delays 18156 wait alls 818 waits 0 send time 47102605.814613 wait 4562468563.792100
+ LP 28 unmatched irecvs 0 unmatched sends 0 Total sends 7655 receives 7700 collectives 165 delays 18744 wait alls 833 waits 0 send time 43722919.167827 wait 4438655118.330465
+ LP 29 unmatched irecvs 0 unmatched sends 0 Total sends 5338 receives 5335 collectives 165 delays 14047 wait alls 818 waits 0 send time 28659629.223436 wait 7415602451.839598
+ LP 30 unmatched irecvs 0 unmatched sends 0 Total sends 4415 receives 4403 collectives 165 delays 12090 wait alls 723 waits 0 send time 24836982.610907 wait 8429789123.096380
+	: Running Time = 2242.5680 seconds
+
+TW Library Statistics:
+	Total Events Processed                                20237447
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             6
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                 395265
+	Total GVT Computations                                   79053
+
+	Net Events Processed                                  20237447
+	Event Rate (events/sec)                                 9024.2
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        171857
+	Memory Allocated                                        144112
+	Memory Wasted                                              571
+
+TW Network Statistics:
+	Remote sends                                                 0
+	Remote recvs                                                 0
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             64
+	LP RNGs                                                     80
+	Total LP                                                   272
+	Event struct                                               144
+	Event struct with Model                                    720
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                3.0818
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                       59.4017
+	Event Cancel                                            0.0586
+	Event Abort                                             0.0000
+
+	GVT                                                  5369.0031
+	Fossil Collect                                          5.2655
+	Primary Rollbacks                                       0.0000
+	Network Read                                            3.2991
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)   5369.6879
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                   79053
+	Total All Reduce Calls                                  158106
+	Average Reduction / GVT                                   2.00
+
+ Total bytes sent 564713492 recvd 564713492 
+ max runtime 38171957179.288765 ns avg runtime 38076505282.498756 
+ max comm time 8660526284.320320 avg comm time 6193220647.686256 
+ max send time 55760528.873564 avg send time 37896048.247691 
+ max recv time 36342589195.592293 avg recv time 21138164904.627800 
+ max wait time 8660401684.884769 avg wait time 6193070698.432308 
+ Average number of hops traversed 1.447529 average chunk latency 8.990396 us maximum chunk latency 129.941465 us avg message size 5634.738281 bytes finished messages 100220 finished chunks 2265893 
+
+ ADAPTIVE ROUTING STATS: 2265893 chunks routed minimally 0 chunks routed non-minimally completed packets 2265893 
+
+ Total packets generated 1168810 finished 1168810 
+8641.83user 160.24system 37:24.45elapsed 392%CPU (0avgtext+0avgdata 1175872maxresident)k
+0inputs+16728outputs (0major+1180704minor)pagefaults 0swaps
+#+END_EXAMPLE
+
+On voit ici avec np=5 que la simulation dure 37 minutes !
+L'efficacité ne change pas.
+
+***** Efficacité                                             :CODES:ROSS:
+L'efficacité est calculée par :
+#+BEGIN_EXAMPLE
+100.0 * (1.0 - ((double) s.s_e_rbs / (double) s.s_net_events))
+#+END_EXAMPLE
+
+Avec 
+- =long s_e_rbs; /**< @brief Number of events rolled back by this LP */=
+- =s.s_net_events= le nombre total d'évènements de type "net" (réseau)
+
+Du coup ca permet de voir rapidement s'il n'y a pas eu trop de
+rollback.
+
+***** Commentaire
+Je remarque une différence en nombre d'event du model entre les
+version synch=3, synch=1 et selon le nombre de np. Je comprend pas
+encore pourquoi ca change, mais je vais regarder ca.
