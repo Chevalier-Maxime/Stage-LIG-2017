@@ -5560,7 +5560,9 @@ Ordering of links
 
 ****** Lancement de la simulation
 #+begin_src sh :results output :exports both
-mpirun -np 4 model-net-mpi-replay --sync=3 --num_net_traces=216 --workload_file=dumpi-2014.03.03.14.55.23- --workload_type=dumpi --lp-io-dir=amg-216-trace --lp-io-use-suffix=1 -- /home/chevamax/Documents/Stage_LIG_2017/logiciels/CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf 
+mpirun -np 4 model-net-mpi-replay --sync=3 --num_net_traces=216 --workload_file=dumpi-2014.03.03.14.55.23- --workload_type=dumpi 
+--lp-io-dir=amg-216-trace --lp-io-use-suffix=1 
+-- /home/chevamax/Documents/Stage_LIG_2017/logiciels/CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf 
 #+end_src
 #+RESULTS:
 #+BEGIN_EXAMPLE
@@ -7338,7 +7340,6 @@ Deux options :
 
 **** Replay sur CODES                                              :CODES:
 ***** Premier replay --synch=4
-
 #+begin_src sh :results output :exports both
 /usr/bin/time model-net-mpi-replay --sync=4 --num_net_traces=16 --workload_file=dumpi-2017.05.29.15.00.43- --workload_type=dumpi --lp-io-dir=amg-16-par-debug --lp-io-use-suffix=1 -- ../../logiciels/CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf
 #+end_src
@@ -7845,4 +7846,94 @@ Je remarque une différence en nombre d'event du model entre les
 version synch=3, synch=1 et selon le nombre de np. Je comprend pas
 encore pourquoi ca change, mais je vais regarder ca.
 
+*** 2017-05-31 mercredi
+**** Mail Arnaud
+***** Content
+Salut,
+  donc si je comprends bien, tu obtiens:
 
+- En séquentiel:
+  #+begin_src sh :results output :exports both
+  /usr/bin/time model-net-mpi-replay --sync=1 --num_net_traces=16
+--workload_file=dumpi-2017.05.29.15.00.43- --workload_type=dumpi
+--lp-io-dir=amg-16-seq --lp-io-use-suffix=1 --
+../../logiciels/CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf
+  
+  : 13.02user 1.63system 0:21.47elapsed 68%CPU (0avgtext+0avgdata 5121596maxresident)k
+  #+end_src
+- En parallèle:
+  #+begin_src sh :results output :exports both
+  /usr/bin/time mpirun -np 4 model-net-mpi-replay --sync=3
+--num_net_traces=16 --workload_file=dumpi-2017.05.29.15.00.43-
+--workload_type=dumpi --
+../../logiciels/CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf
+: 98.50user 4.24system 0:26.56elapsed 386%CPU (0avgtext+0avgdata 1401848maxresident)k
+  #+end_src
+
+Ça a l'air d'être le même workload en entrée et les mêmes sorties sauf
+que la version séquentielle prend 21 secondes en occupant peu le CPU
+alors que la version parallèle prend 26 seconde en occupant bien les 4
+coeurs. C'est normal, c'est souvent comme ça les codes
+parallèles... :) Euh, c'est bien exécuté sur une vraie machine et pas
+dans une VM tout ça, hein ?
+
+Il faudra essayer d'obtenir une trace un peu plus grosse pour voir si
+ça génère plus de parallélisme et si la version parallèle fini par
+aller plus vite que la version séquentielle...
+
+Sinon, l'effort de visualisation n'est pas vain du tout. C'est
+cool. Persévère.
+
+A+
+    Arnaud
+***** Commentaires
+Oui c'est bien ca! Tout est exécuté sur ma vraie machine, quand je
+parle de la virtuelle c'est plutot pour faire les configurations sur
+une machine "clean" (vu que j'installe beaucoups de chose sur mon
+linux et que comme avec OTF ca peut faire des conflits).
+
+Pour l'OTF, je vais continuer de regarder.
+
+Je suis d'accord pour la trace, mais avant ça je voulais regarder un
+peut plus en détail AMG (et ses paramètres d'entrée) pour ne pas
+lancer au hasard. J'ai également fait un récap des simulations que
+j'ai lancé sur une feuille, je met ca dans le journal rapidement.
+
+Je vais aussi regarder pour avoir un autre PC, afin de pouvoir faire
+tourner des simulations et continuer à avancer sur ce PC.
+
+J'ai également recu un mail de réponse pour HPL je met le contenu
+ci-dessous.
+
+***** HPL mailing list                                  :CODES:DUMPI:HPL:
+Hi Maxime,
+
+Thanks for your message. There seems to be a data type that is either
+not supported by DUMPI or CODES. Are you familiar with what data types
+are being used by the HPL trace? I will find out if the support for
+them can be added in the code. 
+
+Regards,
+Misbah
+
+****** Commentaire
+Je vais donc aussi me renseigner sur ce format de trace, en
+commencant par demander à Christian.
+
+**** Objectifs
+- [ ] Se renseigner sur AMG
+- [ ] Demander un PC
+- [ ] Simulations plus grandes
+- [ ] Ajouter le récap des simulations
+- [ ] Structure HPL
+- 
+
+**** /!\ OTF + EMACS
+Attention lors de l'instalation d'Open Trace Format. Il faut lui
+donner un prefix, car sinon il ecrase la librairie Open Text Format
+utilisé par Emacs, et vous allez perdre du temps comme moi...
+
+Il est peut être possible d'installer l'open trace format via apt-get (qui
+gère peut être ce genre de conflit).
+
+Du coup il faut installer dumpi avec le nouveau chemin d'OTF(trace).
