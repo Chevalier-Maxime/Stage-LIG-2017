@@ -7937,3 +7937,59 @@ Il est peut être possible d'installer l'open trace format via apt-get (qui
 gère peut être ce genre de conflit).
 
 Du coup il faut installer dumpi avec le nouveau chemin d'OTF(trace).
+
+**** Meeting avec Florence
+On est revenu sur les points suivants :
+- UNDEINED DATA TYPE :
+  - voir où l'execption est levé dans CODES
+  - Determiner les structures HPL
+- Analyse fichier OTF1
+  - Demander à Guillaume, Jean Marc ou Lucas
+- Voir les options de simulations pour savoir qu'est ce qui prend du
+  temps (pour comprendre pourquoi avec mpirun -np 5 ca prend 37 minutes)
+- Savoir ce que représentent les events dans CODES (model, net,
+  events, ...)
+- Faire une dizaine de simulation de chaque type pour vérifier si le
+  temps est stable et que le 1 minute 45 soit un "outsider"
+- Regarder si on peut déterminer une seed (pour reproduire des cas de
+  rollback, sans rollback, ...).
+
+***** Convertisseur OTF2PAJE
+Lucas Schnorr a mit à jour l'outil pour que ca fonctionne avec la
+derniere version de OTF.
+
+****** Installation
+Via [[https://github.com/schnorr/akypuera/wiki/OTFWithAkypuera][github]] avec l'option --recursive
+Je suis finalement allé voir Lucas pour configurer le cmake, ayant
+deux fichiers otf.h sur mon pc pour text et trace ...
+
+apt-get install libboost-all-dev
+Via [[https://github.com/schnorr/pajeng/wiki/Install][github]] pour pajeng
+
+****** Conversion
+Laconversion se fait comme suit :
+#+BEGIN_EXAMPLE
+otf2paje test.otf | pj_dump > test.csv
+#+END_EXAMPLE
+
+****** Analyse
+Il y a une erreur lors de la conversion, en effet, aucuns conteneur
+n'est défini via otf2page (soit la faute du logiciel, soit (et
+surement) celle de dumpi2otf).
+J'ai donc vu avec Lucas pour savoir comment avancer
+
+****** Script
+Dans un premier temps Lucas a ajouté à la main la définition des
+container.
+Via la commande suivante :
+
+#+begin_src sh :results output :exports both
+cat TEST.paje | grep ^0 | cut -d" " -f3 | sort --version-sort | uniq | 
+sed -e "s/\(p.*\)/10 0.0 \1 root PROCESS \1/"
+#+end_src
+
+puis un copié coller au bon endroit dans le fichier (juste avant
+l'erreur).
+
+Il faut maintenant que j'écrive un script qui automatise tout ca.
+
