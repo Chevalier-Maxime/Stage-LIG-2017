@@ -1297,7 +1297,7 @@ vers du DOT.
 
 *** 2017-05-22 lundi
 
-**** Configuration du system
+**** Configuration du system (how to)
 Maintenant que tout marche séparément il faut que je rassemble tout
 ça. Je pense faire un HowTo pour tout installer dans le bon
 ordre. J'aurais du commencer par installer HPL et DUMPI avant de faire
@@ -7954,7 +7954,7 @@ On est revenu sur les points suivants :
 - Regarder si on peut déterminer une seed (pour reproduire des cas de
   rollback, sans rollback, ...).
 
-***** Convertisseur OTF2PAJE
+***** Convertisseur OTF2PAJE                                      :DUMPI:
 Lucas Schnorr a mit à jour l'outil pour que ca fonctionne avec la
 derniere version de OTF.
 
@@ -7993,3 +7993,149 @@ l'erreur).
 
 Il faut maintenant que j'écrive un script qui automatise tout ca.
 
+** 2017-06 juin
+*** 2017-06-01 Mercredi
+**** Mail Arnaud
+***** Contenu 
+Salut Maxime,
+
+> - [ ] Demander un PC
+
+C'est pas que je ne veuille pas t'en donner un mais "man grid5000" ;)
+
+Sans rire, tu vas sur
+https://www.grid5000.fr/mediawiki/index.php/Grid5000:Get_an_account. Tu
+indiques alegrand comme responsable local. Pierre Neyron et Baptiste
+Pichot sont admins grid5000, la doc de grid5000 est très bien fichue et
+tous (ou presque) les doctorants l'utilisent donc si tu as un problème
+c'est facile.
+
+Si tu as des choses particulières à installer et qui demandent d'être
+root pour être installées, il se peut qu'il faille que tu déploies une
+image mais je ne suis pas sûr que tu aies besoin d'en passer par là.
+
+A+
+    Arnaud
+***** Commentaire
+Ok je vais me renseigner
+
+**** Format HPL
+http://www.netlib.org/benchmark/hpl/algorithm.html
+Via cette page, j'ai vu qu'il y avait deux manières d'Update j'ai donc
+tenté les deux pour voir si CODES aurait accepté les traces, mais non.
+
+J'ai crus comprendre ne parcourant internet que HPL utilise un format
+MPI-LIKE. Je met un lien vers la doc car je n'arrive pas à voir ce qui
+change par rapport à du mpi traditionnel :
+http://www.netlib.org/benchmark/hpl/documentation.html
+
+**** Script OTF
+
+Pour rappel, dans la conversion vers paje il manque la déclration des
+container. Via ce scrip on les défini :
+
+#+begin_src sh :results output :exports both
+cat TEST.paje | grep ^0 | cut -d" " -f3 | sort --version-sort | uniq | 
+sed -e "s/\(p.*\)/10 0.0 \1 root PROCESS \1/"
+#+end_src
+
+Il faut maintenant les ajouters au bon endroit.
+J'ai fait un petit fichier C (premiere version) pour faire la
+passerelle (je connais pas la manipulation de fichier en perl/bash ni
+les expressions régulières...). 
+#+BEGIN_EXAMPLE
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#define TAILLE_MAX 1000
+ 
+int main(int argc, char *argv[])
+{
+    //Recuperer les infos a ajouter
+	FILE *fp = NULL;	
+	char path[1035];
+	char stdoutName[]="azefgbvcser3658412558srdf";
+
+	/* Open the command for reading. */
+	fp = popen("cat test.paje | grep ^0 | cut -d\" \" -f3 | sort --version-sort | uniq | sed -e \"s/\\(p.*\\)/10 0.0 \\1 root PROCESS \\1/\"", "r");
+	if (fp == NULL) {
+	  printf("Failed to run command\n" );
+	  exit(1);
+	}
+
+
+    char chaine[TAILLE_MAX] = "";
+    
+    char cherche[] = "# OTF TimerResolution:";
+    
+    if (stdin != NULL)
+    {
+        while (fgets(chaine, TAILLE_MAX, stdin) != NULL) // On lit le stdin tant qu'on ne reçoit pas d'erreur (NULL)
+        {
+            if(!strncmp(cherche, chaine, 22)) {
+                	/* Read the output a line at a time - output it. */
+				while (fgets(path, sizeof(path)-1, fp) != NULL) {
+				  fprintf(stdout, "%s", path);
+				}
+				/* close */
+				pclose(fp);
+				break;
+			}else{
+				fprintf(stdout, "%s", chaine);
+			}
+        }
+
+        while (fgets(chaine, TAILLE_MAX, stdin) != NULL) // On lit le stdin tant qu'on ne reçoit pas d'erreur (NULL)
+        {
+        	fprintf(stdout, "%s", chaine);
+ 		}
+
+
+    }
+ 
+    return 0;
+}
+#+END_EXAMPLE
+
+J'ai ensuite fait le script suivant :
+#+BEGIN_EXAMPLE
+#!/bin/bash
+otf2paje $1 | ./testScript | pj_dump > $2
+#+END_EXAMPLE
+
+Avec les traces que j'ai déjà ca fonctionne bien. Malheureusement,
+j'ai des soucis sur mon pc qui font que j'arrive plus à faire de
+nouvelles simulations. mpich fonctionne bien (test sur des exemples),
+mais dès que j'ai un lien avec DUMPI ca ne fonctionne plus, avec des
+erreurs de type :
+
+#+BEGIN_EXAMPLE
+[Black-Pearl-2:23119] *** Process received signal ***
+[Black-Pearl-2:23119] Signal: Segmentation fault (11)
+[Black-Pearl-2:23119] Signal code: Address not mapped (1)
+[Black-Pearl-2:23119] Failing at address: 0x44000098
+[Black-Pearl-2:23120] *** Process received signal ***
+[Black-Pearl-2:23120] Signal: Segmentation fault (11)
+[Black-Pearl-2:23120] Signal code: Address not mapped (1)
+[Black-Pearl-2:23120] Failing at address: 0x44000098
+[Black-Pearl-2:23119] [ 0] /lib/x86_64-linux-gnu/libpthread.so.0(+0x11670)[0x7fd714196670]
+[Black-Pearl-2:23119] [ 1] /usr/lib/mpich/lib/libmpi.so.20(MPI_Barrier+0x96)[0x7fd7143fac96]
+[Black-Pearl-2:23120] [ 0] /lib/x86_64-linux-gnu/libpthread.so.0(+0x11670)[0x7f0c7599e670]
+[Black-Pearl-2:23120] [ 1] /usr/lib/mpich/lib/libmpi.so.20(MPI_Barrier+0x96)[0x7f0c75c02c96]
+[Black-Pearl-2:23120] [ 2] /home/chevamax/Documents/Stage_LIG_2017/logiciels/sst-dumpi/install/lib/libdumpi.so.7(MPI_Init+0x362)[0x7f0c75ed6721]
+[Black-Pearl-2:23120] [ 3] ./ping_pong(+0xb14)[0x55d864a24b14]
+[Black-Pearl-2:23120] [ 4] [Black-Pearl-2:23119] [ 2] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf1)[0x7f0c755e63f1]
+[Black-Pearl-2:23120] [ 5] ./ping_pong(+0x9da)[0x55d864a249da]
+[Black-Pearl-2:23120] *** End of error message ***
+/home/chevamax/Documents/Stage_LIG_2017/logiciels/sst-dumpi/install/lib/libdumpi.so.7(MPI_Init+0x362)[0x7fd7146ce721]
+[Black-Pearl-2:23119] [ 3] ./ping_pong(+0xb14)[0x55fa4da65b14]
+[Black-Pearl-2:23119] [ 4] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf1)[0x7fd713dde3f1]
+[Black-Pearl-2:23119] [ 5] ./ping_pong(+0x9da)[0x55fa4da659da]
+[Black-Pearl-2:23119] *** End of error message ***
+--------------------------------------------------------------------------
+mpirun noticed that process rank 0 with PID 0 on node Black-Pearl-2 exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------
+#+END_EXAMPLE
+
+Je pense que je vais tout réinstaller parce que je sais pas ce qui cloche...
