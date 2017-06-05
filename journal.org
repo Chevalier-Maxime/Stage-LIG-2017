@@ -8151,6 +8151,10 @@ J'ai testé avec vite sur le fichier en paje complété mais il n'y a pas
 de flèches & co, quelques traces, mais c'est pas riche.
 
 *** 2017-06-02 vendredi
+:LOGBOOK:
+- State "STARTED"    from "TODO"       [2017-06-05 lun. 11:08]
+- State "TODO"       from              [2017-06-05 lun. 11:08]
+:END:
 
 **** Mail Florence
 
@@ -8346,3 +8350,1245 @@ Il en est de même avec toutes les options qu'on peut ajouter.
 
 reminder : https://pop-coe.eu/further-information/learning-material
 https://github.com/LLNL/ravel (traces dispo dans les issues)
+*** 2017-06-05 lundi
+**** HOW TO
+***** apt-get + versions
+- gcc => 6.3.020170406
+- mpich => 3.2-7
+- cmake => 3.7.2-1
+- doxygen => 1.8.13
+- libtool => 2.4.6-2
+- m4 => 1.4.18-1
+- automake => 1:1.15-5ubuntu1
+- autoconf => 2.69-10
+- libatlas-base-dev => 3.10.3-1ubuntu1
+- libmpich-dev => 3.2-7 build1
+- gfortran 4 => 6.3.0-2ubuntu1
+- flex => 2.6.2-1.3
+- bison => 2:3.0.4.dfsg-1build1
+- pkg-config => 0.29.1-0ubuntu1
+
+***** Don't work yet RAVEL
+[[https://github.com/LLNL/ravel][github]]
+
+[[https://github.com/LLNL/ravel/issues/7][issue]]
+
+****** Otf
+(peut être possible d'installer directemement le paquet libopen-trace-format1)
+[[http://tu-dresden.de/die_tu_dresden/zentrale_einrichtungen/zih/forschung/projekte/otf/index_html/document_view?set_language=en][link]]
+#+begin_src sh :results output :exports both
+./configure --prefix=<path>
+make
+make install
+#+end_src
+#+BEGIN_EXAMPLE
+Libraries have been installed in:
+   /home/chevamax/logiciels/lib
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the `-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the `LD_RUN_PATH' environment variable
+     during linking
+   - use the `-Wl,-rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to `/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+#+END_EXAMPLE
+
+
+****** Otf2
+[[http://www.vi-hps.org/upload/packages/otf2/otf2-2.0.tar.gz][link]]
+#+begin_src sh :results output :exports both
+./configure --prefix=<path>
+make
+make install
+#+end_src
+#+BEGIN_EXAMPLE
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /home/chevamax/logiciels/lib
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the '-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the 'LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the 'LD_RUN_PATH' environment variable
+     during linking
+   - use the '-Wl,-rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to '/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+#+END_EXAMPLE
+
+****** Qt 5 
+[[https://www.qt.io/download-open-source/][link]] 
+#+begin_src sh :results output :exports both
+chmod u+x qt-unified-linux-x64-3.0.0-online.run
+./qt-unified-linux-x64-3.0.0-online.run
+#+end_src
+
+Puis j'ai laissé les options par défaut. Puis j'ai ajouté les chemins
+dans mes variables d'environnement.
+
+****** Muster
+[[https://github.com/LLNL/muster/archive/v1.0.1.tar.gz][link]] 
+
+/!\ Attention ne pas faire ca, ca instal openmpi et on veut pas, trouver
+le paquet avec seulement les header
+#+begin_src sh :results output :exports both
+sudo apt-get install libboost-all-dev
+#+end_src
+
+Puis suivre les instructions d'installation
+
+****** Ravel
+#+begin_src sh :results output :exports both
+sudo apt install mesa-common-dev
+sudo apt-get install libglu1-mesa-dev -y
+#+end_src
+
+***** DUMPI
+
+[[https://github.com/sstsimulator/sst-dumpi][github]] 
+
+#+begin_src sh :results output :exports both
+git clone https://github.com/sstsimulator/sst-dumpi
+cd sst-dumpi
+#+end_src
+
+Ensuite il faut modifier le fichier configure, et remplacer à la ligne
+17344 le =-lotf= par =-lopen-trace-format= .
+
+#+begin_src sh :results output :exports both
+mkdir build
+cd build
+../configure --enable-libdumpi --enable-test --prefix=/home/chevamax/logiciels CC=mpicc CXX=mpiCC CFLAGS="-DMPICH_SUPPRESS_PROTOTYPES=1 -DHAVE_PRAGMA_HP_SEC_DEF=1 -pthread -I/home/chevamax/logiciels/include/open-trace-format -L/home/chevamax/logiciels/lib"
+#+end_src
+
+Puis ajouter le code ci dessous au fichier sst-dumpi/build/dumpi/bin/Makefile
+#+BEGIN_EXAMPLE
+-I/home/chevamax/logiciels/include/open-trace-format -L/home/chevamax/logiciels/lib -lopen-trace-format -lz
+#+END_EXAMPLE
+puis faire 
+#+begin_src sh :results output :exports both
+make
+make install
+make doc
+#+end_src
+
+#+BEGIN_EXAMPLE
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /home/chevamax/logiciels/lib
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the '-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the 'LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the 'LD_RUN_PATH' environment variable
+     during linking
+   - use the '-Wl,-rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to '/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+#+END_EXAMPLE
+
+J'ai quand même beaucoups de WARNING, peut être que c'est pour ca que
+la visu ne fonctionne pas bien...
+#+BEGIN_EXAMPLE
+log.txt
+../../../dumpi/test/testmpi.c: In function ‘main’:
+../../../dumpi/test/testmpi.c:60:3: warning: implicit declaration of function ‘MPI_Init’ [-Wimplicit-function-declaration]
+   MPI_Init(&argc, &argv);
+   ^~~~~~~~
+../../../dumpi/test/testmpi.c:61:3: warning: implicit declaration of function ‘MPI_Comm_rank’ [-Wimplicit-function-declaration]
+   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+   ^~~~~~~~~~~~~
+../../../dumpi/test/testmpi.c:62:3: warning: implicit declaration of function ‘MPI_Comm_size’ [-Wimplicit-function-declaration]
+   MPI_Comm_size(MPI_COMM_WORLD, &size);
+   ^~~~~~~~~~~~~
+../../../dumpi/test/testmpi.c:75:3: warning: implicit declaration of function ‘MPI_Finalize’ [-Wimplicit-function-declaration]
+   MPI_Finalize();
+   ^~~~~~~~~~~~
+../../../dumpi/test/p2p.c: In function ‘sends’:
+../../../dumpi/test/p2p.c:70:3: warning: implicit declaration of function ‘MPI_Buffer_attach’ [-Wimplicit-function-declaration]
+   MPI_Buffer_attach(scratch, bsize);     \
+   ^
+../../../dumpi/test/p2p.c:139:3: note: in expansion of macro ‘DUMPI_TEST_SEND’
+   DUMPI_TEST_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:79:7: warning: implicit declaration of function ‘MPI_Irecv’ [-Wimplicit-function-declaration]
+       MPI_Irecv(recvarr + 1024*i, 1024, XMPI_TYPE, i,   \
+       ^
+../../../dumpi/test/p2p.c:139:3: note: in expansion of macro ‘DUMPI_TEST_SEND’
+   DUMPI_TEST_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:85:7: warning: implicit declaration of function ‘MPI_Send’ [-Wimplicit-function-declaration]
+       MPI_Send(sendarr, 1024, XMPI_TYPE, i, 1, MPI_COMM_WORLD);  \
+       ^
+../../../dumpi/test/p2p.c:139:3: note: in expansion of macro ‘DUMPI_TEST_SEND’
+   DUMPI_TEST_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:88:3: warning: implicit declaration of function ‘MPI_Waitall’ [-Wimplicit-function-declaration]
+   MPI_Waitall(size, req, MPI_STATUSES_IGNORE);    \
+   ^
+../../../dumpi/test/p2p.c:139:3: note: in expansion of macro ‘DUMPI_TEST_SEND’
+   DUMPI_TEST_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:97:7: warning: implicit declaration of function ‘MPI_Bsend’ [-Wimplicit-function-declaration]
+       MPI_Bsend(sendarr, 1024, XMPI_TYPE, i, 1, MPI_COMM_WORLD); \
+       ^
+../../../dumpi/test/p2p.c:139:3: note: in expansion of macro ‘DUMPI_TEST_SEND’
+   DUMPI_TEST_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:107:3: warning: implicit declaration of function ‘MPI_Barrier’ [-Wimplicit-function-declaration]
+   MPI_Barrier(MPI_COMM_WORLD);      \
+   ^
+../../../dumpi/test/p2p.c:139:3: note: in expansion of macro ‘DUMPI_TEST_SEND’
+   DUMPI_TEST_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:110:7: warning: implicit declaration of function ‘MPI_Rsend’ [-Wimplicit-function-declaration]
+       MPI_Rsend(sendarr, 1024, XMPI_TYPE, i, 1, MPI_COMM_WORLD); \
+       ^
+../../../dumpi/test/p2p.c:139:3: note: in expansion of macro ‘DUMPI_TEST_SEND’
+   DUMPI_TEST_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:122:7: warning: implicit declaration of function ‘MPI_Ssend’ [-Wimplicit-function-declaration]
+       MPI_Ssend(sendarr, 1024, XMPI_TYPE, i, 1, MPI_COMM_WORLD); \
+       ^
+../../../dumpi/test/p2p.c:139:3: note: in expansion of macro ‘DUMPI_TEST_SEND’
+   DUMPI_TEST_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:127:3: warning: implicit declaration of function ‘MPI_Buffer_detach’ [-Wimplicit-function-declaration]
+   MPI_Buffer_detach(&scratch, &bsize);     \
+   ^
+../../../dumpi/test/p2p.c:139:3: note: in expansion of macro ‘DUMPI_TEST_SEND’
+   DUMPI_TEST_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:130:7: warning: implicit declaration of function ‘MPI_Request_free’ [-Wimplicit-function-declaration]
+       MPI_Request_free(req+i);      \
+       ^
+../../../dumpi/test/p2p.c:139:3: note: in expansion of macro ‘DUMPI_TEST_SEND’
+   DUMPI_TEST_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c: In function ‘isends’:
+../../../dumpi/test/p2p.c:210:7: warning: implicit declaration of function ‘MPI_Isend’ [-Wimplicit-function-declaration]
+       MPI_Isend(sendarr + 1024*i, 1024, XMPI_TYPE, i,   \
+       ^
+../../../dumpi/test/p2p.c:274:3: note: in expansion of macro ‘DUMPI_TEST_ISEND’
+   DUMPI_TEST_ISEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:216:7: warning: implicit declaration of function ‘MPI_Recv’ [-Wimplicit-function-declaration]
+       MPI_Recv(recvarr, 1024, XMPI_TYPE, i, 1, MPI_COMM_WORLD,  \
+       ^
+../../../dumpi/test/p2p.c:274:3: note: in expansion of macro ‘DUMPI_TEST_ISEND’
+   DUMPI_TEST_ISEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:223:7: warning: implicit declaration of function ‘MPI_Ibsend’ [-Wimplicit-function-declaration]
+       MPI_Ibsend(sendarr + 1024*i, 1024, XMPI_TYPE, i,   \
+       ^
+../../../dumpi/test/p2p.c:274:3: note: in expansion of macro ‘DUMPI_TEST_ISEND’
+   DUMPI_TEST_ISEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:243:7: warning: implicit declaration of function ‘MPI_Irsend’ [-Wimplicit-function-declaration]
+       MPI_Irsend(sendarr + 1024*i, 1024, XMPI_TYPE, i,   \
+       ^
+../../../dumpi/test/p2p.c:274:3: note: in expansion of macro ‘DUMPI_TEST_ISEND’
+   DUMPI_TEST_ISEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:250:7: warning: implicit declaration of function ‘MPI_Issend’ [-Wimplicit-function-declaration]
+       MPI_Issend(sendarr + 1024*i, 1024, XMPI_TYPE, i,   \
+       ^
+../../../dumpi/test/p2p.c:274:3: note: in expansion of macro ‘DUMPI_TEST_ISEND’
+   DUMPI_TEST_ISEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c: In function ‘deferred_sends’:
+../../../dumpi/test/p2p.c:350:7: warning: implicit declaration of function ‘MPI_Send_init’ [-Wimplicit-function-declaration]
+       MPI_Send_init(sendarr, 1024, XMPI_TYPE, i,   \
+       ^
+../../../dumpi/test/p2p.c:435:3: note: in expansion of macro ‘DUMPI_TEST_DEFERRED_SEND’
+   DUMPI_TEST_DEFERRED_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:358:3: warning: implicit declaration of function ‘MPI_Startall’ [-Wimplicit-function-declaration]
+   MPI_Startall(startid, sendreq);     \
+   ^
+../../../dumpi/test/p2p.c:435:3: note: in expansion of macro ‘DUMPI_TEST_DEFERRED_SEND’
+   DUMPI_TEST_DEFERRED_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:364:7: warning: implicit declaration of function ‘MPI_Bsend_init’ [-Wimplicit-function-declaration]
+       MPI_Bsend_init(sendarr, 1024, XMPI_TYPE, i,   \
+       ^
+../../../dumpi/test/p2p.c:435:3: note: in expansion of macro ‘DUMPI_TEST_DEFERRED_SEND’
+   DUMPI_TEST_DEFERRED_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:377:7: warning: implicit declaration of function ‘MPI_Rsend_init’ [-Wimplicit-function-declaration]
+       MPI_Rsend_init(sendarr, 1024, XMPI_TYPE, i,   \
+       ^
+../../../dumpi/test/p2p.c:435:3: note: in expansion of macro ‘DUMPI_TEST_DEFERRED_SEND’
+   DUMPI_TEST_DEFERRED_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:391:7: warning: implicit declaration of function ‘MPI_Ssend_init’ [-Wimplicit-function-declaration]
+       MPI_Ssend_init(sendarr, 1024, XMPI_TYPE, i,   \
+       ^
+../../../dumpi/test/p2p.c:435:3: note: in expansion of macro ‘DUMPI_TEST_DEFERRED_SEND’
+   DUMPI_TEST_DEFERRED_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:406:7: warning: implicit declaration of function ‘MPI_Recv_init’ [-Wimplicit-function-declaration]
+       MPI_Recv_init(recvarr + i*1024, 1024, XMPI_TYPE, i,  \
+       ^
+../../../dumpi/test/p2p.c:435:3: note: in expansion of macro ‘DUMPI_TEST_DEFERRED_SEND’
+   DUMPI_TEST_DEFERRED_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:413:5: warning: implicit declaration of function ‘MPI_Start’ [-Wimplicit-function-declaration]
+     MPI_Start(recvreq+i);      \
+     ^
+../../../dumpi/test/p2p.c:435:3: note: in expansion of macro ‘DUMPI_TEST_DEFERRED_SEND’
+   DUMPI_TEST_DEFERRED_SEND(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c: In function ‘sendrecvs’:
+../../../dumpi/test/p2p.c:499:7: warning: implicit declaration of function ‘MPI_Sendrecv’ [-Wimplicit-function-declaration]
+       MPI_Sendrecv(sendbuf, sendcount, XMPI_TYPE, dest, sendtag, \
+       ^
+../../../dumpi/test/p2p.c:531:3: note: in expansion of macro ‘DUMPI_TEST_SENDRECV’
+   DUMPI_TEST_SENDRECV(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/p2p.c:520:7: warning: implicit declaration of function ‘MPI_Sendrecv_replace’ [-Wimplicit-function-declaration]
+       MPI_Sendrecv_replace(buf, count, XMPI_TYPE,   \
+       ^
+../../../dumpi/test/p2p.c:582:3: note: in expansion of macro ‘DUMPI_TEST_SENDRECV_REPLACE’
+   DUMPI_TEST_SENDRECV_REPLACE(rank, size, char, MPI_CHAR);
+   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/coll.c: In function ‘rooted_collectives’:
+../../../dumpi/test/coll.c:77:5: warning: implicit declaration of function ‘MPI_Bcast’ [-Wimplicit-function-declaration]
+     MPI_Bcast(sendbuf, blen, MPI_DOUBLE, root, MPI_COMM_WORLD);
+     ^~~~~~~~~
+../../../dumpi/test/coll.c:81:5: warning: implicit declaration of function ‘MPI_Scatter’ [-Wimplicit-function-declaration]
+     MPI_Scatter(sendbuf, 1024, MPI_DOUBLE, recvbuf, 1024, MPI_DOUBLE,
+     ^~~~~~~~~~~
+../../../dumpi/test/coll.c:86:5: warning: implicit declaration of function ‘MPI_Scatterv’ [-Wimplicit-function-declaration]
+     MPI_Scatterv(sendbuf, cntarr, displarr, MPI_DOUBLE,
+     ^~~~~~~~~~~~
+../../../dumpi/test/coll.c:91:5: warning: implicit declaration of function ‘MPI_Gather’ [-Wimplicit-function-declaration]
+     MPI_Gather(sendbuf, 1024, MPI_DOUBLE, recvbuf, 1024, MPI_DOUBLE,
+     ^~~~~~~~~~
+../../../dumpi/test/coll.c:96:5: warning: implicit declaration of function ‘MPI_Gatherv’ [-Wimplicit-function-declaration]
+     MPI_Gatherv(sendbuf, 1024, MPI_DOUBLE,
+     ^~~~~~~~~~~
+../../../dumpi/test/coll.c:102:5: warning: implicit declaration of function ‘MPI_Reduce’ [-Wimplicit-function-declaration]
+     MPI_Reduce(sendbuf, recvbuf, blen, MPI_DOUBLE, MPI_MAX,
+     ^~~~~~~~~~
+../../../dumpi/test/coll.c:107:5: warning: implicit declaration of function ‘MPI_Reduce_scatter’ [-Wimplicit-function-declaration]
+     MPI_Reduce_scatter(sendbuf, recvbuf, cntarr, MPI_DOUBLE,
+     ^~~~~~~~~~~~~~~~~~
+../../../dumpi/test/coll.c: In function ‘rootless_collectives’:
+../../../dumpi/test/coll.c:136:5: warning: implicit declaration of function ‘MPI_Barrier’ [-Wimplicit-function-declaration]
+     MPI_Barrier(MPI_COMM_WORLD);
+     ^~~~~~~~~~~
+../../../dumpi/test/coll.c:138:5: warning: implicit declaration of function ‘MPI_Allgather’ [-Wimplicit-function-declaration]
+     MPI_Allgather(sendbuf+1024*rank, 1024, MPI_DOUBLE,
+     ^~~~~~~~~~~~~
+../../../dumpi/test/coll.c:142:5: warning: implicit declaration of function ‘MPI_Allgatherv’ [-Wimplicit-function-declaration]
+     MPI_Allgatherv(sendbuf+1024*rank, 1024, MPI_DOUBLE,
+     ^~~~~~~~~~~~~~
+../../../dumpi/test/coll.c:146:5: warning: implicit declaration of function ‘MPI_Allreduce’ [-Wimplicit-function-declaration]
+     MPI_Allreduce(sendbuf, recvbuf, blen,
+     ^~~~~~~~~~~~~
+../../../dumpi/test/coll.c:149:5: warning: implicit declaration of function ‘MPI_Alltoall’ [-Wimplicit-function-declaration]
+     MPI_Alltoall(sendbuf, 1024, MPI_DOUBLE,
+     ^~~~~~~~~~~~
+../../../dumpi/test/coll.c:152:5: warning: implicit declaration of function ‘MPI_Alltoallv’ [-Wimplicit-function-declaration]
+     MPI_Alltoallv(sendbuf, cntarr, displarr, MPI_DOUBLE,
+     ^~~~~~~~~~~~~
+../../../dumpi/test/coll.c:156:5: warning: implicit declaration of function ‘MPI_Scan’ [-Wimplicit-function-declaration]
+     MPI_Scan(sendbuf, recvbuf, blen, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+     ^~~~~~~~
+../../../dumpi/test/manip.c: In function ‘queries’:
+../../../dumpi/test/manip.c:79:3: warning: implicit declaration of function ‘MPI_Wtime’ [-Wimplicit-function-declaration]
+   MPI_Wtime();
+   ^~~~~~~~~
+../../../dumpi/test/manip.c:80:3: warning: implicit declaration of function ‘MPI_Wtick’ [-Wimplicit-function-declaration]
+   MPI_Wtick();
+   ^~~~~~~~~
+../../../dumpi/test/manip.c:81:3: warning: implicit declaration of function ‘MPI_Comm_rank’ [-Wimplicit-function-declaration]
+   MPI_Comm_rank(MPI_COMM_WORLD, &r);
+   ^~~~~~~~~~~~~
+../../../dumpi/test/manip.c:82:3: warning: implicit declaration of function ‘MPI_Comm_size’ [-Wimplicit-function-declaration]
+   MPI_Comm_size(MPI_COMM_WORLD, &s);
+   ^~~~~~~~~~~~~
+../../../dumpi/test/manip.c: In function ‘probes’:
+../../../dumpi/test/manip.c:99:7: warning: implicit declaration of function ‘MPI_Isend’ [-Wimplicit-function-declaration]
+       MPI_Isend(&rank, 1, MPI_INT, peer, rank, MPI_COMM_WORLD, req+peer);
+       ^~~~~~~~~
+../../../dumpi/test/manip.c:106:2: warning: implicit declaration of function ‘MPI_Probe’ [-Wimplicit-function-declaration]
+  MPI_Probe(peer, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+  ^~~~~~~~~
+../../../dumpi/test/manip.c:110:4: warning: implicit declaration of function ‘MPI_Iprobe’ [-Wimplicit-function-declaration]
+    MPI_Iprobe(peer, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+    ^~~~~~~~~~
+../../../dumpi/test/manip.c:115:7: warning: implicit declaration of function ‘MPI_Get_count’ [-Wimplicit-function-declaration]
+       MPI_Get_count(&status, MPI_INT, &count);
+       ^~~~~~~~~~~~~
+../../../dumpi/test/manip.c:117:7: warning: implicit declaration of function ‘MPI_Recv’ [-Wimplicit-function-declaration]
+       MPI_Recv(&i, 1, MPI_INT, peer, status.MPI_TAG, MPI_COMM_WORLD, &status2);
+       ^~~~~~~~
+../../../dumpi/test/manip.c: In function ‘tests’:
+../../../dumpi/test/manip.c:153:7: warning: implicit declaration of function ‘MPI_Irecv’ [-Wimplicit-function-declaration]
+       MPI_Irecv(matching_value+peer, 1, MPI_INT, peer, matching_tag,
+       ^~~~~~~~~
+../../../dumpi/test/manip.c:163:3: warning: implicit declaration of function ‘MPI_Test’ [-Wimplicit-function-declaration]
+   MPI_Test(nonmatching_recv+reqid, &flag, statuses);
+   ^~~~~~~~
+../../../dumpi/test/manip.c:170:3: warning: implicit declaration of function ‘MPI_Testany’ [-Wimplicit-function-declaration]
+   MPI_Testany(size, nonmatching_recv, &index, &flag, statuses);
+   ^~~~~~~~~~~
+../../../dumpi/test/manip.c:177:3: warning: implicit declaration of function ‘MPI_Testsome’ [-Wimplicit-function-declaration]
+   MPI_Testsome(size, nonmatching_recv, &outcount, indices, statuses);
+   ^~~~~~~~~~~~
+../../../dumpi/test/manip.c:183:3: warning: implicit declaration of function ‘MPI_Testall’ [-Wimplicit-function-declaration]
+   MPI_Testall(size, nonmatching_recv, &flag, statuses);
+   ^~~~~~~~~~~
+../../../dumpi/test/manip.c:190:3: warning: implicit declaration of function ‘MPI_Wait’ [-Wimplicit-function-declaration]
+   MPI_Wait(matching_recv+reqid, statuses);
+   ^~~~~~~~
+../../../dumpi/test/manip.c:193:3: warning: implicit declaration of function ‘MPI_Waitany’ [-Wimplicit-function-declaration]
+   MPI_Waitany(size, matching_recv, &index, statuses);
+   ^~~~~~~~~~~
+../../../dumpi/test/manip.c:196:3: warning: implicit declaration of function ‘MPI_Waitsome’ [-Wimplicit-function-declaration]
+   MPI_Waitsome(size/2, matching_recv, &outcount, indices, statuses);
+   ^~~~~~~~~~~~
+../../../dumpi/test/manip.c:199:3: warning: implicit declaration of function ‘MPI_Waitall’ [-Wimplicit-function-declaration]
+   MPI_Waitall(size, matching_recv, statuses);
+   ^~~~~~~~~~~
+../../../dumpi/test/manip.c:204:7: warning: implicit declaration of function ‘MPI_Cancel’ [-Wimplicit-function-declaration]
+       MPI_Cancel(nonmatching_send+peer);
+       ^~~~~~~~~~
+../../../dumpi/test/manip.c:213:7: warning: implicit declaration of function ‘MPI_Test_cancelled’ [-Wimplicit-function-declaration]
+       MPI_Test_cancelled(statuses, &flag);
+       ^~~~~~~~~~~~~~~~~~
+../../../dumpi/test/manip.c: In function ‘types’:
+../../../dumpi/test/manip.c:264:3: warning: implicit declaration of function ‘MPI_Barrier’ [-Wimplicit-function-declaration]
+   MPI_Barrier(MPI_COMM_WORLD);
+   ^~~~~~~~~~~
+../../../dumpi/test/manip.c:266:3: warning: implicit declaration of function ‘MPI_Type_contiguous’ [-Wimplicit-function-declaration]
+   MPI_Type_contiguous(5, MPI_INT, &cont_type);
+   ^~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/manip.c:267:3: warning: implicit declaration of function ‘MPI_Type_commit’ [-Wimplicit-function-declaration]
+   MPI_Type_commit(&cont_type);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/manip.c:268:3: warning: implicit declaration of function ‘MPI_Type_size’ [-Wimplicit-function-declaration]
+   MPI_Type_size(cont_type, &typesize);
+   ^~~~~~~~~~~~~
+../../../dumpi/test/manip.c:275:3: warning: implicit declaration of function ‘MPI_Type_vector’ [-Wimplicit-function-declaration]
+   MPI_Type_vector(2, 3, 4, cont_type, &vec_type);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/manip.c:282:3: warning: implicit declaration of function ‘MPI_Type_hvector’ [-Wimplicit-function-declaration]
+   MPI_Type_hvector(4, 3, 2, cont_type, &hvec_type);
+   ^~~~~~~~~~~~~~~~
+../../../dumpi/test/manip.c:291:5: warning: implicit declaration of function ‘MPI_Type_indexed’ [-Wimplicit-function-declaration]
+     MPI_Type_indexed(2, indexed_blen, indexed_ind, vec_type, &ind_type);
+     ^~~~~~~~~~~~~~~~
+../../../dumpi/test/manip.c:300:7: warning: implicit declaration of function ‘MPI_Type_hindexed’ [-Wimplicit-function-declaration]
+       MPI_Type_hindexed(2, indexed_blen, hindexed_ind, hvec_type, &hind_type);
+       ^~~~~~~~~~~~~~~~~
+../../../dumpi/test/manip.c:320:5: warning: implicit declaration of function ‘MPI_Type_create_struct’ [-Wimplicit-function-declaration]
+     MPI_Type_create_struct(3, struct_blen, struct_disp,
+     ^~~~~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/manip.c:380:5: warning: implicit declaration of function ‘MPI_Type_create_resized’ [-Wimplicit-function-declaration]
+     MPI_Type_create_resized(MPI_INT, 0, 3*sizeof(int), &resized_type);
+     ^~~~~~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/manip.c:383:5: warning: implicit declaration of function ‘MPI_Type_extent’ [-Wimplicit-function-declaration]
+     MPI_Type_extent(resized_type, &typeextent);
+     ^~~~~~~~~~~~~~~
+../../../dumpi/test/manip.c:395:5: warning: implicit declaration of function ‘MPI_Type_create_subarray’ [-Wimplicit-function-declaration]
+     MPI_Type_create_subarray(ndims, sizes, subsizes, starts, order,
+     ^~~~~~~~~~~~~~~~~~~~~~~~
+../../../dumpi/test/manip.c:406:3: warning: implicit declaration of function ‘MPI_Type_free’ [-Wimplicit-function-declaration]
+   MPI_Type_free(&cont_type);
+   ^~~~~~~~~~~~~
+In file included from ../../../dumpi/test/manip.c:49:0:
+../../../dumpi/test/manip.c: In function ‘ops’:
+../../../dumpi/test/manip.c:483:10: warning: implicit declaration of function ‘MPI_Type_dup’ [-Wimplicit-function-declaration]
+   assert(MPI_Type_dup(MPI_INT, static_aggregate_type) == MPI_SUCCESS);
+          ^
+../../../dumpi/test/manip.c:488:10: warning: implicit declaration of function ‘MPI_Op_create’ [-Wimplicit-function-declaration]
+   assert(MPI_Op_create(sum_bottom_16, 1, &sumfunc) == MPI_SUCCESS);
+          ^
+../../../dumpi/test/manip.c:491:10: warning: implicit declaration of function ‘MPI_Reduce’ [-Wimplicit-function-declaration]
+   assert(MPI_Reduce(indata, outdata, DATACOUNT, *static_aggregate_type,
+          ^
+../../../dumpi/test/manip.c:499:10: warning: implicit declaration of function ‘MPI_Allreduce’ [-Wimplicit-function-declaration]
+   assert(MPI_Allreduce(indata, outdata, DATACOUNT, *static_aggregate_type,
+          ^
+../../../dumpi/test/manip.c:507:10: warning: implicit declaration of function ‘MPI_Op_free’ [-Wimplicit-function-declaration]
+   assert(MPI_Op_free(&sumfunc) == MPI_SUCCESS);
+          ^
+../../../dumpi/test/manip.c: In function ‘groups’:
+../../../dumpi/test/manip.c:542:10: warning: implicit declaration of function ‘MPI_Comm_dup’ [-Wimplicit-function-declaration]
+   assert(MPI_Comm_dup(MPI_COMM_WORLD, &dupworld) == MPI_SUCCESS);
+          ^
+../../../dumpi/test/manip.c:543:10: warning: implicit declaration of function ‘MPI_Comm_group’ [-Wimplicit-function-declaration]
+   assert(MPI_Comm_group(MPI_COMM_WORLD, &worldgroup) == MPI_SUCCESS);
+          ^
+../../../dumpi/test/manip.c:545:10: warning: implicit declaration of function ‘MPI_Group_compare’ [-Wimplicit-function-declaration]
+   assert(MPI_Group_compare(worldgroup, dupworldgroup, &comp) == MPI_SUCCESS);
+          ^
+../../../dumpi/test/manip.c:560:10: warning: implicit declaration of function ‘MPI_Group_incl’ [-Wimplicit-function-declaration]
+   assert(MPI_Group_incl(dupworldgroup,ranksize,ranks,&group_a) == MPI_SUCCESS);
+          ^
+../../../dumpi/test/manip.c:562:12: warning: implicit declaration of function ‘MPI_Group_size’ [-Wimplicit-function-declaration]
+     assert(MPI_Group_size(group_a, &groupsize) == MPI_SUCCESS);
+            ^
+../../../dumpi/test/manip.c:569:10: warning: implicit declaration of function ‘MPI_Group_excl’ [-Wimplicit-function-declaration]
+   assert(MPI_Group_excl(dupworldgroup,ranksize,ranks,&group_b) == MPI_SUCCESS);
+          ^
+../../../dumpi/test/manip.c:573:12: warning: implicit declaration of function ‘MPI_Group_rank’ [-Wimplicit-function-declaration]
+     assert(MPI_Group_rank(group_b, &vv) == MPI_SUCCESS);
+            ^
+../../../dumpi/test/manip.c:580:10: warning: implicit declaration of function ‘MPI_Group_difference’ [-Wimplicit-function-declaration]
+   assert(MPI_Group_difference(worldgroup, group_a, &group_diff) == MPI_SUCCESS);
+          ^
+../../../dumpi/test/manip.c:589:10: warning: implicit declaration of function ‘MPI_Group_union’ [-Wimplicit-function-declaration]
+   assert(MPI_Group_union(group_a, group_b, &group_c) == MPI_SUCCESS);
+          ^
+../../../dumpi/test/manip.c:602:10: warning: implicit declaration of function ‘MPI_Group_intersection’ [-Wimplicit-function-declaration]
+   assert(MPI_Group_intersection(group_a, group_b, &group_d) == MPI_SUCCESS);
+          ^
+../../../dumpi/test/manip.c:656:12: warning: implicit declaration of function ‘MPI_Group_range_incl’ [-Wimplicit-function-declaration]
+     assert(MPI_Group_range_incl(worldgroup, windows, rankrange, &rangegroup_a)
+            ^
+../../../dumpi/test/manip.c:663:12: warning: implicit declaration of function ‘MPI_Group_range_excl’ [-Wimplicit-function-declaration]
+     assert(MPI_Group_range_excl(worldgroup, windows, rankrange, &rangegroup_b)
+            ^
+../../../dumpi/test/manip.c:675:12: warning: implicit declaration of function ‘MPI_Group_free’ [-Wimplicit-function-declaration]
+     assert(MPI_Group_free(&group_a) == MPI_SUCCESS);
+            ^
+../../../dumpi/test/manip.c: In function ‘comms’:
+../../../dumpi/test/manip.c:703:10: warning: implicit declaration of function ‘MPI_Comm_create’ [-Wimplicit-function-declaration]
+   assert(MPI_Comm_create(MPI_COMM_WORLD, groupa, &comma) == MPI_SUCCESS);
+          ^
+../../../dumpi/test/manip.c:714:12: warning: implicit declaration of function ‘MPI_Comm_split’ [-Wimplicit-function-declaration]
+     assert(MPI_Comm_split(comma, color, key, &commb) == MPI_SUCCESS);
+            ^
+../../../dumpi/test/manip.c:721:12: warning: implicit declaration of function ‘MPI_Comm_free’ [-Wimplicit-function-declaration]
+     assert(MPI_Comm_free(&comma) == MPI_SUCCESS);
+            ^
+../../../dumpi/test/testthreads.c: In function ‘main’:
+../../../dumpi/test/testthreads.c:94:3: warning: implicit declaration of function ‘MPI_Init_thread’ [-Wimplicit-function-declaration]
+   MPI_Init_thread(&argc, &argv, required, &provided);
+   ^~~~~~~~~~~~~~~
+../../../dumpi/test/testthreads.c:116:3: warning: implicit declaration of function ‘MPI_Finalize’ [-Wimplicit-function-declaration]
+   MPI_Finalize();
+   ^~~~~~~~~~~~
+../../../dumpi/test/testthreads-multiple.c: In function ‘test_thread_multiple’:
+../../../dumpi/test/testthreads-multiple.c:75:5: warning: implicit declaration of function ‘MPI_Comm_dup’ [-Wimplicit-function-declaration]
+     MPI_Comm_dup(MPI_COMM_WORLD, threadcomm + i);
+     ^~~~~~~~~~~~
+../../../dumpi/test/testthreads-multiple.c: In function ‘multi_p2p’:
+../../../dumpi/test/testthreads-multiple.c:113:3: warning: implicit declaration of function ‘MPI_Comm_size’ [-Wimplicit-function-declaration]
+   MPI_Comm_size(data->threadcomm[data->myid], &size);
+   ^~~~~~~~~~~~~
+../../../dumpi/test/testthreads-multiple.c:114:3: warning: implicit declaration of function ‘MPI_Comm_rank’ [-Wimplicit-function-declaration]
+   MPI_Comm_rank(data->threadcomm[data->myid], &rank);
+   ^~~~~~~~~~~~~
+../../../dumpi/test/testthreads-multiple.c:125:7: warning: implicit declaration of function ‘MPI_Isend’ [-Wimplicit-function-declaration]
+       MPI_Isend(&value, 1, MPI_INT, i, data->myid, data->threadcomm[data->myid],
+       ^~~~~~~~~
+../../../dumpi/test/testthreads-multiple.c:136:11: warning: implicit declaration of function ‘MPI_Irecv’ [-Wimplicit-function-declaration]
+           MPI_Irecv(valarr+j, 1, MPI_INT, MPI_ANY_SOURCE, data->myid,
+           ^~~~~~~~~
+../../../dumpi/test/testthreads-multiple.c:142:5: warning: implicit declaration of function ‘MPI_Waitall’ [-Wimplicit-function-declaration]
+     MPI_Waitall(current_request, requests, MPI_STATUSES_IGNORE);
+     ^~~~~~~~~~~
+../../../dumpi/test/testthreads-multiple.c:150:5: warning: implicit declaration of function ‘MPI_Send’ [-Wimplicit-function-declaration]
+     MPI_Send(valarr, 2*size, MPI_INT, rank, rank, data->threadcomm[0]);
+     ^~~~~~~~
+../../../dumpi/test/testthreads-multiple.c:159:7: warning: implicit declaration of function ‘MPI_Recv’ [-Wimplicit-function-declaration]
+       MPI_Recv(valarr, 2*size, MPI_INT, rank, rank,
+       ^~~~~~~~
+../../../dumpi/test/testthreads-multiple.c: In function ‘multi_coll’:
+../../../dumpi/test/testthreads-multiple.c:178:5: warning: implicit declaration of function ‘MPI_Barrier’ [-Wimplicit-function-declaration]
+     MPI_Barrier(MPI_COMM_WORLD);
+     ^~~~~~~~~~~
+../../../dumpi/test/testthreads-multiple.c:181:3: warning: implicit declaration of function ‘MPI_Allreduce’ [-Wimplicit-function-declaration]
+   MPI_Allreduce(&value, &rank, 1, MPI_INT, MPI_SUM, data->threadcomm[myid]);
+   ^~~~~~~~~~~~~
+../../../dumpi/test/testthreads-serialized.c: In function ‘test_thread_serialized’:
+../../../dumpi/test/testthreads-serialized.c:80:5: warning: implicit declaration of function ‘MPI_Comm_dup’ [-Wimplicit-function-declaration]
+     MPI_Comm_dup(MPI_COMM_WORLD, threadcomm + i);
+     ^~~~~~~~~~~~
+../../../dumpi/test/testthreads-serialized.c: In function ‘multi_p2p’:
+../../../dumpi/test/testthreads-serialized.c:127:3: warning: implicit declaration of function ‘MPI_Comm_size’ [-Wimplicit-function-declaration]
+   MPI_Comm_size(data->threadcomm[data->myid], &size);
+   ^~~~~~~~~~~~~
+../../../dumpi/test/testthreads-serialized.c:128:3: warning: implicit declaration of function ‘MPI_Comm_rank’ [-Wimplicit-function-declaration]
+   MPI_Comm_rank(data->threadcomm[data->myid], &rank);
+   ^~~~~~~~~~~~~
+../../../dumpi/test/testthreads-serialized.c:147:7: warning: implicit declaration of function ‘MPI_Isend’ [-Wimplicit-function-declaration]
+       MPI_Isend(&value, 1, MPI_INT, i, data->myid, data->threadcomm[data->myid],
+       ^~~~~~~~~
+../../../dumpi/test/testthreads-serialized.c:160:11: warning: implicit declaration of function ‘MPI_Irecv’ [-Wimplicit-function-declaration]
+           MPI_Irecv(valarr+j, 1, MPI_INT, MPI_ANY_SOURCE, data->myid,
+           ^~~~~~~~~
+../../../dumpi/test/testthreads-serialized.c:187:7: warning: implicit declaration of function ‘MPI_Waitall’ [-Wimplicit-function-declaration]
+       MPI_Waitall(current_request, requests, MPI_STATUSES_IGNORE);
+       ^~~~~~~~~~~
+../../../dumpi/test/testthreads-serialized.c: In function ‘multi_coll’:
+../../../dumpi/test/testthreads-serialized.c:220:5: warning: implicit declaration of function ‘MPI_Barrier’ [-Wimplicit-function-declaration]
+     MPI_Barrier(MPI_COMM_WORLD);
+     ^~~~~~~~~~~
+../../../dumpi/test/testthreads-serialized.c:238:7: warning: implicit declaration of function ‘MPI_Allreduce’ [-Wimplicit-function-declaration]
+       MPI_Allreduce(&value, &rank, 1, MPI_INT, MPI_SUM, data->threadcomm[myid]);
+       ^~~~~~~~~~~~~
+../../../dumpi/test/testthreads-funneled.c: In function ‘message_thread’:
+../../../dumpi/test/testthreads-funneled.c:96:3: warning: implicit declaration of function ‘MPI_Comm_size’ [-Wimplicit-function-declaration]
+   MPI_Comm_size(MPI_COMM_WORLD, &size);
+   ^~~~~~~~~~~~~
+../../../dumpi/test/testthreads-funneled.c:97:3: warning: implicit declaration of function ‘MPI_Comm_rank’ [-Wimplicit-function-declaration]
+   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+   ^~~~~~~~~~~~~
+../../../dumpi/test/testthreads-funneled.c:99:5: warning: implicit declaration of function ‘MPI_Send’ [-Wimplicit-function-declaration]
+     MPI_Send(&rank, 1, MPI_INT, 0, 100, MPI_COMM_WORLD);
+     ^~~~~~~~
+../../../dumpi/test/testthreads-funneled.c:104:7: warning: implicit declaration of function ‘MPI_Recv’ [-Wimplicit-function-declaration]
+       MPI_Recv(&j, 1, MPI_INT, MPI_ANY_SOURCE, 100, MPI_COMM_WORLD, &stat);
+       ^~~~~~~~
+../../../dumpi/test/testthreads-funneled.c:106:3: warning: implicit declaration of function ‘MPI_Barrier’ [-Wimplicit-function-declaration]
+   MPI_Barrier(MPI_COMM_WORLD);
+   ^~~~~~~~~~~
+#+END_EXAMPLE
+
+PS: toutes les manipulations sont nécessaires à cause de la dernière
+version d'OTF qui met dans un sous dossier.
+
+***** ROSS
+#+begin_src sh :results output :exports both
+git clone -b master --single-branch git@github.com:carothersc/ROSS.git
+cd ROSS
+mkdir build
+cd build
+ARCH=x86_64 CC=mpicc CXX=mpicxx cmake -DCMAKE_INSTALL_PREFIX=/home/chevamax/logiciels ..
+make -j 3
+make install
+#+end_src
+
+***** CODES
+#+begin_src sh :results output :exports both
+cd ~/Documents/Stage_LIG_2017/logiciels
+wget ftp://ftp.mcs.anl.gov/pub/CODES/releases/codes-0.5.2.tar.gz
+tar -xvf codes-0.5.2.tar.gz
+mv codes-0.5.2 CODES
+cd CODES
+./prepare.sh
+mkdir build
+cd build
+../configure --with-dumpi=/home/chevamax/logiciels --prefix=/home/chevamax/logiciels CC=mpicc PKG_CONFIG_PATH=/home/chevamax/logiciels/lib/pkgconfig
+make && make install
+make tests && make check
+#+end_src
+
+Tous les tests doivent être au vert !
+
+***** HPL
+Téléchargez le programme [[http://www.netlib.org/benchmark/hpl/hpl-2.2.tar.gz][ici]], ou en ligne de commande
+#+begin_src sh 
+cd ~/Documents/Stage_LIG_2017/logiciels
+wget http://www.netlib.org/benchmark/hpl/hpl-2.2.tar.gz
+tar -xvf hpl-2.2.tar.gz
+mv hpl-2.2 hpl
+cd hpl/setup
+sh make_generic
+cp Make.UNKNOWN ../Make.linux
+cd ..
+#+end_src
+
+Puis remplacer le contenu du fichier par celui ci dessous, en
+remplacent les lignes avec commentaire #path/to.
+
+#+BEGIN_EXAMPLE
+#  
+#  -- High Performance Computing Linpack Benchmark (HPL)                
+#     HPL - 2.2 - February 24, 2016                          
+#     Antoine P. Petitet                                                
+#     University of Tennessee, Knoxville                                
+#     Innovative Computing Laboratory                                 
+#     (C) Copyright 2000-2008 All Rights Reserved                       
+#                                                                       
+#  -- Copyright notice and Licensing terms:                             
+#                                                                       
+#  Redistribution  and  use in  source and binary forms, with or without
+#  modification, are  permitted provided  that the following  conditions
+#  are met:                                                             
+#                                                                       
+#  1. Redistributions  of  source  code  must retain the above copyright
+#  notice, this list of conditions and the following disclaimer.        
+#                                                                       
+#  2. Redistributions in binary form must reproduce  the above copyright
+#  notice, this list of conditions,  and the following disclaimer in the
+#  documentation and/or other materials provided with the distribution. 
+#                                                                       
+#  3. All  advertising  materials  mentioning  features  or  use of this
+#  software must display the following acknowledgement:                 
+#  This  product  includes  software  developed  at  the  University  of
+#  Tennessee, Knoxville, Innovative Computing Laboratory.             
+#                                                                       
+#  4. The name of the  University,  the name of the  Laboratory,  or the
+#  names  of  its  contributors  may  not  be used to endorse or promote
+#  products  derived   from   this  software  without  specific  written
+#  permission.                                                          
+#                                                                       
+#  -- Disclaimer:                                                       
+#                                                                       
+#  THIS  SOFTWARE  IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,  INCLUDING,  BUT NOT
+#  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+#  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE UNIVERSITY
+#  OR  CONTRIBUTORS  BE  LIABLE FOR ANY  DIRECT,  INDIRECT,  INCIDENTAL,
+#  SPECIAL,  EXEMPLARY,  OR  CONSEQUENTIAL DAMAGES  (INCLUDING,  BUT NOT
+#  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#  DATA OR PROFITS; OR BUSINESS INTERRUPTION)  HOWEVER CAUSED AND ON ANY
+#  THEORY OF LIABILITY, WHETHER IN CONTRACT,  STRICT LIABILITY,  OR TORT
+#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+#  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+# ######################################################################
+#  
+# ----------------------------------------------------------------------
+# - shell --------------------------------------------------------------
+# ----------------------------------------------------------------------
+#
+SHELL        = /bin/sh
+#
+CD           = cd
+CP           = cp
+LN_S         = ln -s
+MKDIR        = mkdir
+RM           = /bin/rm -f
+TOUCH        = touch
+#
+# ----------------------------------------------------------------------
+# - Platform identifier ------------------------------------------------
+# ----------------------------------------------------------------------
+#
+ARCH         = linux #ici mettre le même nom que l'extension donnée au fichier
+#
+# ----------------------------------------------------------------------
+# - HPL Directory Structure / HPL library ------------------------------
+# ----------------------------------------------------------------------
+#
+TOPdir       = $(HOME)/Documents/Stage_LIG_2017/logiciels/hpl #path/to/hpl 
+INCdir       = $(TOPdir)/include
+BINdir       = $(TOPdir)/bin/$(ARCH)
+LIBdir       = $(TOPdir)/lib/$(ARCH)
+#
+HPLlib       = $(LIBdir)/libhpl.a 
+#
+# ----------------------------------------------------------------------
+# - Message Passing library (MPI) --------------------------------------
+# ----------------------------------------------------------------------
+# MPinc tells the  C  compiler where to find the Message Passing library
+# header files,  MPlib  is defined  to be the name of  the library to be 
+# used. The variable MPdir is only used for defining MPinc and MPlib.
+#
+MPdir        = /usr/lib/mpich      #path/to/mpich
+MPinc        = -I $(MPdir)/include
+MPlib        = -L $(MPdir)/lib -L /home/chevamax/Documents/Stage_LIG_2017/logiciels/sst-dumpi/install/lib -ldumpi #path/to/dumpi
+#
+# ----------------------------------------------------------------------
+# - Linear Algebra library (BLAS or VSIPL) -----------------------------
+# ----------------------------------------------------------------------
+# LAinc tells the  C  compiler where to find the Linear Algebra  library
+# header files,  LAlib  is defined  to be the name of  the library to be 
+# used. The variable LAdir is only used for defining LAinc and LAlib.
+#
+LAdir        = /usr/lib/atlas-base #path/to/lib-atlas
+LAinc        = 
+LAlib        = $(LAdir)/libf77blas.a $(LAdir)/libatlas.a -lblas
+#
+# ----------------------------------------------------------------------
+# - F77 / C interface --------------------------------------------------
+# ----------------------------------------------------------------------
+# You can skip this section  if and only if  you are not planning to use
+# a  BLAS  library featuring a Fortran 77 interface.  Otherwise,  it  is
+# necessary  to  fill out the  F2CDEFS  variable  with  the  appropriate
+# options.  **One and only one**  option should be chosen in **each** of
+# the 3 following categories:
+#
+# 1) name space (How C calls a Fortran 77 routine)
+#
+# -DAdd_              : all lower case and a suffixed underscore  (Suns,
+#                       Intel, ...),                           [default]
+# -DNoChange          : all lower case (IBM RS6000),
+# -DUpCase            : all upper case (Cray),
+# -DAdd__             : the FORTRAN compiler in use is f2c.
+#
+# 2) C and Fortran 77 integer mapping
+#
+# -DF77_INTEGER=int   : Fortran 77 INTEGER is a C int,         [default]
+# -DF77_INTEGER=long  : Fortran 77 INTEGER is a C long,
+# -DF77_INTEGER=short : Fortran 77 INTEGER is a C short.
+#
+# 3) Fortran 77 string handling
+#
+# -DStringSunStyle    : The string address is passed at the string loca-
+#                       tion on the stack, and the string length is then
+#                       passed as  an  F77_INTEGER  after  all  explicit
+#                       stack arguments,                       [default]
+# -DStringStructPtr   : The address  of  a  structure  is  passed  by  a
+#                       Fortran 77  string,  and the structure is of the
+#                       form: struct {char *cp; F77_INTEGER len;},
+# -DStringStructVal   : A structure is passed by value for each  Fortran
+#                       77 string,  and  the  structure is  of the form:
+#                       struct {char *cp; F77_INTEGER len;},
+# -DStringCrayStyle   : Special option for  Cray  machines,  which  uses
+#                       Cray  fcd  (fortran  character  descriptor)  for
+#                       interoperation.
+#
+F2CDEFS      = -DAdd_ -DF77_INTEGER=int -DStringSunStyle
+#
+# ----------------------------------------------------------------------
+# - HPL includes / libraries / specifics -------------------------------
+# ----------------------------------------------------------------------
+#
+HPL_INCLUDES = -I$(INCdir) -I$(INCdir)/$(ARCH) $(LAinc) $(MPinc)
+HPL_LIBS     = $(HPLlib) $(LAlib) $(MPlib) -lmpl
+#
+# - Compile time options -----------------------------------------------
+#
+# -DHPL_COPY_L           force the copy of the panel L before bcast;
+# -DHPL_CALL_CBLAS       call the cblas interface;
+# -DHPL_CALL_VSIPL       call the vsip  library;
+# -DHPL_DETAILED_TIMING  enable detailed timers;
+#
+# By default HPL will:
+#    *) not copy L before broadcast,
+#    *) call the BLAS Fortran 77 interface,
+#    *) not display detailed timing information.
+#
+HPL_OPTS     = -DHPL_CALL_CBLAS -DHPL_NO_MPI_DATATYPE
+# 
+# ----------------------------------------------------------------------
+#
+HPL_DEFS     = $(F2CDEFS) $(HPL_OPTS) $(HPL_INCLUDES) 
+#
+# ----------------------------------------------------------------------
+# - Compilers / linkers - Optimization flags ---------------------------
+# ----------------------------------------------------------------------
+#
+CC           = /usr/bin/mpicc
+CCNOOPT      = $(HPL_DEFS) 
+CCFLAGS      = $(HPL_DEFS) -fomit-frame-pointer -O3 -funroll-loops
+#
+LINKER       = /usr/bin/mpicc
+LINKFLAGS    = $(CCFLAGS) -pthread
+#
+ARCHIVER     = ar
+ARFLAGS      = r
+RANLIB       = echo
+#
+# ----------------------------------------------------------------------
+#+END_EXAMPLE
+
+#+begin_src sh :session foo :results output :exports both 
+make arch=linux
+#+end_src
+
+On peut ensuite lancer une execution d'HPL dans =~/hpl/bin/linux=. Il
+faut modifier le fichier HPL.dat pour les paramètres de l'execution,
+et ensuite lancer *xhpl* via *mpirun* pour avoir des traces.
+
+****** Exemple de fichier HPL.dat
+#+BEGIN_EXAMPLE
+HPLinpack benchmark input file
+Innovative Computing Laboratory, University of Tennessee
+HPL.out      output file name (if any) 
+6            device out (6=stdout,7=stderr,file)
+1            # of problems sizes (N)
+18048         Ns
+1            # of NBs
+192           NBs
+0            PMAP process mapping (0=Row-,1=Column-major)
+1            # of process grids (P x Q)
+2            Ps
+2            Qs
+16.0         threshold
+1            # of panel fact
+2            PFACTs (0=left, 1=Crout, 2=Right)
+1            # of recursive stopping criterium
+4            NBMINs (>= 1)
+1            # of panels in recursion
+2            NDIVs
+1            # of recursive panel fact.
+1            RFACTs (0=left, 1=Crout, 2=Right)
+1            # of broadcast
+1            BCASTs (0=1rg,1=1rM,2=2rg,3=2rM,4=Lng,5=LnM)
+1            # of lookahead depth
+1            DEPTHs (>=0)
+2            SWAP (0=bin-exch,1=long,2=mix)
+64           swapping threshold
+0            L1 in (0=transposed,1=no-transposed) form
+0            U  in (0=transposed,1=no-transposed) form
+1            Equilibration (0=no,1=yes)
+8            memory alignment in double (> 0)
+#+END_EXAMPLE
+
+puis lancer avec  =mpirun -n 4 ./xhpl=
+
+Après l'avoir lancé, vous devriez avoir des fichiers dumpi :)
+
+**** Mailling list
+
+Hi Misbah,
+Thanks for your help, you can find dumpi traces with "UNDEFINED DATA TYPE" and without via the link below. Codes-workload-dump utility is very usefull, thanks for that (I was using dumpistat).
+
+https://1drv.ms/f/s!Ati25f8zqy9lnNFi7EX8u1tmdJ4rfw
+
+Regards,
+Maxime
+
+***** from
+De: "Misbah Mubarak" <mmubarak@anl.gov>
+À: "Maxime Chevalier" <maxime.chevalier@inria.fr>, codes-ross-users@lists.mcs.anl.gov
+Envoyé: Vendredi 2 Juin 2017 18:54:13
+Objet: Re: [codes-ross-users] Replay HPL's dumpi trace on CODES
+
+Hi Maxime,
+
+There is a codes-workload-dump utility that helps you inspect the traces and provides detailed information on the individual MPI operations such as number of bytes transmitted (which is derived by the data type and count). If you could run the utility with one of the traces and send me the output, I can have a look at whats going on.  Alternatively, if you could share the traces, I can have a look at those.
+
+Using the utility is simple, here is some documentation on how to run it:
+
+https://xgitlab.cels.anl.gov/codes/codes/wikis/codes-dumpi-workload
+
+Thanks,
+Misbah
+
+****** from
+From: <codes-ross-users-bounces@lists.mcs.anl.gov> on behalf of Maxime Chevalier <maxime.chevalier@inria.fr>
+Date: Friday, June 2, 2017 at 8:52 AM
+To: "codes-ross-users@lists.mcs.anl.gov" <codes-ross-users@lists.mcs.anl.gov>
+Subject: Re: [codes-ross-users] Replay HPL's dumpi trace on CODES
+
+Hi Misbah,
+Thanks for your fast response. I was looking for the data type, but I don't really understand. I have figured out how to avoid "UNDEFINED DATA TYPE" errors by compiling HPL whit "HPL_NO_MPI_DATATYPE", but the output is quite the same (see trace below). I don't know if it's a step forward or backward...
+
+Regards,
+Maxime
+
+Trace :
+Fri Jun 2 09:15:49 2017
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+tw_net_start: Found world size to be 1
+ROSS Core Configuration: 
+Total Nodes 1
+Total Processors [Nodes (1) x PE_per_Node (1)] 1
+Total KPs [Nodes (1) x KPs (16)] 16
+Total LPs 54
+Simulation End Time 300000000000.00
+LP-to-PE Mapping model defined
+
+ROSS Event Memory Allocation:
+Model events 13825
+Network events 50000
+Total events 63824
+ *** START SEQUENTIAL SIMULATION ***
+ *** END SIMULATION ***
+
+LP 1 unmatched irecvs 1 unmatched sends 0 Total sends 0 receives 2 collectives 0 delays 8 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+LP 3 unmatched irecvs 1 unmatched sends 0 Total sends 1 receives 1 collectives 0 delays 10 wait alls 0 waits 0 send time 3.202149 wait 0.000000
+LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 1 collectives 0 delays 7 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+LP 7 unmatched irecvs 1 unmatched sends 0 Total sends 1 receives 1 collectives 0 delays 10 wait alls 0 waits 0 send time 3.189207 wait 0.000000
+: Running Time = 0.0001 seconds
+TW Library Statistics:
+Total Events Processed 56
+Events Aborted (part of RBs) 0
+Events Rolled Back 0
+Event Ties Detected in PE Queues 0
+Efficiency 100.00 %
+Total Remote (shared mem) Events Processed 0
+Percent Remote Events 0.00 %
+Total Remote (network) Events Processed 0
+Percent Remote Events 0.00 %
+Total Roll Backs 0
+Primary Roll Backs 0
+Secondary Roll Backs 0
+Fossil Collect Attempts 0
+Total GVT Computations 0
+Net Events Processed 56
+Event Rate (events/sec) 823529.4
+Total Events Scheduled Past End Time 0
+TW Memory Statistics:
+Events Allocated 63825
+Memory Allocated 62573
+Memory Wasted 683
+TW Data Structure sizes in bytes (sizeof):
+PE struct 608
+KP struct 144
+LP struct 128
+LP Model struct 760
+LP RNGs 80
+Total LP 968
+Event struct 144
+Event struct with Model 928
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+Priority Queue (enq/deq) 0.0000
+AVL Tree (insert/delete) 0.0000
+LZ4 (de)compression 0.0000
+Buddy system 0.0000
+Event Processing 0.0000
+Event Cancel 0.0000
+Event Abort 0.0000
+GVT 0.0000
+Fossil Collect 0.0000
+Primary Rollbacks 0.0000
+Network Read 0.0000
+Statistics Computation 0.0000
+Statistics Write 0.0000
+Total Time (Note: Using Running Time above for Speedup) 0.0002
+TW GVT Statistics: MPI AllReduce
+GVT Interval 16
+GVT Real Time Interval (cycles) 0
+GVT Real Time Interval (sec) 0.00000000
+Batch Size 16
+Forced GVT 0
+Total GVT Computations 0
+Total All Reduce Calls 0
+Average Reduction / GVT -nan
+Total bytes sent 8 recvd 20 
+max runtime 0.000000 ns avg runtime 0.000000 
+max comm time 0.000000 avg comm time -69573.000000 
+max send time 3.202149 avg send time 1.597839 
+max recv time 45682.609151 avg recv time 11420.652288 
+max wait time 0.000000 avg wait time 0.000000
+
+******* from
+De: "Misbah Mubarak" <mmubarak@anl.gov>
+À: "Maxime Chevalier" <maxime.chevalier@inria.fr>, codes-ross-users@lists.mcs.anl.gov
+Envoyé: Mardi 30 Mai 2017 18:12:46
+Objet: Re: [codes-ross-users] Replay HPL's dumpi trace on CODES
+
+Hi Maxime,
+
+Thanks for your message. There seems to be a data type that is either not supported by DUMPI or CODES. Are you familiar with what data types are being used by the HPL trace? I will find out if the support for them can be added in the code. 
+
+Regards,
+Misbah
+
+******** from 
+From: <codes-ross-users-bounces@lists.mcs.anl.gov> on behalf of Maxime Chevalier <maxime.chevalier@inria.fr>
+Date: Monday, May 29, 2017 at 3:51 AM
+To: "codes-ross-users@lists.mcs.anl.gov" <codes-ross-users@lists.mcs.anl.gov>
+Subject: [codes-ross-users] Replay HPL's dumpi trace on CODES
+
+Hi,
+I'm trying to replay HPL's DUMPI trace generated on my computer with CODES. Unfortunately, I get a lot of "Undefined data type" errors (see the trace below).
+I have already replayed AMG traces (downloaded here) and replayed my own generated AMG traces. It has worked fine.
+So I'm wondering if I did something wrong, or if it's HPL fault.
+
+Best regards,
+Maxime
+
+
+Trace :
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+tw_net_start: Found world size to be 1
+ROSS Core Configuration: 
+Total Nodes 1
+Total Processors [Nodes (1) x PE_per_Node (1)] 1
+Total KPs [Nodes (1) x KPs (16)] 16
+Total LPs 5
+Simulation End Time 300000000000.00
+LP-to-PE Mapping model defined
+
+ROSS Event Memory Allocation:
+Model events 1281
+Network events 50000
+Total events 51280
+
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type 
+Undefined data type *** START SEQUENTIAL SIMULATION ***
+ *** END SIMULATION ***
+
+LP 1 unmatched irecvs 1 unmatched sends 0 Total sends 0 receives 1 collectives 0 delays 7 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+: Running Time = 0.0000 seconds
+TW Library Statistics:
+Total Events Processed 8
+Events Aborted (part of RBs) 0
+Events Rolled Back 0
+Event Ties Detected in PE Queues 0
+Efficiency 100.00 %
+Total Remote (shared mem) Events Processed 0
+Percent Remote Events 0.00 %
+Total Remote (network) Events Processed 0
+Percent Remote Events 0.00 %
+Total Roll Backs 0
+Primary Roll Backs 0
+Secondary Roll Backs 0
+Fossil Collect Attempts 0
+Total GVT Computations 0
+Net Events Processed 8
+Event Rate (events/sec) 307692.3
+Total Events Scheduled Past End Time 0
+TW Memory Statistics:
+Events Allocated 51281
+Memory Allocated 51168
+Memory Wasted 720
+TW Data Structure sizes in bytes (sizeof):
+PE struct 608
+KP struct 144
+LP struct 128
+LP Model struct 760
+LP RNGs 80
+Total LP 968
+Event struct 144
+Event struct with Model 928
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+Priority Queue (enq/deq) 0.0000
+AVL Tree (insert/delete) 0.0000
+LZ4 (de)compression 0.0000
+Buddy system 0.0000
+Event Processing 0.0000
+Event Cancel 0.0000
+Event Abort 0.0000
+GVT 0.0000
+Fossil Collect 0.0000
+Primary Rollbacks 0.0000
+Network Read 0.0000
+Statistics Computation 0.0000
+Statistics Write 0.0000
+Total Time (Note: Using Running Time above for Speedup) 0.0001
+TW GVT Statistics: MPI AllReduce
+GVT Interval 16
+GVT Real Time Interval (cycles) 0
+GVT Real Time Interval (sec) 0.00000000
+Batch Size 16
+Forced GVT 0
+Total GVT Computations 0
+Total All Reduce Calls 0
+Average Reduction / GVT -nan
+Total bytes sent 0 recvd 4 
+max runtime 0.000000 ns avg runtime 0.000000 
+max comm time 0.000000 avg comm time -66232.000000 
+max send time 0.000000 avg send time 0.000000 
+max recv time 0.000000 avg recv time 0.000000 
+max wait time 0.000000 avg wait time 0.000000 
+LP-IO: writing output to hpl-trace-25282-1495543803/
+LP-IO: data files:
+hpl-trace-25282-1495543803/mpi-replay-stats
+hpl-trace-25282-1495543803/model-net-category-all
