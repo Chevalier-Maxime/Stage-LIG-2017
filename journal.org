@@ -7994,7 +7994,7 @@ l'erreur).
 Il faut maintenant que j'écrive un script qui automatise tout ca.
 
 ** 2017-06 juin
-*** 2017-06-01 Mercredi
+*** 2017-06-01 jeudi
 **** Mail Arnaud
 ***** Contenu 
 Salut Maxime,
@@ -8023,6 +8023,12 @@ Ok je vais me renseigner
 http://www.netlib.org/benchmark/hpl/algorithm.html
 Via cette page, j'ai vu qu'il y avait deux manières d'Update j'ai donc
 tenté les deux pour voir si CODES aurait accepté les traces, mais non.
+J'ai également testé avec l'option de compilation =-DHPL_COPY_L= pour
+savoir si ca aller changer quelque chose, mais non plus...
+
+J'ai vu également qu'il y a une option de compilation pour avoir des
+times détaillés. On va peut être pouvoir avoir plus d'information avec
+ca.
 
 J'ai crus comprendre ne parcourant internet que HPL utilise un format
 MPI-LIKE. Je met un lien vers la doc car je n'arrive pas à voir ce qui
@@ -8139,3 +8145,204 @@ mpirun noticed that process rank 0 with PID 0 on node Black-Pearl-2 exited on si
 #+END_EXAMPLE
 
 Je pense que je vais tout réinstaller parce que je sais pas ce qui cloche...
+
+***** Visualisation
+J'ai testé avec vite sur le fichier en paje complété mais il n'y a pas
+de flèches & co, quelques traces, mais c'est pas riche.
+
+*** 2017-06-02 vendredi
+
+**** Mail Florence
+
+***** Content
+Salut Maxime,
+
+finalement je n’ai pas eu une minute dans mon bureau avant 17h aujourd’hui… 
+Demain je suis bloquée le matin de 10h à 13h mais autrement c’est « souple ». On peut se voir avant 10h, ou en tout début d’après-midi, pour faire le point notamment sur les aspects suivants:
+- format HPL 
+- G5K
+- simulations (répétitions avec les mêmes paramètres pour AMG afin de confirmer le caractère « ralenti » de la simu //) 
+- events/model/net/messages, PE/LP/KP… : cf ci-dessous
+- si on a le temps, j’aimerais installer l’ensemble des soft nécessaires pour reproduire certaines de tes expériences sur ma machine : je sais que tu as mis un « howto »  qqpart dans ton journal, mais il a dû évoluer, et ton aide me sera précieuse :-)
++ ce que tu auras à ajouter :-)
+
+N’hésite pas à m’envoyer un meeting request (mail ou sms 06 85 72 49 71) si tu ne me trouves pas dans mon bureau. 
+
+À demain ! Bonne soirée
+
+Flo
+
+
+PS: sur la terminologie dans les fichiers de sortie (de codes)
+in =codes/doc/GETTING_STARTED=:
+"to automate LP placement on KPs/PEs »
+"DUMPI collects and reads events from MPI applications » => events = input?
+
+in ROSS/README.md
+ --nkp=n number of kernel processes (KPs) per pe (default 1)
+(…)
+ 1 (sequential): Instructs ROSS to use a sequential engine, i.e. the simulation will consist of only one processor (PE).
+(…)
+ROSS Event Memory Allocation:
+     Model events                                               124
+     Network events                                           50000
+=> tous ces termes doivent être définis dans la spec de ROSS quelquepart. 
+(…)
+PE=Processing Element (=processeur)
+(…)
+--synch={1,2,3,4}
+
+The synch option can take the following values:
+        • 1 (sequential): Instructs ROSS to use a sequential engine, i.e. the simulation will consist of only one processor (PE).
+        • 2 (conservative): Instructs ROSS to use a conservative engine, i.e. all LPs will have the same notion of virtual time.
+        • 3 (optimistic): Instructs ROSS to use an optimistic engine, i.e. LPs can have varying notions of virtual time, though rollbacks will be possible and a reverse event handler will be required in this case.
+=> donc on peut être en séquentiel (1 seul PE) mais avec plusieurs LP (si je comprends bien) ce qui expliquerait pourquoi tu as des rollbacks dans une simu séquentielle.
+        • 4 (optimistic debug): Executes ROSS in a serial simulation until it runs out of memory. Then it rolls every message back. This can be used to test rollback functions.
+=> cela explique pourquoi tu avais 100% de rollbacks dans une de tes simulations avec l’option Debug.
+Pour les notions d’événements "events vs messages", et leur variabilité, on regarde demain.
+
+***** Commentaires
+Ok super pour la terminologie! Du coup si je comprend bien, sur ma
+machine je peux avoir qu'un seul PE  et plusieurs KP ?
+
+**** HPL
+J'expériemente d'autres manières de compiler dumpi pour voir si y'en a
+pas une qui pourrait nous être utile (notamment =HPL_NO_MPI_DATATYPE= et
+=HPL_DETAILED_TIMING=)
+
+On arrive à visualiser les traces dumpi dans vite (mais il y a pleins
+de warning)
+
+***** =HPL_NO_MPI_DATATYPE=
+
+En ajoutant cette option dans le make.<arch> avec l'option -D, on
+arrive à visualiser quelque chose avec vite (je ne sais pas quoi
+exactement, mais il y a des couleurs et des flèches). On arrive
+également à faire un replay dans CODES sans "UNDEFINED DATA TYPE" !
+Cependant c'est pas encore ca, voici la sortie avec un lancement
+séquentiel (toujours pas possible de lancer mpirun avec dumpi) : 
+#+BEGIN_EXAMPLE
+Fri Jun  2 09:15:49 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                   54
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                             13825
+	Network events                                           50000
+	Total events                                             63824
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 1 unmatched sends 0 Total sends 0 receives 2 collectives 0 delays 8 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 3 unmatched irecvs 1 unmatched sends 0 Total sends 1 receives 1 collectives 0 delays 10 wait alls 0 waits 0 send time 3.202149 wait 0.000000
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 1 collectives 0 delays 7 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 7 unmatched irecvs 1 unmatched sends 0 Total sends 1 receives 1 collectives 0 delays 10 wait alls 0 waits 0 send time 3.189207 wait 0.000000
+	: Running Time = 0.0001 seconds
+
+TW Library Statistics:
+	Total Events Processed                                      56
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                        56
+	Event Rate (events/sec)                               823529.4
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         63825
+	Memory Allocated                                         62573
+	Memory Wasted                                              683
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.0002
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 8 recvd 20 
+ max runtime 0.000000 ns avg runtime 0.000000 
+ max comm time 0.000000 avg comm time -69573.000000 
+ max send time 3.202149 avg send time 1.597839 
+ max recv time 45682.609151 avg recv time 11420.652288 
+ max wait time 0.000000 avg wait time 0.000000 
+#+END_EXAMPLE
+
+Il y a du unmatch, un running time très petit, et des valeurs
+négatives.
+
+(en fait on a la même execution qu'en temps normal mais sans les
+UNDEFINED DATATYPE)
+
+***** =HPL_DETAILED_TIMING=
+
+Avec cette option on a aussi une visualisation dans vite mais des
+=undefined datatype=. 
+
+***** BOTH
+
+On tente avec les deux !
+Même résultat qu'avec =NO_MPI_DATATYPE= 
+
+Il en est de même avec toutes les options qu'on peut ajouter.
+
+
+reminder : https://pop-coe.eu/further-information/learning-material
+https://github.com/LLNL/ravel (traces dispo dans les issues)
