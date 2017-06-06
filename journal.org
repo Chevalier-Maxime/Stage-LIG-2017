@@ -4683,10 +4683,18 @@ suivants : =../../test/amg2013.dumpi", "-laplace", "-n", "40",
 "40","40", "-P", "2", "2", "2"= 
 
 ****** Compilation AMG
-Changement du makefile dans le sous dossier test pour ajouter le lien
-vers la librairie dumpi
-=-L/home/chevamax/Documents/Stage_LIG_2017/logiciels/sst-dumpi/install/lib
--ldumpi\= dans LFLAGS.
+Changement du makefile.include pour ajouter le lien
+vers la librairie dumpi + quelques autres options :
+#+BEGIN_EXAMPLE
+INCLUDE_CFLAGS = -O2 -DTIMER_USE_MPI -HYPRE_LONG_LONG 
+INCLUDE_LFLAGS = -lm
+#+END_EXAMPLE
+
+et modifier le makefile du sous dossier test avec les liens dans
+LFLAGS (ou les mettre dans le CFLAGS ci-dessus)
+#+BEGIN_EXAMPLE
+-L<path to dumpi lib> -ldumpi
+#+END_EXAMPLE
 
 ****** Lancement d'AMG
 #+begin_src sh :results output :exports both
@@ -8430,6 +8438,7 @@ more information, such as the ld(1) and ld.so(8) manual pages.
 #+END_EXAMPLE
 
 ****** Qt 5 
+Il y a surement un paquet pour qt5, mais je ne l'ai pas trouvé.
 [[https://www.qt.io/download-open-source/][link]] 
 #+begin_src sh :results output :exports both
 chmod u+x qt-unified-linux-x64-3.0.0-online.run
@@ -8443,7 +8452,7 @@ dans mes variables d'environnement.
 [[https://github.com/LLNL/muster/archive/v1.0.1.tar.gz][link]] 
 
 /!\ Attention ne pas faire ca, ca instal openmpi et on veut pas, trouver
-le paquet avec seulement les header
+le paquet avec seulement les headers
 #+begin_src sh :results output :exports both
 sudo apt-get install libboost-all-dev
 #+end_src
@@ -8474,7 +8483,8 @@ cd build
 ../configure --enable-libdumpi --enable-test --prefix=/home/chevamax/logiciels CC=mpicc CXX=mpiCC CFLAGS="-DMPICH_SUPPRESS_PROTOTYPES=1 -DHAVE_PRAGMA_HP_SEC_DEF=1 -pthread -I/home/chevamax/logiciels/include/open-trace-format -L/home/chevamax/logiciels/lib"
 #+end_src
 
-Puis ajouter le code ci dessous au fichier sst-dumpi/build/dumpi/bin/Makefile
+Puis ajouter le code ci dessous au fichier
+sst-dumpi/build/dumpi/bin/Makefile à CXXFLAGS
 #+BEGIN_EXAMPLE
 -I/home/chevamax/logiciels/include/open-trace-format -L/home/chevamax/logiciels/lib -lopen-trace-format -lz
 #+END_EXAMPLE
@@ -9592,3 +9602,1205 @@ LP-IO: writing output to hpl-trace-25282-1495543803/
 LP-IO: data files:
 hpl-trace-25282-1495543803/mpi-replay-stats
 hpl-trace-25282-1495543803/model-net-category-all
+
+*** 2017-06-06 mardi
+**** Nouvel outils pour analyser les traces
+https://xgitlab.cels.anl.gov/codes/codes/wikis/codes-dumpi-workload
+Grâce aux échanges avec la mailling list, j'ai pu découvir un nouvel
+outils pour analyser les traces dumpi. Il sagit de
+=codes-workload-dump=. Il s'utilise comme suit :
+#+BEGIN_EXAMPLE
+ ./bin/codes-workload-dump --type "dumpi-trace-workload" -s --num-ranks n --dumpi-log  dumpi-trace-dir/dumpi-2014.03.06.20.34.26-
+#+END_EXAMPLE
+
+***** Documentation
+"Individual operations in the DUMPI traces can be inspected by using
+the codes-workload-dump utility (in src/workload). This utility
+provides detailed information on each of the MPI operations in the
+logs e.g. operation type (whether send/recv/wait/collective), tag
+number, number of bytes transmitted (derived from the data type and
+count of the MPI operation), start and end times of operation.
+Note that running this utility on a large number of traces will
+generate a lot of output so it is preferred to run it on a small
+number of MPI ranks (<4). Using the -s command line option will
+display the aggregate statistics."
+
+-Help
+#+BEGIN_EXAMPLE
+Usage: codes-workload-dump --type TYPE --num-ranks N [OPTION...]
+--type: type of workload ("darshan_io_workload", "iolang_workload", dumpi-trace-workload" etc.)
+--num-ranks: number of ranks to process (if not set, it is set by the workload)
+-s: print final workload stats
+DARSHAN OPTIONS (darshan_io_workload)
+--d-log: darshan log file
+--d-aggregator-cnt: number of aggregators for collective I/O in darshan
+IOLANG OPTIONS (iolang_workload)
+--i-meta: i/o language kernel meta file path
+--i-use-relpath: use i/o kernel path relative meta file path
+RECORDER OPTIONS (recorder_io_workload)
+--r-trace-dir: directory containing recorder trace files
+--r-nprocs: number of ranks in original recorder workload
+DUMPI TRACE OPTIONS (dumpi-trace-workload) 
+--dumpi-log: dumpi log file 
+CHECKPOINT OPTIONS (checkpoint_io_workload)
+--chkpoint-size: size of aggregate checkpoint to write
+--chkpoint-bw: checkpointing bandwidth
+--chkpoint-iters: iteration count for checkpoint workload
+--chkpoint-mtti: mean time to interrupt
+MOCK IO OPTIONS (iomock_workload)
+--iomock-request-type: whether to write or read
+--iomock-num-requests: number of writes/reads
+--iomock-request-size: size of each request
+--iomock-file-id: file id to use for requests
+--iomock-use-uniq-file-ids: whether to offset file ids by rank
+#+END_EXAMPLE
+
+- Exemple sur HPL
+#+begin_example
+...
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3057 start:2.80202e+11 end:2.80202e+11
+op: app:0 rank:3 type:delay seconds:0.000123
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3058 start:2.80202e+11 end:2.80202e+11
+op: app:0 rank:3 type:delay seconds:0.004705
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3061 start:2.80207e+11 end:2.80207e+11
+op: app:0 rank:3 type:delay seconds:0.000114
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3062 start:2.80207e+11 end:2.80207e+11
+op: app:0 rank:3 type:delay seconds:0.004304
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3065 start:2.80211e+11 end:2.80211e+11
+op: app:0 rank:3 type:delay seconds:0.000120
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3066 start:2.80211e+11 end:2.80211e+11
+op: app:0 rank:3 type:delay seconds:0.004374
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3069 start:2.80216e+11 end:2.80216e+11
+op: app:0 rank:3 type:delay seconds:0.000114
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3070 start:2.80216e+11 end:2.80216e+11
+op: app:0 rank:3 type:delay seconds:0.004264
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3073 start:2.80220e+11 end:2.80220e+11
+op: app:0 rank:3 type:delay seconds:0.000109
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3074 start:2.80220e+11 end:2.80220e+11
+op: app:0 rank:3 type:delay seconds:0.004151
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3077 start:2.80224e+11 end:2.80224e+11
+op: app:0 rank:3 type:delay seconds:0.000131
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3078 start:2.80224e+11 end:2.80224e+11
+op: app:0 rank:3 type:delay seconds:0.003925
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3081 start:2.80228e+11 end:2.80228e+11
+op: app:0 rank:3 type:delay seconds:0.000134
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3082 start:2.80229e+11 end:2.80229e+11
+op: app:0 rank:3 type:delay seconds:0.003889
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3085 start:2.80232e+11 end:2.80232e+11
+op: app:0 rank:3 type:delay seconds:0.000091
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3086 start:2.80233e+11 end:2.80233e+11
+op: app:0 rank:3 type:delay seconds:0.003731
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3089 start:2.80236e+11 end:2.80236e+11
+op: app:0 rank:3 type:delay seconds:0.000097
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3090 start:2.80236e+11 end:2.80236e+11
+op: app:0 rank:3 type:delay seconds:0.003528
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3093 start:2.80240e+11 end:2.80240e+11
+op: app:0 rank:3 type:delay seconds:0.000095
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3094 start:2.80240e+11 end:2.80240e+11
+op: app:0 rank:3 type:delay seconds:0.003257
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3097 start:2.80243e+11 end:2.80243e+11
+op: app:0 rank:3 type:delay seconds:0.000107
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3098 start:2.80243e+11 end:2.80243e+11
+op: app:0 rank:3 type:delay seconds:0.003171
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3101 start:2.80247e+11 end:2.80247e+11
+op: app:0 rank:3 type:delay seconds:0.000114
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3102 start:2.80247e+11 end:2.80247e+11
+op: app:0 rank:3 type:delay seconds:0.003044
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3105 start:2.80250e+11 end:2.80250e+11
+op: app:0 rank:3 type:delay seconds:0.000107
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3106 start:2.80250e+11 end:2.80250e+11
+op: app:0 rank:3 type:delay seconds:0.002954
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3109 start:2.80253e+11 end:2.80253e+11
+op: app:0 rank:3 type:delay seconds:0.000117
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3110 start:2.80253e+11 end:2.80253e+11
+op: app:0 rank:3 type:delay seconds:0.002820
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3113 start:2.80256e+11 end:2.80256e+11
+op: app:0 rank:3 type:delay seconds:0.000106
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3114 start:2.80256e+11 end:2.80256e+11
+op: app:0 rank:3 type:delay seconds:0.002725
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3117 start:2.80259e+11 end:2.80259e+11
+op: app:0 rank:3 type:delay seconds:0.000087
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3118 start:2.80259e+11 end:2.80259e+11
+op: app:0 rank:3 type:delay seconds:0.002479
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3121 start:2.80261e+11 end:2.80261e+11
+op: app:0 rank:3 type:delay seconds:0.000098
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3122 start:2.80261e+11 end:2.80261e+11
+op: app:0 rank:3 type:delay seconds:0.002460
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3125 start:2.80264e+11 end:2.80264e+11
+op: app:0 rank:3 type:delay seconds:0.000093
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3126 start:2.80264e+11 end:2.80264e+11
+op: app:0 rank:3 type:delay seconds:0.002207
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3129 start:2.80266e+11 end:2.80266e+11
+op: app:0 rank:3 type:delay seconds:0.000093
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3130 start:2.80266e+11 end:2.80266e+11
+op: app:0 rank:3 type:delay seconds:0.002091
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3133 start:2.80268e+11 end:2.80268e+11
+op: app:0 rank:3 type:delay seconds:0.000116
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3134 start:2.80268e+11 end:2.80268e+11
+op: app:0 rank:3 type:delay seconds:0.001936
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3137 start:2.80270e+11 end:2.80270e+11
+op: app:0 rank:3 type:delay seconds:0.000105
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3138 start:2.80270e+11 end:2.80270e+11
+op: app:0 rank:3 type:delay seconds:0.001636
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3141 start:2.80272e+11 end:2.80272e+11
+op: app:0 rank:3 type:delay seconds:0.000130
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3142 start:2.80272e+11 end:2.80272e+11
+op: app:0 rank:3 type:delay seconds:0.001605
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3145 start:2.80274e+11 end:2.80274e+11
+op: app:0 rank:3 type:delay seconds:0.000117
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3146 start:2.80274e+11 end:2.80274e+11
+op: app:0 rank:3 type:delay seconds:0.001385
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3149 start:2.80275e+11 end:2.80275e+11
+op: app:0 rank:3 type:delay seconds:0.000110
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3150 start:2.80275e+11 end:2.80275e+11
+op: app:0 rank:3 type:delay seconds:0.001184
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3153 start:2.80277e+11 end:2.80277e+11
+op: app:0 rank:3 type:delay seconds:0.000123
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3154 start:2.80277e+11 end:2.80277e+11
+op: app:0 rank:3 type:delay seconds:0.001118
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3157 start:2.80278e+11 end:2.80278e+11
+op: app:0 rank:3 type:delay seconds:0.000116
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3158 start:2.80278e+11 end:2.80278e+11
+op: app:0 rank:3 type:delay seconds:0.001138
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3161 start:2.80279e+11 end:2.80279e+11
+op: app:0 rank:3 type:delay seconds:0.000117
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3162 start:2.80279e+11 end:2.80279e+11
+op: app:0 rank:3 type:delay seconds:0.000875
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3165 start:2.80280e+11 end:2.80280e+11
+op: app:0 rank:3 type:delay seconds:0.000110
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3166 start:2.80280e+11 end:2.80280e+11
+op: app:0 rank:3 type:delay seconds:0.000732
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3169 start:2.80281e+11 end:2.80281e+11
+op: app:0 rank:3 type:delay seconds:0.000108
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3170 start:2.80281e+11 end:2.80281e+11
+op: app:0 rank:3 type:delay seconds:0.000598
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3173 start:2.80282e+11 end:2.80282e+11
+op: app:0 rank:3 type:delay seconds:0.000155
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3174 start:2.80282e+11 end:2.80282e+11
+op: app:0 rank:3 type:delay seconds:0.000260
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3177 start:2.80282e+11 end:2.80283e+11
+op: app:0 rank:3 type:delay seconds:0.000128
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3178 start:2.80283e+11 end:2.80283e+11
+op: app:0 rank:3 type:delay seconds:0.000141
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3181 start:2.80283e+11 end:2.80283e+11
+op: app:0 rank:3 type:delay seconds:0.000098
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3182 start:2.80283e+11 end:2.80283e+11
+op: app:0 rank:3 type:delay seconds:0.000078
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:1536 type:14 count:192 tag:3185 start:2.80283e+11 end:2.80284e+11
+op: app:0 rank:3 type:delay seconds:0.000077
+op: app:0 rank:3 type:send src:3 dst:0 bytes:1536 type:14 count:192 tag:3186 start:2.80284e+11 end:2.80284e+11
+op: app:0 rank:3 type:delay seconds:0.000005
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:send src:3 dst:2 bytes:8 type:14 count:1 tag:9001 start:2.80284e+11 end:2.80284e+11
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:delay seconds:0.000001
+op: app:0 rank:3 type:delay seconds:0.000001
+op: app:0 rank:3 type:recv src:2 dst:-1 bytes:8 type:14 count:1 tag:9001 start:2.80284e+11 end:2.80284e+11
+op: app:0 rank:3 type:delay seconds:5.071062
+op: app:0 rank:3 type:delay seconds:0.000005
+op: app:0 rank:3 type:delay seconds:0.000006
+op: app:0 rank:3 type:send src:3 dst:0 bytes:72192 type:14 count:9024 tag:9001 start:2.85355e+11 end:2.85355e+11
+op: app:0 rank:3 type:delay seconds:0.000005
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:recv src:2 dst:-1 bytes:8 type:14 count:1 tag:9001 start:2.85355e+11 end:2.85410e+11
+op: app:0 rank:3 type:delay seconds:0.234955
+op: app:0 rank:3 type:delay seconds:0.000007
+op: app:0 rank:3 type:delay seconds:0.000010
+op: app:0 rank:3 type:send src:3 dst:0 bytes:72192 type:14 count:9024 tag:9001 start:2.85645e+11 end:2.85651e+11
+op: app:0 rank:3 type:delay seconds:0.000016
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:delay seconds:0.000003
+op: app:0 rank:3 type:recv src:2 dst:-1 bytes:8 type:14 count:1 tag:9001 start:2.85651e+11 end:2.85651e+11
+op: app:0 rank:3 type:delay seconds:0.000027
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:delay seconds:0.000003
+op: app:0 rank:3 type:send src:3 dst:0 bytes:72192 type:14 count:9024 tag:9001 start:2.85651e+11 end:2.85651e+11
+op: app:0 rank:3 type:delay seconds:0.000004
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:recv src:2 dst:-1 bytes:8 type:14 count:1 tag:9001 start:2.85651e+11 end:2.85651e+11
+op: app:0 rank:3 type:delay seconds:0.000003
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:recv src:2 dst:-1 bytes:8 type:14 count:1 tag:9001 start:2.85651e+11 end:2.85651e+11
+op: app:0 rank:3 type:delay seconds:0.000003
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:recv src:0 dst:-1 bytes:8 type:14 count:1 tag:9001 start:2.85651e+11 end:2.85651e+11
+op: app:0 rank:3 type:delay seconds:0.380798
+op: app:0 rank:3 type:delay seconds:0.000005
+op: app:0 rank:3 type:delay seconds:0.000007
+op: app:0 rank:3 type:send src:3 dst:0 bytes:72192 type:14 count:9024 tag:9001 start:2.86032e+11 end:2.86034e+11
+op: app:0 rank:3 type:delay seconds:0.000010
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:send src:3 dst:0 bytes:72192 type:14 count:9024 tag:9001 start:2.86034e+11 end:2.86034e+11
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:delay seconds:0.000001
+op: app:0 rank:3 type:delay seconds:0.000002
+op: app:0 rank:3 type:recv src:2 dst:-1 bytes:8 type:14 count:1 tag:9001 start:2.86034e+11 end:2.86034e+11
+op: app:0 rank:3 type:delay seconds:0.080296
+op: app:0 rank:3 type:end
+
+ * * * * * FINAL STATS * * * * * *
+NUM_OPENS:       0
+NUM_CLOSES:      0
+NUM_BARRIERS:    0
+TOTAL_DELAY:     1111.8083
+NUM_READS:       0
+READ_SIZE:       0
+NUM_WRITES:      0
+WRITE_SIZE:      0
+NUM_SENDS:       37377
+NUM_FREES:       0
+SEND_SIZE:       3357378196
+NUM_RECVS:       725
+RECV_SIZE:       1983852132
+NUM_ISENDS:      0
+ISEND_SIZE:      0
+NUM_IRECVS:      36652
+IRECV_SIZE:      1373526064
+NUM_BCASTS:      0
+BCAST_SIZE:      0
+NUM_ALLGATHERS:  0
+ALLGATHER_SIZE:  0
+NUM_ALLGATHERVS: 0
+ALLGATHERV_SIZE: 0
+NUM_ALLTOALLS:   0
+ALLTOALL_SIZE:   0
+NUM_ALLTOALLVS:  0
+ALLTOALLV_SIZE:  0
+NUM_REDUCES:     0
+REDUCE_SIZE:     0
+NUM_ALLREDUCE:   0
+ALLREDUCE_SIZE:  0
+NUM_COLLECTIVE:  0
+COLLECTIVE_SIZE: 0
+NUM_WAITALLS:    0
+NUM_WAITS:       36652
+NUM_WAITSOMES:   0
+NUM_WAITANYS:    0
+NUM_TESTALLS:    0
+#+end_example
+
+**** Replay HPL CODES 
+
+***** output
+#+BEGIN_EXAMPLE
+mpirun -n 4 model-net-mpi-replay --sync=3 --num_net_traces=4 --workload_file=dumpi-2017.06.05.18.33.12- --workload_type=dumpi --lp-io-dir=amg-16-par --lp-io-use-suffix=1 -- /home/chevamax/Téléchargements/CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+model-net-mpi-replay --sync=3 --num_net_traces=4 --workload_file=dumpi-2017.06.05.18.33.12- --workload_type=dumpi --lp-io-dir=amg-16-par --lp-io-use-suffix=1 -- /home/chevamax/Téléchargements/CODES/src/network-workloads/conf/modelnet-mpi-test.conf 
+
+Tue Jun  6 09:43:39 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   56
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              3585
+	Network events                                           50000
+	Total events                                             53584
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 0 receives 2 collectives 0 delays 8 wait alls 0 waits 0 send time 0.000000 wait 0.000000
+ LP 3 unmatched irecvs 1 unmatched sends 0 Total sends 1 receives 1 collectives 0 delays 10 wait alls 0 waits 0 send time 3.202149 wait 0.000000
+ LP 5 unmatched irecvs 1 unmatched sends 0 Total sends 1 receives 2 collectives 0 delays 11 wait alls 0 waits 0 send time 3.205433 wait 0.000000
+ LP 7 unmatched irecvs 1 unmatched sends 0 Total sends 1 receives 1 collectives 0 delays 10 wait alls 0 waits 0 send time 3.189207 wait 0.000000
+	: Running Time = 0.0003 seconds
+
+TW Library Statistics:
+	Total Events Processed                                      69
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      8
+	Total GVT Computations                                       2
+
+	Net Events Processed                                        69
+	Event Rate (events/sec)                               205970.1
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         53585
+	Memory Allocated                                         71502
+	Memory Wasted                                              906
+
+TW Network Statistics:
+	Remote sends                                                 0
+	Remote recvs                                                 0
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0002
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0008
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.0008
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       2
+	Total All Reduce Calls                                       4
+	Average Reduction / GVT                                   2.00
+
+ Total bytes sent 12 recvd 24 
+ max runtime 0.000000 ns avg runtime 0.000000 
+ max comm time 0.000000 avg comm time -952871.750000 
+ max send time 3.205433 avg send time 2.399197 
+ max recv time 10156.664791 avg recv time 2539.166198 
+ max wait time 0.000000 avg wait time 0.000000 
+LP-IO: writing output to amg-16-par-6512-1496735019/
+LP-IO: data files:
+   amg-16-par-6512-1496735019/model-net-category-all
+   amg-16-par-6512-1496735019/mpi-replay-stats
+   amg-16-par-6512-1496735019/model-net-category-test
+#+END_EXAMPLE
+
+Toujours le même genre d'output, mais au moins ca marche.
+Je vais faire avec AMG du coup.
+
+**** AMG
+
+***** Installation
+[[https://portal.nersc.gov/project/CAL/doe-miniapps-srcs/amg20130624.tgz][archive]] 
+
+Verifiez la non présence d'openmpi !
+
+****** Compilation AMG
+Changement du makefile.include pour ajouter le lien
+vers la librairie dumpi + quelques autres options :
+#+BEGIN_EXAMPLE
+INCLUDE_CFLAGS = -O2 -DTIMER_USE_MPI -HYPRE_LONG_LONG -L<path to dumpi lib> -ldumpi
+INCLUDE_LFLAGS = -lm
+#+END_EXAMPLE
+
+Le =-L= est utile seulement si vous n'avez pas configuré votre =LD_LIBRARY_PATH=
+
+****** Lancement d'AMG
+#+begin_src sh :results output :exports both
+mpirun -np 8 ./amg2013 -laplace -n 40 40 40 -P 2 2 2
+#+end_src
+
+Sortie : 
+#+begin_src sh :results output :exports both
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Tue Jun  6 15:45:48 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ Total nodes 1056 routers 264 groups 33 radix 16 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                 2376
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            608257
+	Network events                                           50000
+	Total events                                            658256
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 0 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 8187913.974337 wait 865246321.758128
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 7287976.135521 wait 560542941.964223
+ LP 2 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 7536684.249505 wait 571749913.716578
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 7750926.621984 wait 933839790.970317
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 8636987.439616 wait 898909385.460124
+ LP 10 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 8203584.988557 wait 825732294.253115
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 8281196.008655 wait 915988399.306430
+ LP 12 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 8076730.606683 wait 838540429.296298
+	: Running Time = 172.2083 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 2429875
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                   2429875
+	Event Rate (events/sec)                                14110.1
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        658257
+	Memory Allocated                                        479532
+	Memory Wasted                                               28
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             64
+	LP RNGs                                                     80
+	Total LP                                                   272
+	Event struct                                               144
+	Event struct with Model                                    736
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)    412.3424
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1874219246.601267 ns avg runtime 1863889122.194420 
+ max comm time 933925326.488712 avg comm time 801401414.069420 
+ max send time 8636987.439616 avg send time 7995250.003107 
+ max recv time 2527977615.376651 avg recv time 1678766128.851202 
+ max wait time 933839790.970317 avg wait time 801318684.590652 
+ Average number of hops traversed 1.365391 average chunk latency 4.554955 us maximum chunk latency 84.417238 us avg message size 2408.470215 bytes finished messages 26162 finished chunks 261364 
+
+ ADAPTIVE ROUTING STATS: 261364 chunks routed minimally 0 chunks routed non-minimally completed packets 261364 
+
+ Total packets generated 140603 finished 140603 
+#+END_EXAMPLE
+****** Deprecated
+******* Compilation AMG
+Changement du makefile dans le sous dossier test pour ajouter le lien
+vers la librairie dumpi
+=-L/home/chevamax/Documents/Stage_LIG_2017/logiciels/sst-dumpi/install/lib
+-ldumpi\= dans LFLAGS.
+
+Puis faire make dans le dossier principal
+
+******* Lancement d'AMG
+#+begin_src sh :results output :exports both
+mpirun -np 8 ./amg2013 -laplace -n 40 40 40 -P 2 2 2
+#+end_src
+
+******* Replay
+traces téléchargées.
+
+#+begin_src sh :results output :exports both
+model-net-mpi-replay --sync=1 --num_net_traces=216 --workload_file=../../df_AMG_n216_dumpi/dumpi-2014.03.03.14.55.23- --workload_type=dumpi --lp-io-dir=amg-8-trace --lp-io-use-suffix=1 -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf 
+
+Tue Jun  6 10:40:13 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ Total nodes 1056 routers 264 groups 33 radix 16 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                 2376
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            608257
+	Network events                                           50000
+	Total events                                            658256
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 0 unmatched irecvs 0 unmatched sends 0 Total sends 478 receives 478 collectives 0 delays 1218 wait alls 56 waits 0 send time 612826.428503 wait 14669328.061635
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 832 receives 832 collectives 0 delays 1930 wait alls 60 waits 0 send time 1018385.000731 wait 64370657.327652
+ LP 2 unmatched irecvs 0 unmatched sends 0 Total sends 566 receives 566 collectives 0 delays 1398 wait alls 60 waits 0 send time 750754.503860 wait 72563845.789648
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 840 receives 840 collectives 0 delays 1946 wait alls 60 waits 0 send time 1047815.519626 wait 157051216.933560
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 464 receives 464 collectives 0 delays 1184 wait alls 50 waits 0 send time 647397.328881 wait 66705324.503492
+ LP 10 unmatched irecvs 0 unmatched sends 0 Total sends 386 receives 386 collectives 0 delays 1034 wait alls 56 waits 0 send time 503242.249048 wait 66246441.900921
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 654 receives 654 collectives 0 delays 1574 wait alls 60 waits 0 send time 846491.070120 wait 117358929.038023
+ LP 12 unmatched irecvs 0 unmatched sends 0 Total sends 790 receives 790 collectives 0 delays 1846 wait alls 60 waits 0 send time 1041571.325534 wait 70288613.070390
+ LP 18 unmatched irecvs 0 unmatched sends 0 Total sends 1194 receives 1194 collectives 0 delays 2654 wait alls 60 waits 0 send time 1470155.471660 wait 68216556.238328
+ LP 19 unmatched irecvs 0 unmatched sends 0 Total sends 1010 receives 1010 collectives 0 delays 2286 wait alls 60 waits 0 send time 1264102.027885 wait 66450400.852029
+ LP 20 unmatched irecvs 0 unmatched sends 0 Total sends 956 receives 956 collectives 0 delays 2178 wait alls 60 waits 0 send time 1205111.164923 wait 59633424.426049
+ LP 21 unmatched irecvs 0 unmatched sends 0 Total sends 528 receives 528 collectives 0 delays 1318 wait alls 56 waits 0 send time 723458.275000 wait 117875229.796452
+ LP 27 unmatched irecvs 0 unmatched sends 0 Total sends 1026 receives 1026 collectives 0 delays 2324 wait alls 66 waits 0 send time 1235379.351462 wait 74247344.022784
+ LP 28 unmatched irecvs 0 unmatched sends 0 Total sends 1004 receives 1004 collectives 0 delays 2274 wait alls 60 waits 0 send time 1255522.120947 wait 118504878.250013
+ LP 29 unmatched irecvs 0 unmatched sends 0 Total sends 1066 receives 1066 collectives 0 delays 2398 wait alls 60 waits 0 send time 1336751.450998 wait 63630925.617630
+ LP 30 unmatched irecvs 0 unmatched sends 0 Total sends 1042 receives 1042 collectives 0 delays 2356 wait alls 66 waits 0 send time 1303271.469921 wait 116979946.393221
+ LP 36 unmatched irecvs 0 unmatched sends 0 Total sends 978 receives 978 collectives 0 delays 2222 wait alls 60 waits 0 send time 1264630.386888 wait 60750187.906107
+ LP 37 unmatched irecvs 0 unmatched sends 0 Total sends 628 receives 628 collectives 0 delays 1522 wait alls 60 waits 0 send time 816591.158841 wait 159049402.123190
+ LP 38 unmatched irecvs 0 unmatched sends 0 Total sends 756 receives 756 collectives 0 delays 1778 wait alls 60 waits 0 send time 962886.542565 wait 62828381.096530
+ LP 39 unmatched irecvs 0 unmatched sends 0 Total sends 1224 receives 1224 collectives 0 delays 2714 wait alls 60 waits 0 send time 1516243.201509 wait 117957528.505235
+ LP 45 unmatched irecvs 0 unmatched sends 0 Total sends 1058 receives 1058 collectives 0 delays 2382 wait alls 60 waits 0 send time 1320910.147259 wait 60146490.080305
+ LP 46 unmatched irecvs 0 unmatched sends 0 Total sends 708 receives 708 collectives 0 delays 1672 wait alls 50 waits 0 send time 967492.464439 wait 158523458.934212
+ LP 47 unmatched irecvs 0 unmatched sends 0 Total sends 1132 receives 1132 collectives 0 delays 2530 wait alls 60 waits 0 send time 1397302.027431 wait 74069915.010258
+ LP 48 unmatched irecvs 0 unmatched sends 0 Total sends 740 receives 740 collectives 0 delays 1746 wait alls 60 waits 0 send time 928590.332869 wait 65232701.431432
+ LP 54 unmatched irecvs 0 unmatched sends 0 Total sends 664 receives 664 collectives 0 delays 1594 wait alls 60 waits 0 send time 848973.949047 wait 36345958.118133
+ LP 55 unmatched irecvs 0 unmatched sends 0 Total sends 674 receives 674 collectives 0 delays 1604 wait alls 50 waits 0 send time 938229.478640 wait 125516971.862382
+ LP 56 unmatched irecvs 0 unmatched sends 0 Total sends 1028 receives 1028 collectives 0 delays 2328 wait alls 66 waits 0 send time 1267561.482412 wait 117911981.356183
+ LP 57 unmatched irecvs 0 unmatched sends 0 Total sends 1236 receives 1236 collectives 0 delays 2744 wait alls 66 waits 0 send time 1504637.069302 wait 50347396.693650
+ LP 63 unmatched irecvs 0 unmatched sends 0 Total sends 878 receives 878 collectives 0 delays 2022 wait alls 60 waits 0 send time 1146823.708011 wait 123363217.866624
+ LP 64 unmatched irecvs 0 unmatched sends 0 Total sends 690 receives 690 collectives 0 delays 1646 wait alls 60 waits 0 send time 879885.796478 wait 227372017.567977
+ LP 65 unmatched irecvs 0 unmatched sends 0 Total sends 646 receives 646 collectives 0 delays 1558 wait alls 60 waits 0 send time 774507.757742 wait 71956122.051773
+ LP 66 unmatched irecvs 0 unmatched sends 0 Total sends 768 receives 768 collectives 0 delays 1798 wait alls 56 waits 0 send time 950385.223462 wait 158583089.307583
+ LP 72 unmatched irecvs 0 unmatched sends 0 Total sends 670 receives 670 collectives 0 delays 1606 wait alls 60 waits 0 send time 849275.876803 wait 121573968.425720
+ LP 73 unmatched irecvs 0 unmatched sends 0 Total sends 794 receives 794 collectives 0 delays 1854 wait alls 60 waits 0 send time 967002.342169 wait 226746422.904084
+ LP 74 unmatched irecvs 0 unmatched sends 0 Total sends 676 receives 676 collectives 0 delays 1618 wait alls 60 waits 0 send time 853497.663715 wait 73897714.895026
+ LP 75 unmatched irecvs 0 unmatched sends 0 Total sends 516 receives 516 collectives 0 delays 1294 wait alls 56 waits 0 send time 641329.482212 wait 184735895.207342
+ LP 81 unmatched irecvs 0 unmatched sends 0 Total sends 650 receives 650 collectives 0 delays 1562 wait alls 56 waits 0 send time 858544.351669 wait 223511975.760137
+ LP 82 unmatched irecvs 0 unmatched sends 0 Total sends 1008 receives 1008 collectives 0 delays 2282 wait alls 60 waits 0 send time 1287474.151241 wait 74911528.900648
+ LP 83 unmatched irecvs 0 unmatched sends 0 Total sends 886 receives 886 collectives 0 delays 2038 wait alls 60 waits 0 send time 1173980.655245 wait 186291322.476267
+ LP 84 unmatched irecvs 0 unmatched sends 0 Total sends 726 receives 726 collectives 0 delays 1708 wait alls 50 waits 0 send time 1006582.941256 wait 180308323.805768
+ LP 90 unmatched irecvs 0 unmatched sends 0 Total sends 1080 receives 1080 collectives 0 delays 2432 wait alls 66 waits 0 send time 1358841.625623 wait 114358120.575814
+ LP 91 unmatched irecvs 0 unmatched sends 0 Total sends 804 receives 804 collectives 0 delays 1874 wait alls 60 waits 0 send time 1009827.313515 wait 225479612.621467
+ LP 92 unmatched irecvs 0 unmatched sends 0 Total sends 996 receives 996 collectives 0 delays 2258 wait alls 60 waits 0 send time 1292993.186195 wait 159080981.001880
+ LP 93 unmatched irecvs 0 unmatched sends 0 Total sends 1044 receives 1044 collectives 0 delays 2344 wait alls 50 waits 0 send time 1409568.727912 wait 123803484.427334
+ LP 99 unmatched irecvs 0 unmatched sends 0 Total sends 1010 receives 1010 collectives 0 delays 2276 wait alls 50 waits 0 send time 1392107.978241 wait 72580169.316250
+ LP 100 unmatched irecvs 0 unmatched sends 0 Total sends 1952 receives 1952 collectives 0 delays 4182 wait alls 72 waits 0 send time 2346398.054515 wait 223514663.875979
+ LP 101 unmatched irecvs 0 unmatched sends 0 Total sends 998 receives 998 collectives 0 delays 2252 wait alls 50 waits 0 send time 1362987.743583 wait 178904814.966390
+ LP 102 unmatched irecvs 0 unmatched sends 0 Total sends 1016 receives 1016 collectives 0 delays 2298 wait alls 60 waits 0 send time 1296163.307307 wait 159821204.649910
+ LP 108 unmatched irecvs 0 unmatched sends 0 Total sends 858 receives 858 collectives 0 delays 1982 wait alls 60 waits 0 send time 1098585.436320 wait 61204099.545769
+ LP 109 unmatched irecvs 0 unmatched sends 0 Total sends 1852 receives 1852 collectives 0 delays 3980 wait alls 70 waits 0 send time 2231130.888345 wait 239282149.488297
+ LP 110 unmatched irecvs 0 unmatched sends 0 Total sends 1036 receives 1036 collectives 0 delays 2328 wait alls 50 waits 0 send time 1417221.694278 wait 231406965.247936
+ LP 111 unmatched irecvs 0 unmatched sends 0 Total sends 1096 receives 1096 collectives 0 delays 2448 wait alls 50 waits 0 send time 1469905.820924 wait 242108030.842040
+ LP 117 unmatched irecvs 0 unmatched sends 0 Total sends 1508 receives 1508 collectives 0 delays 3282 wait alls 60 waits 0 send time 1893400.232530 wait 227244561.724871
+ LP 118 unmatched irecvs 0 unmatched sends 0 Total sends 704 receives 704 collectives 0 delays 1664 wait alls 50 waits 0 send time 987026.752725 wait 182374233.768544
+ LP 119 unmatched irecvs 0 unmatched sends 0 Total sends 708 receives 708 collectives 0 delays 1672 wait alls 50 waits 0 send time 980978.812301 wait 13967711.361794
+ LP 120 unmatched irecvs 0 unmatched sends 0 Total sends 1344 receives 1344 collectives 0 delays 2954 wait alls 60 waits 0 send time 1720179.012817 wait 35015531.040038
+ LP 126 unmatched irecvs 0 unmatched sends 0 Total sends 1614 receives 1614 collectives 0 delays 3494 wait alls 60 waits 0 send time 2023971.208713 wait 182946647.373766
+ LP 127 unmatched irecvs 0 unmatched sends 0 Total sends 1642 receives 1642 collectives 0 delays 3550 wait alls 60 waits 0 send time 2015590.811251 wait 184289237.361690
+ LP 128 unmatched irecvs 0 unmatched sends 0 Total sends 1346 receives 1346 collectives 0 delays 2958 wait alls 60 waits 0 send time 1700357.502209 wait 243228804.840325
+ LP 129 unmatched irecvs 0 unmatched sends 0 Total sends 1214 receives 1214 collectives 0 delays 2694 wait alls 60 waits 0 send time 1518689.918331 wait 179953424.617609
+ LP 135 unmatched irecvs 0 unmatched sends 0 Total sends 926 receives 926 collectives 0 delays 2118 wait alls 60 waits 0 send time 1246349.675652 wait 237034450.909029
+ LP 136 unmatched irecvs 0 unmatched sends 0 Total sends 954 receives 954 collectives 0 delays 2164 wait alls 50 waits 0 send time 1352503.447149 wait 235505287.971080
+ LP 137 unmatched irecvs 0 unmatched sends 0 Total sends 1460 receives 1460 collectives 0 delays 3196 wait alls 70 waits 0 send time 1852326.853503 wait 236632839.250267
+ LP 138 unmatched irecvs 0 unmatched sends 0 Total sends 1066 receives 1066 collectives 0 delays 2388 wait alls 50 waits 0 send time 1409283.182707 wait 235555608.684319
+ LP 144 unmatched irecvs 0 unmatched sends 0 Total sends 1752 receives 1752 collectives 0 delays 3776 wait alls 66 waits 0 send time 2130807.570266 wait 225930646.267494
+ LP 145 unmatched irecvs 0 unmatched sends 0 Total sends 1130 receives 1130 collectives 0 delays 2532 wait alls 66 waits 0 send time 1388729.942234 wait 242848402.532029
+ LP 146 unmatched irecvs 0 unmatched sends 0 Total sends 718 receives 718 collectives 0 delays 1698 wait alls 56 waits 0 send time 930406.156660 wait 229788144.347419
+ LP 147 unmatched irecvs 0 unmatched sends 0 Total sends 670 receives 670 collectives 0 delays 1596 wait alls 50 waits 0 send time 945853.904861 wait 234202698.028066
+ LP 153 unmatched irecvs 0 unmatched sends 0 Total sends 1562 receives 1562 collectives 0 delays 3396 wait alls 66 waits 0 send time 1893068.247829 wait 44977957.049517
+ LP 154 unmatched irecvs 0 unmatched sends 0 Total sends 780 receives 780 collectives 0 delays 1826 wait alls 60 waits 0 send time 1038846.624604 wait 228435021.601487
+ LP 155 unmatched irecvs 0 unmatched sends 0 Total sends 884 receives 884 collectives 0 delays 2034 wait alls 60 waits 0 send time 1153261.695121 wait 242093904.982951
+ LP 156 unmatched irecvs 0 unmatched sends 0 Total sends 704 receives 704 collectives 0 delays 1674 wait alls 60 waits 0 send time 883647.081994 wait 226714793.456252
+ LP 162 unmatched irecvs 0 unmatched sends 0 Total sends 848 receives 848 collectives 0 delays 1968 wait alls 66 waits 0 send time 1056655.404335 wait 157175170.273683
+ LP 163 unmatched irecvs 0 unmatched sends 0 Total sends 1212 receives 1212 collectives 0 delays 2696 wait alls 66 waits 0 send time 1473940.846421 wait 28336559.684429
+ LP 164 unmatched irecvs 0 unmatched sends 0 Total sends 1194 receives 1194 collectives 0 delays 2660 wait alls 66 waits 0 send time 1440356.469666 wait 151749253.578270
+ LP 165 unmatched irecvs 0 unmatched sends 0 Total sends 682 receives 682 collectives 0 delays 1620 wait alls 50 waits 0 send time 955091.139227 wait 161779088.065750
+ LP 171 unmatched irecvs 0 unmatched sends 0 Total sends 944 receives 944 collectives 0 delays 2154 wait alls 60 waits 0 send time 1221491.539740 wait 43063209.056568
+ LP 172 unmatched irecvs 0 unmatched sends 0 Total sends 602 receives 602 collectives 0 delays 1470 wait alls 60 waits 0 send time 784025.269904 wait 233804447.033664
+ LP 173 unmatched irecvs 0 unmatched sends 0 Total sends 942 receives 942 collectives 0 delays 2150 wait alls 60 waits 0 send time 1229456.029328 wait 50172193.310056
+ LP 174 unmatched irecvs 0 unmatched sends 0 Total sends 968 receives 968 collectives 0 delays 2192 wait alls 50 waits 0 send time 1319939.372680 wait 227463054.419840
+ LP 180 unmatched irecvs 0 unmatched sends 0 Total sends 1024 receives 1024 collectives 0 delays 2304 wait alls 50 waits 0 send time 1400669.257240 wait 55674515.977710
+ LP 181 unmatched irecvs 0 unmatched sends 0 Total sends 1454 receives 1454 collectives 0 delays 3174 wait alls 60 waits 0 send time 1816148.078225 wait 181507834.768630
+ LP 182 unmatched irecvs 0 unmatched sends 0 Total sends 1544 receives 1544 collectives 0 delays 3354 wait alls 60 waits 0 send time 1911634.255754 wait 224604363.142339
+ LP 183 unmatched irecvs 0 unmatched sends 0 Total sends 1078 receives 1078 collectives 0 delays 2422 wait alls 60 waits 0 send time 1309799.522605 wait 230384066.827760
+ LP 189 unmatched irecvs 0 unmatched sends 0 Total sends 1054 receives 1054 collectives 0 delays 2374 wait alls 60 waits 0 send time 1362222.775894 wait 189425317.992194
+ LP 190 unmatched irecvs 0 unmatched sends 0 Total sends 1702 receives 1702 collectives 0 delays 3670 wait alls 60 waits 0 send time 2070140.487704 wait 117181727.419880
+ LP 191 unmatched irecvs 0 unmatched sends 0 Total sends 1096 receives 1096 collectives 0 delays 2448 wait alls 50 waits 0 send time 1452532.883894 wait 224114053.684710
+ LP 192 unmatched irecvs 0 unmatched sends 0 Total sends 1548 receives 1548 collectives 0 delays 3362 wait alls 60 waits 0 send time 1914415.247092 wait 227210177.590556
+ LP 198 unmatched irecvs 0 unmatched sends 0 Total sends 1014 receives 1014 collectives 0 delays 2284 wait alls 50 waits 0 send time 1393252.678999 wait 220299486.476730
+ LP 199 unmatched irecvs 0 unmatched sends 0 Total sends 1390 receives 1390 collectives 0 delays 3056 wait alls 70 waits 0 send time 1669083.321960 wait 241003019.512698
+ LP 200 unmatched irecvs 0 unmatched sends 0 Total sends 1628 receives 1628 collectives 0 delays 3534 wait alls 72 waits 0 send time 1969004.464915 wait 185460021.241456
+ LP 201 unmatched irecvs 0 unmatched sends 0 Total sends 1666 receives 1666 collectives 0 delays 3598 wait alls 60 waits 0 send time 2080485.562014 wait 227932490.141174
+ LP 207 unmatched irecvs 0 unmatched sends 0 Total sends 1722 receives 1722 collectives 0 delays 3710 wait alls 60 waits 0 send time 2139705.407085 wait 176512745.363789
+ LP 208 unmatched irecvs 0 unmatched sends 0 Total sends 1458 receives 1458 collectives 0 delays 3182 wait alls 60 waits 0 send time 1843616.685628 wait 189486438.128715
+ LP 209 unmatched irecvs 0 unmatched sends 0 Total sends 1538 receives 1538 collectives 0 delays 3342 wait alls 60 waits 0 send time 1918725.054495 wait 239318145.981069
+ LP 210 unmatched irecvs 0 unmatched sends 0 Total sends 740 receives 740 collectives 0 delays 1736 wait alls 50 waits 0 send time 1016436.312454 wait 231850048.656625
+ LP 216 unmatched irecvs 0 unmatched sends 0 Total sends 992 receives 992 collectives 0 delays 2250 wait alls 60 waits 0 send time 1267154.230789 wait 177495309.095000
+ LP 217 unmatched irecvs 0 unmatched sends 0 Total sends 1456 receives 1456 collectives 0 delays 3178 wait alls 60 waits 0 send time 1821569.537089 wait 116792071.752879
+ LP 218 unmatched irecvs 0 unmatched sends 0 Total sends 1050 receives 1050 collectives 0 delays 2356 wait alls 50 waits 0 send time 1436108.782684 wait 37291272.684969
+ LP 219 unmatched irecvs 0 unmatched sends 0 Total sends 1584 receives 1584 collectives 0 delays 3434 wait alls 60 waits 0 send time 1973944.999668 wait 49904082.837897
+ LP 225 unmatched irecvs 0 unmatched sends 0 Total sends 1012 receives 1012 collectives 0 delays 2280 wait alls 50 waits 0 send time 1388698.228261 wait 126694818.180600
+ LP 226 unmatched irecvs 0 unmatched sends 0 Total sends 1028 receives 1028 collectives 0 delays 2322 wait alls 60 waits 0 send time 1320794.752760 wait 118546753.671267
+ LP 227 unmatched irecvs 0 unmatched sends 0 Total sends 822 receives 822 collectives 0 delays 1910 wait alls 60 waits 0 send time 1043424.735314 wait 163767703.897466
+ LP 228 unmatched irecvs 0 unmatched sends 0 Total sends 724 receives 724 collectives 0 delays 1704 wait alls 50 waits 0 send time 1019108.346654 wait 120293854.572289
+ LP 234 unmatched irecvs 0 unmatched sends 0 Total sends 1170 receives 1170 collectives 0 delays 2606 wait alls 60 waits 0 send time 1477524.275769 wait 163838276.502195
+ LP 235 unmatched irecvs 0 unmatched sends 0 Total sends 1080 receives 1080 collectives 0 delays 2426 wait alls 60 waits 0 send time 1362518.229356 wait 72469903.266244
+ LP 236 unmatched irecvs 0 unmatched sends 0 Total sends 1034 receives 1034 collectives 0 delays 2340 wait alls 66 waits 0 send time 1305745.383152 wait 181265556.555207
+ LP 237 unmatched irecvs 0 unmatched sends 0 Total sends 736 receives 736 collectives 0 delays 1738 wait alls 60 waits 0 send time 930078.205976 wait 124599280.836448
+ LP 243 unmatched irecvs 0 unmatched sends 0 Total sends 748 receives 748 collectives 0 delays 1762 wait alls 60 waits 0 send time 944942.837639 wait 226684255.961120
+ LP 244 unmatched irecvs 0 unmatched sends 0 Total sends 1266 receives 1266 collectives 0 delays 2798 wait alls 60 waits 0 send time 1559772.421147 wait 224068310.261899
+ LP 245 unmatched irecvs 0 unmatched sends 0 Total sends 882 receives 882 collectives 0 delays 2030 wait alls 60 waits 0 send time 1171132.628482 wait 59646838.696376
+ LP 246 unmatched irecvs 0 unmatched sends 0 Total sends 884 receives 884 collectives 0 delays 2034 wait alls 60 waits 0 send time 1169541.450742 wait 230349262.080623
+ LP 252 unmatched irecvs 0 unmatched sends 0 Total sends 1132 receives 1132 collectives 0 delays 2530 wait alls 60 waits 0 send time 1419571.729277 wait 117445327.827391
+ LP 253 unmatched irecvs 0 unmatched sends 0 Total sends 496 receives 496 collectives 0 delays 1248 wait alls 50 waits 0 send time 697422.312509 wait 51882411.210824
+ LP 254 unmatched irecvs 0 unmatched sends 0 Total sends 668 receives 668 collectives 0 delays 1592 wait alls 50 waits 0 send time 897448.488961 wait 220915271.187779
+ LP 255 unmatched irecvs 0 unmatched sends 0 Total sends 1482 receives 1482 collectives 0 delays 3230 wait alls 60 waits 0 send time 1843559.665634 wait 125682220.057065
+ LP 261 unmatched irecvs 0 unmatched sends 0 Total sends 1732 receives 1732 collectives 0 delays 3730 wait alls 60 waits 0 send time 2055488.948681 wait 171337339.221986
+ LP 262 unmatched irecvs 0 unmatched sends 0 Total sends 2020 receives 2020 collectives 0 delays 4316 wait alls 70 waits 0 send time 2390286.865081 wait 179397186.992181
+ LP 263 unmatched irecvs 0 unmatched sends 0 Total sends 1038 receives 1038 collectives 0 delays 2332 wait alls 50 waits 0 send time 1400244.520539 wait 78380897.412120
+ LP 264 unmatched irecvs 0 unmatched sends 0 Total sends 854 receives 854 collectives 0 delays 1974 wait alls 60 waits 0 send time 1130986.389140 wait 185598053.656403
+ LP 270 unmatched irecvs 0 unmatched sends 0 Total sends 1318 receives 1318 collectives 0 delays 2912 wait alls 70 waits 0 send time 1605993.188225 wait 183441365.822489
+ LP 271 unmatched irecvs 0 unmatched sends 0 Total sends 1494 receives 1494 collectives 0 delays 3254 wait alls 60 waits 0 send time 1853253.940284 wait 237731108.339606
+ LP 272 unmatched irecvs 0 unmatched sends 0 Total sends 1114 receives 1114 collectives 0 delays 2484 wait alls 50 waits 0 send time 1506073.121325 wait 187989091.856423
+ LP 273 unmatched irecvs 0 unmatched sends 0 Total sends 1504 receives 1504 collectives 0 delays 3274 wait alls 60 waits 0 send time 1925987.933597 wait 186961890.194399
+ LP 279 unmatched irecvs 0 unmatched sends 0 Total sends 1284 receives 1284 collectives 0 delays 2834 wait alls 60 waits 0 send time 1699702.868855 wait 41587294.618191
+ LP 280 unmatched irecvs 0 unmatched sends 0 Total sends 962 receives 962 collectives 0 delays 2190 wait alls 60 waits 0 send time 1268313.802547 wait 56179800.029834
+ LP 281 unmatched irecvs 0 unmatched sends 0 Total sends 772 receives 772 collectives 0 delays 1800 wait alls 50 waits 0 send time 1045713.702199 wait 242366453.174915
+ LP 282 unmatched irecvs 0 unmatched sends 0 Total sends 1444 receives 1444 collectives 0 delays 3154 wait alls 60 waits 0 send time 1827816.130192 wait 239838693.289420
+ LP 288 unmatched irecvs 0 unmatched sends 0 Total sends 1086 receives 1086 collectives 0 delays 2428 wait alls 50 waits 0 send time 1495648.511026 wait 242109938.601502
+ LP 289 unmatched irecvs 0 unmatched sends 0 Total sends 1474 receives 1474 collectives 0 delays 3214 wait alls 60 waits 0 send time 1866654.582048 wait 239148605.136481
+ LP 290 unmatched irecvs 0 unmatched sends 0 Total sends 1666 receives 1666 collectives 0 delays 3598 wait alls 60 waits 0 send time 2074126.473026 wait 231683272.233514
+ LP 291 unmatched irecvs 0 unmatched sends 0 Total sends 1270 receives 1270 collectives 0 delays 2806 wait alls 60 waits 0 send time 1570096.533302 wait 229041214.090651
+ LP 297 unmatched irecvs 0 unmatched sends 0 Total sends 1168 receives 1168 collectives 0 delays 2602 wait alls 60 waits 0 send time 1478174.260760 wait 228006413.133874
+ LP 298 unmatched irecvs 0 unmatched sends 0 Total sends 1854 receives 1854 collectives 0 delays 3984 wait alls 70 waits 0 send time 2235385.680993 wait 54407837.495879
+ LP 299 unmatched irecvs 0 unmatched sends 0 Total sends 1530 receives 1530 collectives 0 delays 3326 wait alls 60 waits 0 send time 1918623.175208 wait 43435109.217533
+ LP 300 unmatched irecvs 0 unmatched sends 0 Total sends 1688 receives 1688 collectives 0 delays 3642 wait alls 60 waits 0 send time 2073585.683253 wait 180443386.817762
+ LP 306 unmatched irecvs 0 unmatched sends 0 Total sends 1006 receives 1006 collectives 0 delays 2268 wait alls 50 waits 0 send time 1369678.066230 wait 234827300.894513
+ LP 307 unmatched irecvs 0 unmatched sends 0 Total sends 1182 receives 1182 collectives 0 delays 2630 wait alls 60 waits 0 send time 1453872.587879 wait 225128096.688900
+ LP 308 unmatched irecvs 0 unmatched sends 0 Total sends 774 receives 774 collectives 0 delays 1814 wait alls 60 waits 0 send time 986412.539371 wait 238588346.901442
+ LP 309 unmatched irecvs 0 unmatched sends 0 Total sends 1064 receives 1064 collectives 0 delays 2394 wait alls 60 waits 0 send time 1368119.135462 wait 230947991.556343
+ LP 315 unmatched irecvs 0 unmatched sends 0 Total sends 676 receives 676 collectives 0 delays 1608 wait alls 50 waits 0 send time 925767.213918 wait 229314849.631709
+ LP 316 unmatched irecvs 0 unmatched sends 0 Total sends 1082 receives 1082 collectives 0 delays 2430 wait alls 60 waits 0 send time 1359575.569396 wait 241533502.538067
+ LP 317 unmatched irecvs 0 unmatched sends 0 Total sends 958 receives 958 collectives 0 delays 2182 wait alls 60 waits 0 send time 1216238.557433 wait 235232023.804240
+ LP 318 unmatched irecvs 0 unmatched sends 0 Total sends 544 receives 544 collectives 0 delays 1350 wait alls 56 waits 0 send time 728295.820487 wait 241818960.780068
+ LP 324 unmatched irecvs 0 unmatched sends 0 Total sends 942 receives 942 collectives 0 delays 2156 wait alls 66 waits 0 send time 1140182.089447 wait 47864710.306853
+ LP 325 unmatched irecvs 0 unmatched sends 0 Total sends 754 receives 754 collectives 0 delays 1774 wait alls 60 waits 0 send time 1023713.128732 wait 239851624.351898
+ LP 326 unmatched irecvs 0 unmatched sends 0 Total sends 1178 receives 1178 collectives 0 delays 2622 wait alls 60 waits 0 send time 1446818.706926 wait 227632766.612120
+ LP 327 unmatched irecvs 0 unmatched sends 0 Total sends 682 receives 682 collectives 0 delays 1620 wait alls 50 waits 0 send time 948953.171935 wait 238425191.492895
+ LP 333 unmatched irecvs 0 unmatched sends 0 Total sends 930 receives 930 collectives 0 delays 2126 wait alls 60 waits 0 send time 1197751.448529 wait 235173176.706286
+ LP 334 unmatched irecvs 0 unmatched sends 0 Total sends 748 receives 748 collectives 0 delays 1762 wait alls 60 waits 0 send time 921654.263274 wait 227369786.169390
+ LP 335 unmatched irecvs 0 unmatched sends 0 Total sends 904 receives 904 collectives 0 delays 2074 wait alls 60 waits 0 send time 1175455.369354 wait 239444069.426787
+ LP 336 unmatched irecvs 0 unmatched sends 0 Total sends 1574 receives 1574 collectives 0 delays 3420 wait alls 66 waits 0 send time 1909375.763095 wait 240876821.702868
+ LP 342 unmatched irecvs 0 unmatched sends 0 Total sends 1064 receives 1064 collectives 0 delays 2384 wait alls 50 waits 0 send time 1431078.085745 wait 239582472.113191
+ LP 343 unmatched irecvs 0 unmatched sends 0 Total sends 1022 receives 1022 collectives 0 delays 2300 wait alls 50 waits 0 send time 1392639.599693 wait 54306997.881879
+ LP 344 unmatched irecvs 0 unmatched sends 0 Total sends 1392 receives 1392 collectives 0 delays 3050 wait alls 60 waits 0 send time 1762868.547964 wait 237377876.573738
+ LP 345 unmatched irecvs 0 unmatched sends 0 Total sends 732 receives 732 collectives 0 delays 1720 wait alls 50 waits 0 send time 1009808.307314 wait 229509575.923357
+ LP 351 unmatched irecvs 0 unmatched sends 0 Total sends 1096 receives 1096 collectives 0 delays 2458 wait alls 60 waits 0 send time 1395358.000737 wait 239002588.009873
+ LP 352 unmatched irecvs 0 unmatched sends 0 Total sends 1082 receives 1082 collectives 0 delays 2420 wait alls 50 waits 0 send time 1468959.213742 wait 238612525.266457
+ LP 353 unmatched irecvs 0 unmatched sends 0 Total sends 1540 receives 1540 collectives 0 delays 3346 wait alls 60 waits 0 send time 1910908.953035 wait 236151256.616066
+ LP 354 unmatched irecvs 0 unmatched sends 0 Total sends 1070 receives 1070 collectives 0 delays 2396 wait alls 50 waits 0 send time 1460741.955959 wait 244232512.426837
+ LP 360 unmatched irecvs 0 unmatched sends 0 Total sends 1070 receives 1070 collectives 0 delays 2396 wait alls 50 waits 0 send time 1439992.987388 wait 232491468.639140
+ LP 361 unmatched irecvs 0 unmatched sends 0 Total sends 1002 receives 1002 collectives 0 delays 2270 wait alls 60 waits 0 send time 1268899.691438 wait 234563596.485585
+ LP 362 unmatched irecvs 0 unmatched sends 0 Total sends 736 receives 736 collectives 0 delays 1728 wait alls 50 waits 0 send time 1047246.540606 wait 226312200.080464
+ LP 363 unmatched irecvs 0 unmatched sends 0 Total sends 972 receives 972 collectives 0 delays 2200 wait alls 50 waits 0 send time 1346636.251382 wait 234003752.808560
+ LP 369 unmatched irecvs 0 unmatched sends 0 Total sends 1762 receives 1762 collectives 0 delays 3790 wait alls 60 waits 0 send time 2158949.638434 wait 240479668.726626
+ LP 370 unmatched irecvs 0 unmatched sends 0 Total sends 1684 receives 1684 collectives 0 delays 3634 wait alls 60 waits 0 send time 2045615.450660 wait 233456691.814360
+ LP 371 unmatched irecvs 0 unmatched sends 0 Total sends 1410 receives 1410 collectives 0 delays 3086 wait alls 60 waits 0 send time 1793352.499286 wait 239029658.233294
+ LP 372 unmatched irecvs 0 unmatched sends 0 Total sends 948 receives 948 collectives 0 delays 2162 wait alls 60 waits 0 send time 1232901.018381 wait 236571751.867198
+ LP 378 unmatched irecvs 0 unmatched sends 0 Total sends 954 receives 954 collectives 0 delays 2174 wait alls 60 waits 0 send time 1252010.787490 wait 28872020.499920
+ LP 379 unmatched irecvs 0 unmatched sends 0 Total sends 1270 receives 1270 collectives 0 delays 2806 wait alls 60 waits 0 send time 1627886.750878 wait 223550083.236020
+ LP 380 unmatched irecvs 0 unmatched sends 0 Total sends 1506 receives 1506 collectives 0 delays 3278 wait alls 60 waits 0 send time 1877065.936016 wait 44484845.249219
+ LP 381 unmatched irecvs 0 unmatched sends 0 Total sends 980 receives 980 collectives 0 delays 2216 wait alls 50 waits 0 send time 1347203.572137 wait 37974722.570828
+ LP 387 unmatched irecvs 0 unmatched sends 0 Total sends 1702 receives 1702 collectives 0 delays 3676 wait alls 66 waits 0 send time 2071769.522280 wait 120930600.863587
+ LP 388 unmatched irecvs 0 unmatched sends 0 Total sends 846 receives 846 collectives 0 delays 1958 wait alls 60 waits 0 send time 1121676.269522 wait 236390395.372274
+ LP 389 unmatched irecvs 0 unmatched sends 0 Total sends 644 receives 644 collectives 0 delays 1554 wait alls 60 waits 0 send time 849074.614689 wait 239583967.466475
+ LP 390 unmatched irecvs 0 unmatched sends 0 Total sends 898 receives 898 collectives 0 delays 2062 wait alls 60 waits 0 send time 1194248.256042 wait 77551255.308577
+ LP 396 unmatched irecvs 0 unmatched sends 0 Total sends 1394 receives 1394 collectives 0 delays 3066 wait alls 72 waits 0 send time 1680447.482774 wait 181954755.003045
+ LP 397 unmatched irecvs 0 unmatched sends 0 Total sends 1448 receives 1448 collectives 0 delays 3168 wait alls 66 waits 0 send time 1730700.253292 wait 179452043.558964
+ LP 398 unmatched irecvs 0 unmatched sends 0 Total sends 1090 receives 1090 collectives 0 delays 2446 wait alls 60 waits 0 send time 1362520.825888 wait 184339756.060921
+ LP 399 unmatched irecvs 0 unmatched sends 0 Total sends 964 receives 964 collectives 0 delays 2194 wait alls 60 waits 0 send time 1163915.966380 wait 226976312.408118
+ LP 405 unmatched irecvs 0 unmatched sends 0 Total sends 654 receives 654 collectives 0 delays 1574 wait alls 60 waits 0 send time 785996.187805 wait 235819906.841401
+ LP 406 unmatched irecvs 0 unmatched sends 0 Total sends 654 receives 654 collectives 0 delays 1570 wait alls 56 waits 0 send time 842502.145936 wait 182925092.226000
+ LP 407 unmatched irecvs 0 unmatched sends 0 Total sends 734 receives 734 collectives 0 delays 1730 wait alls 56 waits 0 send time 924714.183380 wait 188442299.926165
+ LP 408 unmatched irecvs 0 unmatched sends 0 Total sends 1032 receives 1032 collectives 0 delays 2340 wait alls 70 waits 0 send time 1235125.968845 wait 161082373.801387
+ LP 414 unmatched irecvs 0 unmatched sends 0 Total sends 778 receives 778 collectives 0 delays 1828 wait alls 66 waits 0 send time 972096.350793 wait 231361833.270194
+ LP 415 unmatched irecvs 0 unmatched sends 0 Total sends 726 receives 726 collectives 0 delays 1724 wait alls 66 waits 0 send time 840037.942789 wait 161424164.007532
+ LP 416 unmatched irecvs 0 unmatched sends 0 Total sends 784 receives 784 collectives 0 delays 1836 wait alls 62 waits 0 send time 991389.414077 wait 182640364.070923
+ LP 417 unmatched irecvs 0 unmatched sends 0 Total sends 1380 receives 1380 collectives 0 delays 3036 wait alls 70 waits 0 send time 1648899.118545 wait 233117396.568241
+ LP 423 unmatched irecvs 0 unmatched sends 0 Total sends 690 receives 690 collectives 0 delays 1636 wait alls 50 waits 0 send time 973248.559611 wait 162699136.436757
+ LP 424 unmatched irecvs 0 unmatched sends 0 Total sends 682 receives 682 collectives 0 delays 1620 wait alls 50 waits 0 send time 955682.437545 wait 230925787.404967
+ LP 425 unmatched irecvs 0 unmatched sends 0 Total sends 1206 receives 1206 collectives 0 delays 2678 wait alls 60 waits 0 send time 1487774.469349 wait 228363345.677702
+ LP 426 unmatched irecvs 0 unmatched sends 0 Total sends 728 receives 728 collectives 0 delays 1722 wait alls 60 waits 0 send time 912367.151058 wait 229756244.240830
+ LP 432 unmatched irecvs 0 unmatched sends 0 Total sends 722 receives 722 collectives 0 delays 1710 wait alls 60 waits 0 send time 911450.421544 wait 40130943.189459
+ LP 433 unmatched irecvs 0 unmatched sends 0 Total sends 1064 receives 1064 collectives 0 delays 2394 wait alls 60 waits 0 send time 1361151.609776 wait 74152714.250620
+ LP 434 unmatched irecvs 0 unmatched sends 0 Total sends 972 receives 972 collectives 0 delays 2210 wait alls 60 waits 0 send time 1252078.728616 wait 227835027.875529
+ LP 435 unmatched irecvs 0 unmatched sends 0 Total sends 1156 receives 1156 collectives 0 delays 2578 wait alls 60 waits 0 send time 1447239.062585 wait 228657241.661385
+ LP 441 unmatched irecvs 0 unmatched sends 0 Total sends 788 receives 788 collectives 0 delays 1842 wait alls 60 waits 0 send time 1062313.289631 wait 237410160.582239
+ LP 442 unmatched irecvs 0 unmatched sends 0 Total sends 884 receives 884 collectives 0 delays 2034 wait alls 60 waits 0 send time 1089451.411746 wait 121658383.355642
+ LP 443 unmatched irecvs 0 unmatched sends 0 Total sends 950 receives 950 collectives 0 delays 2166 wait alls 60 waits 0 send time 1155609.993471 wait 164773488.395418
+ LP 444 unmatched irecvs 0 unmatched sends 0 Total sends 1086 receives 1086 collectives 0 delays 2438 wait alls 60 waits 0 send time 1362374.449758 wait 161352193.949322
+ LP 450 unmatched irecvs 0 unmatched sends 0 Total sends 1188 receives 1188 collectives 0 delays 2652 wait alls 70 waits 0 send time 1477398.179498 wait 120814719.110398
+ LP 451 unmatched irecvs 0 unmatched sends 0 Total sends 1102 receives 1102 collectives 0 delays 2470 wait alls 60 waits 0 send time 1351933.540047 wait 120456427.367757
+ LP 452 unmatched irecvs 0 unmatched sends 0 Total sends 1612 receives 1612 collectives 0 delays 3502 wait alls 72 waits 0 send time 1880752.859434 wait 226689385.494537
+ LP 453 unmatched irecvs 0 unmatched sends 0 Total sends 694 receives 694 collectives 0 delays 1654 wait alls 60 waits 0 send time 878190.189927 wait 119678148.347902
+ LP 459 unmatched irecvs 0 unmatched sends 0 Total sends 934 receives 934 collectives 0 delays 2140 wait alls 66 waits 0 send time 1122283.617665 wait 124098407.652423
+ LP 460 unmatched irecvs 0 unmatched sends 0 Total sends 896 receives 896 collectives 0 delays 2058 wait alls 60 waits 0 send time 1150567.877600 wait 187384767.985001
+ LP 461 unmatched irecvs 0 unmatched sends 0 Total sends 1174 receives 1174 collectives 0 delays 2614 wait alls 60 waits 0 send time 1423410.518199 wait 183216359.475160
+ LP 462 unmatched irecvs 0 unmatched sends 0 Total sends 804 receives 804 collectives 0 delays 1874 wait alls 60 waits 0 send time 1074091.749002 wait 77431811.628409
+ LP 468 unmatched irecvs 0 unmatched sends 0 Total sends 970 receives 970 collectives 0 delays 2206 wait alls 60 waits 0 send time 1211009.781027 wait 117800903.942812
+ LP 469 unmatched irecvs 0 unmatched sends 0 Total sends 606 receives 606 collectives 0 delays 1478 wait alls 60 waits 0 send time 809266.469347 wait 231986628.903106
+ LP 470 unmatched irecvs 0 unmatched sends 0 Total sends 464 receives 464 collectives 0 delays 1190 wait alls 56 waits 0 send time 584690.327968 wait 162310616.991503
+ LP 471 unmatched irecvs 0 unmatched sends 0 Total sends 736 receives 736 collectives 0 delays 1744 wait alls 66 waits 0 send time 940218.685630 wait 186896575.091691
+ LP 477 unmatched irecvs 0 unmatched sends 0 Total sends 866 receives 866 collectives 0 delays 1998 wait alls 60 waits 0 send time 1009355.984707 wait 48347050.325136
+ LP 478 unmatched irecvs 0 unmatched sends 0 Total sends 776 receives 776 collectives 0 delays 1818 wait alls 60 waits 0 send time 934262.453814 wait 237456164.552619
+ LP 479 unmatched irecvs 0 unmatched sends 0 Total sends 576 receives 576 collectives 0 delays 1418 wait alls 60 waits 0 send time 751647.854004 wait 235302036.020718
+ LP 480 unmatched irecvs 0 unmatched sends 0 Total sends 468 receives 468 collectives 0 delays 1198 wait alls 56 waits 0 send time 572385.313953 wait 226989333.384371
+	: Running Time = 11.0548 seconds
+
+TW Library Statistics:
+	Total Events Processed                                11540841
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                  11540841
+	Event Rate (events/sec)                              1043967.8
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        658257
+	Memory Allocated                                        479532
+	Memory Wasted                                               28
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             64
+	LP RNGs                                                     80
+	Total LP                                                   272
+	Event struct                                               144
+	Event struct with Model                                    736
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)     26.4695
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 136925280 recvd 136925280 
+ max runtime 832428174.181527 ns avg runtime 831592158.607247 
+ max comm time 244256041.446027 avg comm time 165598826.375765 
+ max send time 2390286.865081 avg send time 1321096.933746 
+ max recv time 1242807411.964691 avg recv time 491966904.633888 
+ max wait time 244232512.426837 avg wait time 165575909.276246 
+LP-IO: writing output to amg-8-trace-11460-1496738413/
+LP-IO: data files:
+   amg-8-trace-11460-1496738413/dragonfly-router-traffic
+   amg-8-trace-11460-1496738413/dragonfly-router-stats
+   amg-8-trace-11460-1496738413/dragonfly-msg-stats
+   amg-8-trace-11460-1496738413/model-net-category-all
+   amg-8-trace-11460-1496738413/model-net-category-test
+   amg-8-trace-11460-1496738413/mpi-replay-stats
+ Average number of hops traversed 3.033524 average chunk latency 1.896739 us maximum chunk latency 17.016149 us avg message size 610.249207 bytes finished messages 224376 finished chunks 702636 
+
+ ADAPTIVE ROUTING STATS: 574306 chunks routed minimally 128330 chunks routed non-minimally completed packets 702636 
+
+ Total packets generated 449894 finished 449894 
+#+end_src
+
+Traces générées :
+#+BEGIN_EXAMPLE
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.06.06.10.01.19- --workload_type=dumpi --lp-io-dir=amg-8-trace --lp-io-use-suffix=1 -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf 
+
+Tue Jun  6 10:43:57 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ Total nodes 1056 routers 264 groups 33 radix 16 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                 2376
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            608257
+	Network events                                           50000
+	Total events                                            658256
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 0 unmatched irecvs 11 unmatched sends 1 Total sends 12 receives 16 collectives 4 delays 8221 wait alls 2 waits 0 send time 25265.591539 wait 0.000000
+ LP 1 unmatched irecvs 6 unmatched sends 1 Total sends 10 receives 11 collectives 4 delays 5814 wait alls 2 waits 1 send time 24109.662548 wait 0.000000
+ LP 2 unmatched irecvs 3 unmatched sends 4 Total sends 3 receives 5 collectives 4 delays 52 wait alls 1 waits 0 send time 2409.319522 wait 0.000000
+ LP 3 unmatched irecvs 1 unmatched sends 4 Total sends 3 receives 4 collectives 4 delays 51 wait alls 1 waits 0 send time 2408.773640 wait 0.000000
+ LP 9 unmatched irecvs 4 unmatched sends 4 Total sends 3 receives 6 collectives 4 delays 53 wait alls 1 waits 0 send time 2409.227179 wait 0.000000
+ LP 10 unmatched irecvs 1 unmatched sends 4 Total sends 3 receives 4 collectives 4 delays 51 wait alls 1 waits 0 send time 2408.965475 wait 0.000000
+ LP 11 unmatched irecvs 2 unmatched sends 3 Total sends 3 receives 5 collectives 4 delays 52 wait alls 1 waits 0 send time 2408.101657 wait 0.000000
+ LP 12 unmatched irecvs 8 unmatched sends 0 Total sends 10 receives 11 collectives 4 delays 10012 wait alls 2 waits 1 send time 23571.601525 wait 0.000000
+	: Running Time = 0.0101 seconds
+
+TW Library Statistics:
+	Total Events Processed                                   28635
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                     28635
+	Event Rate (events/sec)                              2823686.0
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        658257
+	Memory Allocated                                        479532
+	Memory Wasted                                               28
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             64
+	LP RNGs                                                     80
+	Total LP                                                   272
+	Event struct                                               144
+	Event struct with Model                                    736
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.0243
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 116088 recvd 40040 
+ max runtime 0.000000 ns avg runtime 0.000000 
+ max comm time 0.000000 avg comm time -67382407.000000 
+ max send time 25265.591539 avg send time 10623.905386 
+ max recv time 97865523.416018 avg recv time 37668845.067461 
+ max wait time 0.000000 avg wait time 0.000000 
+LP-IO: writing output to amg-8-trace-11620-1496738637/
+LP-IO: data files:
+   amg-8-trace-11620-1496738637/dragonfly-router-traffic
+   amg-8-trace-11620-1496738637/dragonfly-router-stats
+   amg-8-trace-11620-1496738637/dragonfly-msg-stats
+   amg-8-trace-11620-1496738637/model-net-category-all
+   amg-8-trace-11620-1496738637/model-net-category-test
+   amg-8-trace-11620-1496738637/mpi-replay-stats
+ Average number of hops traversed 1.331967 average chunk latency 1.783403 us maximum chunk latency 3.837023 us avg message size 2469.957520 bytes finished messages 47 finished chunks 488 
+
+ ADAPTIVE ROUTING STATS: 488 chunks routed minimally 0 chunks routed non-minimally completed packets 488 
+
+ Total packets generated 263 finished 263 
+#+END_EXAMPLE
+
+J'ai du unmatch et ca c'est pas bon...
+En regénérant des traces, j'obtient la même chose
+
+Je vais voir en rejouant mes anciennes traces générées :
+#+BEGIN_EXAMPLE
+model-net-mpi-replay --sync=1 --num_net_traces=16 --workload_file=./anciennesTraces/dumpi-2017.05.29.15.00.43- --workload_type=dumpi --lp-io-dir=amg-8-trace --lp-io-use-suffix=1 -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test-dfly-amg-216.conf 
+
+Tue Jun  6 10:53:22 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ Total nodes 1056 routers 264 groups 33 radix 16 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                 2376
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            608257
+	Network events                                           50000
+	Total events                                            658256
+
+ *** START SEQUENTIAL SIMULATION ***
+
+GVT #0: simulation 1% complete, max event queue size 136 (GVT = 3000418690.7835).
+AVL tree size: 0
+GVT #0: simulation 2% complete, max event queue size 402 (GVT = 6035527191.2941).
+AVL tree size: 0
+GVT #0: simulation 3% complete, max event queue size 688 (GVT = 11483113110.0620).
+AVL tree size: 0
+GVT #0: simulation 4% complete, max event queue size 688 (GVT = 12009052862.3804).
+AVL tree size: 0
+GVT #0: simulation 5% complete, max event queue size 755 (GVT = 15041415977.3348).
+AVL tree size: 0
+GVT #0: simulation 6% complete, max event queue size 755 (GVT = 18002513250.3600).
+AVL tree size: 0
+GVT #0: simulation 7% complete, max event queue size 755 (GVT = 21000392946.9969).
+AVL tree size: 0
+GVT #0: simulation 8% complete, max event queue size 755 (GVT = 24001429862.3904).
+AVL tree size: 0
+GVT #0: simulation 9% complete, max event queue size 755 (GVT = 27016181539.3666).
+AVL tree size: 0
+GVT #0: simulation 10% complete, max event queue size 755 (GVT = 30000421301.8214).
+AVL tree size: 0
+GVT #0: simulation 11% complete, max event queue size 755 (GVT = 33000388626.2790).
+AVL tree size: 0
+GVT #0: simulation 12% complete, max event queue size 755 (GVT = 36000490201.6426).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+
+ LP 0 unmatched irecvs 0 unmatched sends 0 Total sends 5195 receives 5196 collectives 165 delays 13765 wait alls 818 waits 0 send time 31049590.884462 wait 6896811063.124624
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 5320 receives 5320 collectives 165 delays 14014 wait alls 818 waits 0 send time 27406535.422290 wait 4902476557.148384
+ LP 2 unmatched irecvs 0 unmatched sends 0 Total sends 7528 receives 7578 collectives 165 delays 18495 wait alls 833 waits 0 send time 48394690.382042 wait 7307331091.361316
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 7513 receives 7497 collectives 165 delays 18384 wait alls 818 waits 0 send time 52232192.354479 wait 4480098136.370174
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 7725 receives 7733 collectives 165 delays 18832 wait alls 818 waits 0 send time 55760528.873564 wait 4495196328.271902
+ LP 10 unmatched irecvs 0 unmatched sends 0 Total sends 7224 receives 7206 collectives 165 delays 17804 wait alls 818 waits 0 send time 55449250.169176 wait 6989604606.631558
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 5134 receives 5124 collectives 165 delays 13593 wait alls 786 waits 0 send time 25451387.954232 wait 8660401684.884769
+ LP 12 unmatched irecvs 0 unmatched sends 0 Total sends 5011 receives 4998 collectives 165 delays 13383 wait alls 818 waits 0 send time 23487805.313354 wait 7571367496.128121
+ LP 18 unmatched irecvs 0 unmatched sends 0 Total sends 4971 receives 4971 collectives 165 delays 13277 wait alls 786 waits 0 send time 27980908.753104 wait 5488817203.298100
+ LP 19 unmatched irecvs 0 unmatched sends 0 Total sends 5156 receives 5146 collectives 165 delays 13676 wait alls 818 waits 0 send time 24128321.802325 wait 7623737540.569324
+ LP 20 unmatched irecvs 0 unmatched sends 0 Total sends 6995 receives 6951 collectives 165 delays 17281 wait alls 786 waits 0 send time 46167576.805130 wait 4851373601.992508
+ LP 21 unmatched irecvs 0 unmatched sends 0 Total sends 7635 receives 7685 collectives 165 delays 18709 wait alls 833 waits 0 send time 44505846.432115 wait 4975400608.077621
+ LP 27 unmatched irecvs 0 unmatched sends 0 Total sends 7405 receives 7377 collectives 165 delays 18156 wait alls 818 waits 0 send time 47102605.814613 wait 4562468563.792100
+ LP 28 unmatched irecvs 0 unmatched sends 0 Total sends 7655 receives 7700 collectives 165 delays 18744 wait alls 833 waits 0 send time 43722919.167827 wait 4438655118.330465
+ LP 29 unmatched irecvs 0 unmatched sends 0 Total sends 5338 receives 5335 collectives 165 delays 14047 wait alls 818 waits 0 send time 28659629.223436 wait 7415602451.839598
+ LP 30 unmatched irecvs 0 unmatched sends 0 Total sends 4415 receives 4403 collectives 165 delays 12090 wait alls 723 waits 0 send time 24836982.610907 wait 8429789123.096380
+	: Running Time = 11.2695 seconds
+
+TW Library Statistics:
+	Total Events Processed                                20237447
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             6
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                  20237447
+	Event Rate (events/sec)                              1795778.2
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        658257
+	Memory Allocated                                        479532
+	Memory Wasted                                               28
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             64
+	LP RNGs                                                     80
+	Total LP                                                   272
+	Event struct                                               144
+	Event struct with Model                                    736
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)     26.9842
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 564713492 recvd 564713492 
+ max runtime 38171957179.288765 ns avg runtime 38076505282.498756 
+ max comm time 8660526284.320320 avg comm time 6193220647.686256 
+ max send time 55760528.873564 avg send time 37896048.247691 
+ max recv time 36342589195.592293 avg recv time 21138164904.627800 
+ max wait time 8660401684.884769 avg wait time 6193070698.432308 
+LP-IO: writing output to amg-8-trace-12096-1496739202/
+LP-IO: data files:
+   amg-8-trace-12096-1496739202/dragonfly-router-traffic
+   amg-8-trace-12096-1496739202/dragonfly-router-stats
+   amg-8-trace-12096-1496739202/dragonfly-msg-stats
+   amg-8-trace-12096-1496739202/model-net-category-all
+   amg-8-trace-12096-1496739202/model-net-category-test
+   amg-8-trace-12096-1496739202/mpi-replay-stats
+ Average number of hops traversed 1.447529 average chunk latency 8.990396 us maximum chunk latency 129.941465 us avg message size 5634.738281 bytes finished messages 100220 finished chunks 2265893 
+
+ ADAPTIVE ROUTING STATS: 2265893 chunks routed minimally 0 chunks routed non-minimally completed packets 2265893 
+
+ Total packets generated 1168810 finished 1168810 
+#+END_EXAMPLE
+
+Ca se passe bien. J'ai donc un soucis dans mes traces DUMPI générés...
+
+******* Réinstallation de DUMPI
+Peut être que dumpi s'est mal installé à cause de openmpi. 
+En l'ayant désinstallé j'ai toujours le problème. Surement le fait de
+l'utilisation d'une autre librairie OTF.
+
+Via une machine virtuelle j'ai installé dumpi et AMG. Je crois que le
+problème vient de ma configuration d'AMG. Je vais donc réinstaller AMG
+dans un premier temps en mettant à jours directement le wiki.
+
+
+
+**** Webinar
+Participation au Webinar épisode 9 sur les Testbeds. Il faudra que je
+relise le récap quand il sera dispo car c'est pile dans le sujet du
+stage (avec présentation de Grid'5000)
