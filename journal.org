@@ -8453,6 +8453,8 @@ dans mes variables d'environnement.
 
 /!\ Attention ne pas faire ca, ca instal openmpi et on veut pas, trouver
 le paquet avec seulement les headers
+-> Apparement non, mais on peut définir notre systeme mpi préféré via
+la commande =sudo update-alternatives --set mpi /usr/include/mpich=
 #+begin_src sh :results output :exports both
 sudo apt-get install libboost-all-dev
 #+end_src
@@ -10804,3 +10806,2414 @@ dans un premier temps en mettant à jours directement le wiki.
 Participation au Webinar épisode 9 sur les Testbeds. Il faudra que je
 relise le récap quand il sera dispo car c'est pile dans le sujet du
 stage (avec présentation de Grid'5000)
+*** 2017-06-07 mercredi
+**** AMG replay
+Maintenant que j'ai pu rejouer une trace AMG sur mon pc, je vais
+pouvoir la rejouer un certain nombre de fois pour voir si le temps
+reste constant.
+***** Parallele
+****** Resultat 1
+#+begin_src sh :results output :exports both
+mpirun -n 4 model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 08:40:54 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   56
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              3585
+	Network events                                           50000
+	Total events                                             53584
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #7911: simulation 100% complete, max event queue size 603 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+	: Running Time = 3.4431 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 2258477
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                     1602174
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                             -144.12 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                  41840
+	Percent Remote Events                                     6.38 %
+
+	Total Roll Backs                                        167444
+	Primary Roll Backs                                       26815
+	Secondary Roll Backs                                    140629
+	Fossil Collect Attempts                                  31648
+	Total GVT Computations                                    7912
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                               190615.5
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         53585
+	Memory Allocated                                         71502
+	Memory Wasted                                              906
+
+TW Network Statistics:
+	Remote sends                                            292188
+	Remote recvs                                            292188
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.1970
+	AVL Tree (insert/delete)                                0.1210
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        3.9324
+	Event Cancel                                            1.7647
+	Event Abort                                             0.0000
+
+	GVT                                                     8.2201
+	Fossil Collect                                          0.1008
+	Primary Rollbacks                                       0.3989
+	Network Read                                            0.8247
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      8.2442
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    7912
+	Total All Reduce Calls                                   23090
+	Average Reduction / GVT                                   2.92
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 2
+#+begin_src sh :results output :exports both
+mpirun -n 4 model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 08:42:32 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   56
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              3585
+	Network events                                           50000
+	Total events                                             53584
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #8000: simulation 100% complete, max event queue size 603 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+	: Running Time = 3.3772 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 2276815
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                     1620512
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                             -146.92 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                  41840
+	Percent Remote Events                                     6.38 %
+
+	Total Roll Backs                                        169474
+	Primary Roll Backs                                       27253
+	Secondary Roll Backs                                    142221
+	Fossil Collect Attempts                                  32004
+	Total GVT Computations                                    8001
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                               194331.6
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         53585
+	Memory Allocated                                         71502
+	Memory Wasted                                              906
+
+TW Network Statistics:
+	Remote sends                                            294372
+	Remote recvs                                            294372
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.2015
+	AVL Tree (insert/delete)                                0.1208
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        3.8104
+	Event Cancel                                            1.7647
+	Event Abort                                             0.0000
+
+	GVT                                                     8.0637
+	Fossil Collect                                          0.1009
+	Primary Rollbacks                                       0.4035
+	Network Read                                            0.8015
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      8.0866
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    8001
+	Total All Reduce Calls                                   23345
+	Average Reduction / GVT                                   2.92
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 3
+#+begin_src sh :results output :exports both
+mpirun -n 4 model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 08:45:20 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   56
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              3585
+	Network events                                           50000
+	Total events                                             53584
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #7946: simulation 100% complete, max event queue size 603 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+	: Running Time = 3.3574 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 2259837
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                     1603534
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                             -144.33 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                  41840
+	Percent Remote Events                                     6.38 %
+
+	Total Roll Backs                                        167331
+	Primary Roll Backs                                       26713
+	Secondary Roll Backs                                    140618
+	Fossil Collect Attempts                                  31788
+	Total GVT Computations                                    7947
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                               195476.9
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         53585
+	Memory Allocated                                         71502
+	Memory Wasted                                              906
+
+TW Network Statistics:
+	Remote sends                                            291912
+	Remote recvs                                            291912
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.1972
+	AVL Tree (insert/delete)                                0.1197
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        3.8881
+	Event Cancel                                            1.7873
+	Event Abort                                             0.0000
+
+	GVT                                                     8.0155
+	Fossil Collect                                          0.1018
+	Primary Rollbacks                                       0.3973
+	Network Read                                            0.8025
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      8.0392
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    7947
+	Total All Reduce Calls                                   23192
+	Average Reduction / GVT                                   2.92
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 4
+#+begin_src sh :results output :exports both
+mpirun -n 4 model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 08:45:45 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   56
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              3585
+	Network events                                           50000
+	Total events                                             53584
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #7861: simulation 100% complete, max event queue size 603 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+	: Running Time = 3.3531 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 2243949
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                     1587646
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                             -141.91 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                  41840
+	Percent Remote Events                                     6.38 %
+
+	Total Roll Backs                                        166403
+	Primary Roll Backs                                       26871
+	Secondary Roll Backs                                    139532
+	Fossil Collect Attempts                                  31448
+	Total GVT Computations                                    7862
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                               195728.1
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         53585
+	Memory Allocated                                         71502
+	Memory Wasted                                              906
+
+TW Network Statistics:
+	Remote sends                                            290228
+	Remote recvs                                            290228
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.1951
+	AVL Tree (insert/delete)                                0.1178
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        3.7959
+	Event Cancel                                            1.7294
+	Event Abort                                             0.0000
+
+	GVT                                                     8.0053
+	Fossil Collect                                          0.1018
+	Primary Rollbacks                                       0.4001
+	Network Read                                            0.7963
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      8.0289
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    7862
+	Total All Reduce Calls                                   22955
+	Average Reduction / GVT                                   2.92
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+
+#+END_EXAMPLE
+****** Resultat 5
+#+begin_src sh :results output :exports both
+mpirun -n 4 model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 08:46:46 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   56
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              3585
+	Network events                                           50000
+	Total events                                             53584
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #8216: simulation 100% complete, max event queue size 603 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+	: Running Time = 3.6221 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 2354922
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                     1698619
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                             -158.82 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                  41840
+	Percent Remote Events                                     6.38 %
+
+	Total Roll Backs                                        172397
+	Primary Roll Backs                                       27471
+	Secondary Roll Backs                                    144926
+	Fossil Collect Attempts                                  32868
+	Total GVT Computations                                    8217
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                               181193.7
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         53585
+	Memory Allocated                                         71502
+	Memory Wasted                                              906
+
+TW Network Statistics:
+	Remote sends                                            329220
+	Remote recvs                                            329220
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.2067
+	AVL Tree (insert/delete)                                0.1380
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        4.0489
+	Event Cancel                                            1.9717
+	Event Abort                                             0.0000
+
+	GVT                                                     8.6499
+	Fossil Collect                                          0.1016
+	Primary Rollbacks                                       0.4383
+	Network Read                                            0.8995
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      8.6729
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    8217
+	Total All Reduce Calls                                   24029
+	Average Reduction / GVT                                   2.92
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+
+#+END_EXAMPLE
+****** Resultat 6
+#+begin_src sh :results output :exports both
+mpirun -n 4 model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 08:47:13 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   56
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              3585
+	Network events                                           50000
+	Total events                                             53584
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #7956: simulation 100% complete, max event queue size 603 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+	: Running Time = 3.3595 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 2270330
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                     1614027
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                             -145.93 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                  41840
+	Percent Remote Events                                     6.38 %
+
+	Total Roll Backs                                        169192
+	Primary Roll Backs                                       27229
+	Secondary Roll Backs                                    141963
+	Fossil Collect Attempts                                  31828
+	Total GVT Computations                                    7957
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                               195357.5
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         53585
+	Memory Allocated                                         71502
+	Memory Wasted                                              906
+
+TW Network Statistics:
+	Remote sends                                            293432
+	Remote recvs                                            293432
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.1991
+	AVL Tree (insert/delete)                                0.1254
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        3.8695
+	Event Cancel                                            1.7786
+	Event Abort                                             0.0000
+
+	GVT                                                     8.0209
+	Fossil Collect                                          0.1031
+	Primary Rollbacks                                       0.4074
+	Network Read                                            0.7982
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      8.0441
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    7957
+	Total All Reduce Calls                                   23229
+	Average Reduction / GVT                                   2.92
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 7
+#+begin_src sh :results output :exports both
+mpirun -n 4 model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 08:47:32 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   56
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              3585
+	Network events                                           50000
+	Total events                                             53584
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #7937: simulation 100% complete, max event queue size 603 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+	: Running Time = 3.6399 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 2262965
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                     1606662
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                             -144.80 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                  41840
+	Percent Remote Events                                     6.38 %
+
+	Total Roll Backs                                        167920
+	Primary Roll Backs                                       26884
+	Secondary Roll Backs                                    141036
+	Fossil Collect Attempts                                  31752
+	Total GVT Computations                                    7938
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                               180308.4
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         53585
+	Memory Allocated                                         71502
+	Memory Wasted                                              906
+
+TW Network Statistics:
+	Remote sends                                            291976
+	Remote recvs                                            291976
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.2063
+	AVL Tree (insert/delete)                                0.1197
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        3.8670
+	Event Cancel                                            1.8060
+	Event Abort                                             0.0000
+
+	GVT                                                     8.6905
+	Fossil Collect                                          0.1055
+	Primary Rollbacks                                       0.4131
+	Network Read                                            0.7923
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      8.7155
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    7938
+	Total All Reduce Calls                                   23151
+	Average Reduction / GVT                                   2.92
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+
+#+END_EXAMPLE
+****** Resultat 8
+#+begin_src sh :results output :exports both
+mpirun -n 4 model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 08:47:53 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   56
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              3585
+	Network events                                           50000
+	Total events                                             53584
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #8004: simulation 100% complete, max event queue size 603 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+	: Running Time = 3.4843 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 2279212
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                     1622909
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                             -147.28 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                  41840
+	Percent Remote Events                                     6.38 %
+
+	Total Roll Backs                                        169365
+	Primary Roll Backs                                       27358
+	Secondary Roll Backs                                    142007
+	Fossil Collect Attempts                                  32020
+	Total GVT Computations                                    8005
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                               188360.3
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         53585
+	Memory Allocated                                         71502
+	Memory Wasted                                              906
+
+TW Network Statistics:
+	Remote sends                                            293524
+	Remote recvs                                            293524
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.2076
+	AVL Tree (insert/delete)                                0.1193
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        3.9233
+	Event Cancel                                            1.8276
+	Event Abort                                             0.0000
+
+	GVT                                                     8.3182
+	Fossil Collect                                          0.1031
+	Primary Rollbacks                                       0.4122
+	Network Read                                            0.8021
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      8.3429
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    8005
+	Total All Reduce Calls                                   23366
+	Average Reduction / GVT                                   2.92
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+
+#+END_EXAMPLE
+****** Resultat 9
+#+begin_src sh :results output :exports both
+mpirun -n 4 model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 08:48:16 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   56
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              3585
+	Network events                                           50000
+	Total events                                             53584
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #8131: simulation 100% complete, max event queue size 603 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+	: Running Time = 3.5705 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 2316113
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                     1659810
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                             -152.90 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                  41840
+	Percent Remote Events                                     6.38 %
+
+	Total Roll Backs                                        171347
+	Primary Roll Backs                                       27411
+	Secondary Roll Backs                                    143936
+	Fossil Collect Attempts                                  32528
+	Total GVT Computations                                    8132
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                               183810.3
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         53585
+	Memory Allocated                                         71502
+	Memory Wasted                                              906
+
+TW Network Statistics:
+	Remote sends                                            306948
+	Remote recvs                                            306948
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.2101
+	AVL Tree (insert/delete)                                0.1305
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        4.0191
+	Event Cancel                                            1.8989
+	Event Abort                                             0.0000
+
+	GVT                                                     8.5252
+	Fossil Collect                                          0.1127
+	Primary Rollbacks                                       0.4155
+	Network Read                                            0.8252
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      8.5495
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    8132
+	Total All Reduce Calls                                   23766
+	Average Reduction / GVT                                   2.92
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+
+#+END_EXAMPLE
+****** Resultat 10
+#+begin_src sh :results output :exports both
+mpirun -n 4 model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 08:48:32 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   56
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              3585
+	Network events                                           50000
+	Total events                                             53584
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #7757: simulation 100% complete, max event queue size 603 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+	: Running Time = 4.0470 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 2211432
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                     1555129
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                             -136.95 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                  41840
+	Percent Remote Events                                     6.38 %
+
+	Total Roll Backs                                        164780
+	Primary Roll Backs                                       25999
+	Secondary Roll Backs                                    138781
+	Fossil Collect Attempts                                  31032
+	Total GVT Computations                                    7758
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                               162170.2
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         53585
+	Memory Allocated                                         71502
+	Memory Wasted                                              906
+
+TW Network Statistics:
+	Remote sends                                            281468
+	Remote recvs                                            281468
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.1987
+	AVL Tree (insert/delete)                                0.1220
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        5.0381
+	Event Cancel                                            1.7588
+	Event Abort                                             0.0000
+
+	GVT                                                     9.6701
+	Fossil Collect                                          0.1144
+	Primary Rollbacks                                       0.3929
+	Network Read                                            0.7637
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      9.6903
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    7758
+	Total All Reduce Calls                                   22589
+	Average Reduction / GVT                                   2.91
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+***** Sequentiel 
+****** Resultat 1
+#+begin_src sh :results output :exports both
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 13:39:09 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                   54
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                             13825
+	Network events                                           50000
+	Total events                                             63824
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+	: Running Time = 0.2727 seconds
+
+TW Library Statistics:
+	Total Events Processed                                  656303
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                              2406420.3
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         63825
+	Memory Allocated                                         62573
+	Memory Wasted                                              683
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.6530
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 2
+#+begin_src sh :results output :exports both
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 13:42:50 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                   54
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                             13825
+	Network events                                           50000
+	Total events                                             63824
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+	: Running Time = 0.2694 seconds
+
+TW Library Statistics:
+	Total Events Processed                                  656303
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                              2435776.8
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         63825
+	Memory Allocated                                         62573
+	Memory Wasted                                              683
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.6452
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 3
+#+begin_src sh :results output :exports both
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 13:43:08 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                   54
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                             13825
+	Network events                                           50000
+	Total events                                             63824
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+	: Running Time = 0.2676 seconds
+
+TW Library Statistics:
+	Total Events Processed                                  656303
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                              2452919.0
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         63825
+	Memory Allocated                                         62573
+	Memory Wasted                                              683
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.6407
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 4
+#+begin_src sh :results output :exports both
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 13:43:35 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                   54
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                             13825
+	Network events                                           50000
+	Total events                                             63824
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+	: Running Time = 0.2725 seconds
+
+TW Library Statistics:
+	Total Events Processed                                  656303
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                              2408566.3
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         63825
+	Memory Allocated                                         62573
+	Memory Wasted                                              683
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.6525
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 5
+#+begin_src sh :results output :exports both
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 13:43:48 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                   54
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                             13825
+	Network events                                           50000
+	Total events                                             63824
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+	: Running Time = 0.2688 seconds
+
+TW Library Statistics:
+	Total Events Processed                                  656303
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                              2441785.1
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         63825
+	Memory Allocated                                         62573
+	Memory Wasted                                              683
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.6436
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 6
+#+begin_src sh :results output :exports both
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 13:44:02 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                   54
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                             13825
+	Network events                                           50000
+	Total events                                             63824
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+	: Running Time = 0.2694 seconds
+
+TW Library Statistics:
+	Total Events Processed                                  656303
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                              2436048.0
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         63825
+	Memory Allocated                                         62573
+	Memory Wasted                                              683
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.6451
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 7
+#+begin_src sh :results output :exports both
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 13:44:11 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                   54
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                             13825
+	Network events                                           50000
+	Total events                                             63824
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+	: Running Time = 0.2743 seconds
+
+TW Library Statistics:
+	Total Events Processed                                  656303
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                              2392917.2
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         63825
+	Memory Allocated                                         62573
+	Memory Wasted                                              683
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.6567
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 8
+#+begin_src sh :results output :exports both
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 13:44:27 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                   54
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                             13825
+	Network events                                           50000
+	Total events                                             63824
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+	: Running Time = 0.2688 seconds
+
+TW Library Statistics:
+	Total Events Processed                                  656303
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                              2441539.8
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         63825
+	Memory Allocated                                         62573
+	Memory Wasted                                              683
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.6436
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 9
+#+begin_src sh :results output :exports both
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 13:44:37 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                   54
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                             13825
+	Network events                                           50000
+	Total events                                             63824
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+	: Running Time = 0.2688 seconds
+
+TW Library Statistics:
+	Total Events Processed                                  656303
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                              2441558.0
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         63825
+	Memory Allocated                                         62573
+	Memory Wasted                                              683
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.6436
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+****** Resultat 10
+#+begin_src sh :results output :exports both
+model-net-mpi-replay --sync=1 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../CODES/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+RESULTS:
+#+BEGIN_EXAMPLE
+Wed Jun  7 13:44:47 2017
+
+ROSS Revision: 4c6a7d8eb9c784797d900edfc76725d62ec25941
+
+tw_net_start: Found world size to be 1 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                   54
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                             13825
+	Network events                                           50000
+	Total events                                             63824
+
+ *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+ LP 1 unmatched irecvs 0 unmatched sends 0 Total sends 3316 receives 3338 collectives 140 delays 9083 wait alls 584 waits 0 send time 564673.438014 wait 864289399.804539
+ LP 3 unmatched irecvs 0 unmatched sends 0 Total sends 3259 receives 3265 collectives 140 delays 8953 wait alls 584 waits 0 send time 516319.092984 wait 559585821.219168
+ LP 5 unmatched irecvs 0 unmatched sends 0 Total sends 3189 receives 3177 collectives 140 delays 8795 wait alls 584 waits 0 send time 504658.277001 wait 570800048.399966
+ LP 7 unmatched irecvs 0 unmatched sends 0 Total sends 3409 receives 3410 collectives 140 delays 9248 wait alls 584 waits 0 send time 520109.736998 wait 932883767.906023
+ LP 9 unmatched irecvs 0 unmatched sends 0 Total sends 3196 receives 3176 collectives 140 delays 8784 wait alls 567 waits 0 send time 504530.145300 wait 897957292.014923
+ LP 11 unmatched irecvs 0 unmatched sends 0 Total sends 3255 receives 3276 collectives 140 delays 8960 wait alls 584 waits 0 send time 509138.727596 wait 824776328.759475
+ LP 13 unmatched irecvs 0 unmatched sends 0 Total sends 3262 receives 3238 collectives 140 delays 8929 wait alls 584 waits 0 send time 510002.463940 wait 915030709.793312
+ LP 15 unmatched irecvs 0 unmatched sends 0 Total sends 3276 receives 3282 collectives 140 delays 8987 wait alls 584 waits 0 send time 487936.698410 wait 837590373.616801
+	: Running Time = 0.2709 seconds
+
+TW Library Statistics:
+	Total Events Processed                                  656303
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                    656303
+	Event Rate (events/sec)                              2422640.5
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         63825
+	Memory Allocated                                         62573
+	Memory Wasted                                              683
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            760
+	LP RNGs                                                     80
+	Total LP                                                   968
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.6487
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1873261977.339076 ns avg runtime 1862934388.822206 
+ max comm time 932969051.538982 avg comm time 800446680.697205 
+ max send time 564673.438014 avg send time 514671.072530 
+ max recv time 2523106611.125298 avg recv time 1673622329.972924 
+ max wait time 932883767.906023 avg wait time 800364217.689276 
+#+END_EXAMPLE
+***** Commentaires
+****** Running Time seq                                              :R:
+#+begin_src R :file plotSeqRunningTime.png :results output graphics :session *R*
+library(ggplot2)
+sequentiel = c(0.2727,0.2694,0.2676,0.2725,0.2688,0.2694,0.2743,0.2688,0.2688,0.2709)
+parallel = c(3.4431,3.3772,3.3574,3.3531,3.6221,3.3595,3.6399,3.4843,3.5702,4.0470)
+rollBack = c(167444,169474,167331,166403,172397,169192,167920,169365,171347,164780)
+print(qplot(seq(1,10),sequentiel) + scale_x_continuous(breaks=seq(0,10,1)) + ylab("Running Time") + xlab("Numéro simulation"))
+#+end_src
+
+#+RESULTS:
+[[file:plotSeqRunningTime.png]]
+****** Running Time par                                              :R:
+#+begin_src R :file plotParRunningTime.png :results output graphics :session *R* :exports both
+print(qplot(seq(1,10),parallel) + scale_x_continuous(breaks=seq(0,10,1)) + ylab("Running Time") + xlab("Numéro simulation"))
+#+end_src
+
+#+RESULTS:
+[[file:plotParRunningTime.png]]
+
+#+begin_src R :file plotParRollBack.png :results output graphics :session *R* :exports both
+qplot(seq(1,10),rollBack) + scale_x_continuous(breaks=seq(0,10,1)) + ylab("Total rollback") + xlab("Numéro simulation")
+#+end_src
+
+#+RESULTS:
+[[file:plotParRollBack.png]]
+
+On remarque pas de corrélation entre le nombre de rollback et le
+running time. Ca vient donc d'autre part et il faut que je le face
+avec des traces plus importantes (ie. Grid5000).
+**** Réunion
+Sait dumper trace
+Sait convertir
+Sait rejouer sur CODEs (mais avec info bizarres)
+Toujours d'info sur replay plus vite en simulation // que seq
+AMG : Matrice calcul en fonction des voisin (for(i)for()... send recv
+Scalatrace : compresse les traces en comprenant le schemas d'echange
+entre les processus. Ca permet également d'annonymiser les traces.
+HPL lui a une zone de calcul/comm qui change en fonction du
+temps. Scalatrace fait donc des analyses avec les regressions
+linéaire. Il y a un outils qui compare directement des traces faites
+sur des nombre != de proco, et fait des statistiques dessus. Une foi
+les variables identifié, il est possible de faire à partir de
+plusieurs petites traces, de l'extrapolation.
+HPL : Le code et la gestion MPI sont entrelacé et le nombre de prob
+MPI change en fonction de chaque execution. Celui à qui on envoit
+dépend de qui on a recu, donc l'exection n'est jamais la même. C'est
+complexe à rejouer. Scalatrace gère une forme de non determinisme mais
+pas la variabilité du à MPI.
+
+DUMPI-CORTEX : gere les appels mpi collectifs. MPI à différents algo
+en collectif en fonction de la taille et l'algo de diffusion. Cet
+outil transforme les BCAST en send/rcv point à point.
+
+CODES c'est voir l'interaction entre les topologies, les differentes
+applications MPI qui tournent (voir si ils se gènent) et le scheduler
+qui positionne ces applications sur le réseau.
+
+Bonne simulation : modèle de machine résonnable, modèle workload
+résonable, la gestion des collectives, capture de l'application (si on
+lit avec une bibli de trace y'a un biai de capture), calibration de la
+platforme (latence, bande passante, ...) -> Instanciation du modèl. Il
+faut également prendre en compte les modèles physiques et logiques qui
+sont différents et impactent donc les résultats. Les compilateurs,
+techno, dérive des horloges sont à prendre en compte.
+ex: Sacha Hunald, =MPI_BROADCAST= à un temps d'exection très variable
+pour les mêmes expériences/conditions. Il faut donc répéter ne
+nombreuses fois l'expérience pour s'approcher d'un résultat plausible.
+
+Il faut comprendre les paramètres dans les réglages de CODES, car
+c'est peut être seulement ce qu'on donne à CODES qui fait que ca ne
+marche pas.
+**** Obj
+- [X] Finir expériences
+- [X] VITE
+- [ ] GRID'5000
+- [ ] Définir si on garde AMG (peut être s'intéréssé au NAS de la NASA?)
+- [ ] Faire une bibliographie
+**** VITE
+
+#+BEGIN_EXAMPLE
+sudo apt-get install vite -y
+sudo update-alternatives --set mpi /usr/include/mpich
+#+END_EXAMPLE
+
+Une foi qu'on transforme en otf, on peut ouvrir avec VITE. Avec un
+zoom 4848331% on obtient ce genre de siualisation :
+[[file:testViteExport.png]]
+**** Grid 5000
+
+Ressources : 
+- https://www.grid5000.fr/mediawiki/index.php/Getting_Started
+- https://www.grid5000.fr/mediawiki/index.php/SSH_and_Grid%275000
+- https://www.grid5000.fr/mediawiki/index.php/HPC_and_HTC_tutorial
+- https://www.grid5000.fr/mediawiki/index.php/Run_MPI_On_Grid%275000
+- https://www.grid5000.fr/mediawiki/index.php/Advanced_OAR
+- https://www.grid5000.fr/mediawiki/index.php/Advanced_Kadeploy
+- https://www.grid5000.fr/mediawiki/index.php/Grid5000:UsagePolicy
+
