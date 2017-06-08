@@ -13309,3 +13309,160 @@ Ok donc si je résume, mes objectifs pour la semaine sont :
   évoqué plusieurs fois) soit via ScalaExtrap.
 - Faire génrerer des traces DUMPI à SimGrid ? Je pense pas comprendre
   ce point là.
+**** DUMPI
+Article intéréssant :
+https://pdfs.semanticscholar.org/95d2/b96a0b525fdade8aaa0e17bd213377b55530.pdf
+Notamment le passage suivant :
+#+BEGIN_EXAMPLE
+To evaluate this approach we have prototyped the idea using existing performance
+tools. We used the DUMPI MPI tracing library that was developed by Sandia as part
+of their SST/macro project [8]. The traces are recorded in a binary format with utilities
+to convert the results to plain text. The library records both the input arguments and
+return values1
+for the MPI functions. The library can also support tracing individual
+functions, and can be configured to record performance counter data using PAPI [8].
+There are utilities for converting DUMPI trace files to Open Trace Format (OTF) files,
+which could be used with existing performance visualization tools like Vampir.
+#+END_EXAMPLE
+
+Qui a l'air de dire que dumpi2otf fonctionne bien.
+***** User manual
+On peut configurer plus finement dumpi via un fichier .conf dans le
+répertoir courant.
+#+BEGIN_EXAMPLE
+\section config Runtime configuration of the DUMPI trace library
+The DUMPI trace collect library, libdumpi, will look for a file called <tt>dumpi.conf</tt> in the current working directory to pick up configuration information. These can be used to initially configure what dumpi collects, how it names its files, etc. Below are a list of options followed by the default value.
+<ul>
+<li> <tt>fileroot dumpi-</tt> This allows you to specify the prefix, including the filesystem directory where to write the generated DUMPI trace files.
+<li> <tt>timestamp full</tt> Can specify <tt>none, cpu, wall, </tt> or <tt>full</tt>.
+<li> <tt>MPI_Default enable</tt> Can specify <tt>disable, success</tt> or <tt>enable</tt>. These allow you to specify how much profiling you want for MPI calls by default. This can be disabled or enabled for profiling (call count statistics will still be collected).  Additionally, probing calls (Iprobe, Test*, ...) can be conditionally profiled iff they succeed (for non-probing calls, success is equivalent to enable).
+<li> Individual MPI calls (e.g. <tt>MPI_Init, MPI_Iprobe, MPI_Testany,</tt>) can be specified using the same arguments above.
+<li><tt>statuses success</tt> Also takes the same arguments as above. Can be used to disable the collection of XXX to reduce the size of the trace files. More information can be found in the \ref traceformat documentation.
+<li><tt>PAPI </tt>\<counter\> (e.g. <tt>PAPI PAPI PAPI_TOT_CYC</tt>) If DUMPI is so configured, you can collect PAPI information on each call to the DUMPI library (e.g. on entry and exit to <tt>MPI_Send</tt>) This greatly increases the file size, and the names of the counters supported is system dependent. Also, the number of counters that can be collected, etc. is also system dependent.
+</ul>
+
+A typical file that we use is:
+
+# Concept configuration file for dumpi (refactored).
+
+# file root defaults to "dumpi-"
+fileroot     dumpi-
+
+# You can define what sort of timestamp information you want output.
+# timestamp (none|cpu|wall|full)  # defaults to full
+timestamp    full
+
+# Specify how much profiling you want for individual MPI calls.
+# All calls can be disabled or enabled for profiling (call count statistics
+# will still be collected).  Additionally, probing calls (Iprobe, Test*, ...)
+# can be conditionally profiled iff they succeed (for non-probing calls,
+# success is equivalent to enable).
+#
+# MPI_Default (disable|success|enable)  # all MPI calls default to enable
+MPI_Default enable
+# Individual MPI calls can override the default setting, e.g.:
+MPI_Iprobe   success
+MPI_Test     success
+MPI_Testsome success
+MPI_Testany  success
+MPI_Testall  success
+#
+# Output can also be selectively suppressed for status information (it is
+# big and clumsy, and you may not want to use it).  
+# success is synonymous with enable.
+# statuses (disable|success|enable)   # defaults to enable
+statuses     enable
+
+#
+# There is a whole set of other calls for PAPI profiling support.
+# By default, all PAPI calls are disabled unless explictly turned on.
+# To turn on a PAPI call, just specify its name (not commented), e.g.
+PAPI PAPI_TOT_CYC   # total cycles
+PAPI PAPI_LST_INS   # total load store instructions
+PAPI PAPI_BR_INS    # total branch instructions executed
+# Note that you can also specify non-native PAPI calls this way 
+# -- use papi_avail or papi_native_avail to figure out the name of
+# the performance counter you want to use
+
+#
+# You can enable or disable debugging from this file.
+# The valid flags are:
+#     debug off      Disable all debugging
+#     debug all      Enable all debugging
+#     debug traceio  Get info about io functions
+#     debug mpicalls Get info about when MPI functions are entered or exited
+#     debug libdumpi Get debug info about internal workings of libdumpi
+#
+# All debug flags except "off" are cumulative, so you can use
+#     debug traceio
+#     debug mpicalls
+# to get info about both traceio and mpicalls.
+debug        off
+#+END_EXAMPLE
+***** AMG
+Je viens de voir sur le site des traces AMG que :
+
+"Note that, unlike the IPM data, the dumpi traces only track the
+communications for one V-cycle of the multigrid sequence. This was
+accomplished by turning off profiling for most of the code using the
+dumpi API and turning it on only in the single routine in the file
+parcsr_ls/par_cycle.c. Within this file, the variable maxit_prec was set
+equal to 1."
+
+C'est peut être pour ca que je vois pas grand chose en OTF avec VITE.
+
+En visualisant les traces trouvées sur internet avec VITE, j'ai
+remarqué qu'elles sont plus pauvres que celle que je génère, ca me
+rassure.
+
+Toutes les traces que je trouve en fait donne le même genre de
+visualisation sur VITE, toute réduite à la fin comme celle que je
+génère. Mais les exemples de traces OTF sur le site de Vampir donne
+une visualisation "attendu" qui rempli toute la période.
+**** Mail Arnaud
+***** Content
+#+BEGIN_EXAMPLE
+Salut,
+
+Le 08/06/2017 09:17, Maxime Chevalier a écrit :
+>> Pour avancer dans notre compréhension de CODES et de ses performance, il
+>> faudrait des traces plus grandes. Quand on n'a pas de grosse machine
+>> sous la mains, ça n'est pas forcément évident... C'est pour ça que je
+>> mentionnais scalaExtrap, sous projet de scalatrace. Tu peux essayer mais
+>> j'ai peur que ça soit moins propre que CODES.
+> 
+> Du coup j'abandonne Grid'5000 pour faire de plus grandes traces, en
+> tentant de remplacer DUMPI par scalatrace, et en les extrapolant via
+> scalaExtrap ?
+
+Toutes les approches présentent des difficultés. J'ai peur que tu ne
+puisses pas aller à très grande échelle sur Grid5000 (quelques
+centaines de processus, ce qui est déjà pas mal, mais si on a besoin
+de plusieurs milliers pour donner assez de travail à CODES on risque
+d'être un peu coincé...) mais si tu as commencé et/ou que c'est
+quelque chose qui te tente, il faut te lancer! :) Ça ne sera pas perdu
+de toutes façons.
+
+> Une autre approche serait d'utiliser SimGrid mais ça veut dire arriver à
+> générer des traces DUMPI. C'est ce que disait Lucas après tout, on ne
+> sait jamais, sur un coup de chance, ça pourrait marcher puisque SMPI
+> fourni l'interface PMPI. ;)
+> 
+> J'ai pas trop compris ce point, il faut que j'exécute HPL sur SimGrid et
+> celui-ci me fournisse des traces DUMPI ?
+
+Ça serait l'idée. Exécuter HPL sur SimGrid, actuellement, c'est
+facile, ça se fait sur un portable et ça va relativement vite. Par
+contre, SimGrid fournit des traces paje, pas DUMPI... :( Mais en
+linkant avec libDUMPI, ça pourrait marcher. Ceci dit tu vas être
+ennuyé car même si tu génères ainsi une grosse trace DUMPI de HPL, ça
+ne résoudra pas le problème que CODES a l'air de planter à l'heure
+actuelle avec une telle trace. Et si c'est une trace de AMG qu'on
+souhaite obtenir, SimGrid devrait fonctionner mais si l'application
+n'est pas préparée (c'est ce que Tom a fait pendant son stage), ça
+sera très lent...
+
+À bientôt,
+
+    Arnaud
+#+END_EXAMPLE
