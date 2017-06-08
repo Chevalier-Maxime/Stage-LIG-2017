@@ -10801,7 +10801,6 @@ problème vient de ma configuration d'AMG. Je vais donc réinstaller AMG
 dans un premier temps en mettant à jours directement le wiki.
 
 
-
 **** Webinar
 Participation au Webinar épisode 9 sur les Testbeds. Il faudra que je
 relise le récap quand il sera dispo car c'est pile dans le sujet du
@@ -13466,3 +13465,32 @@ sera très lent...
 
     Arnaud
 #+END_EXAMPLE
+**** ROSS
+Un article qui permet de comprendre un peu mieux comment fonctionne
+ROSS :
+https://pdfs.semanticscholar.org/8cf9/e252c8314e26f20b619acb6392d52abac647.pdf
+Notament avec une explication des LP/KP/PE et une évaluation de
+performance sur ROSS.
+
+Il y a un outil qui permet de faire des traces de la simulation :
+[[http://carothersc.github.io/ROSS/feature/instrumentation.html][link]].
+#+BEGIN_EXAMPLE
+Event Tracing
+There are two ways to collect the event trace. One is to collect data only about events that are causing rollbacks. When an event that should have been processed in the past is received, data about this event is collected (described below). The other method of event tracing is to collect data for all events. For event tracing, ROSS can directly access the source and destination LP IDs for each event, as well as the sent and received virtual timestamps. It will also record the real time that the event is computed at. To turn on the event tracing with either --event-trace=1 for full event trace or --event-trace=2 for tracing only events that cause rollbacks.
+Because event types are determined by the model developer, ROSS cannot directly access this. The user can create a callback function that ROSS will use to collect the event type, and ROSS will then handle storing the data in the buffer and the I/O. The benefit to this is that the user can choose to collect other data about the event, and ROSS will handle this as well. It’s important to remember that this data collection will result in a lot of output, since it’s happening per event. The details on using event tracing with model-level data is described in the next section on Model-level sampling
+#+END_EXAMPLE
+
+Mais il faut modifier des choses dans le code/model.
+
+Il y a un merge request sur le git de CODES, qui ajoute l'event
+tracing aux modèles.On pourrait partir de là ? [[https://xgitlab.cels.anl.gov/codes/codes/merge_requests/28/diffs][lien]]
+
+Un autre merge request vient juste d'être posté ajoutant "codes-vis
+model-level instrumentation WIP" et d'autres choses [[https://xgitlab.cels.anl.gov/codes/codes/merge_requests/30][lien]] . Ce dernier
+merge request à l'air d'être très complet en reprenant le premier
+merge et en changeant énormémant de choses au niveau de MPI, des
+messages d'erreurs, des changements de types de données,...
+
+Donc je pense que la gestion des traces dans CODES arrive sous
+peu. Cependant dans la doc ROSS c'est un format à eux qui est utilisé,
+je pense pas qu'on puisse linker DUMPI avec.
