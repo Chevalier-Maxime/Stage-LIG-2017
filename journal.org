@@ -13216,4 +13216,96 @@ Ressources :
 - https://www.grid5000.fr/mediawiki/index.php/Advanced_OAR
 - https://www.grid5000.fr/mediawiki/index.php/Advanced_Kadeploy
 - https://www.grid5000.fr/mediawiki/index.php/Grid5000:UsagePolicy
+*** 2017-06-08 jeudi
+**** Mailling list CODES-ROSS
+***** Content
+Hi Maxime,
 
+I ran the HPL traces with no MPI data type on the simulation and here are some observations. I disabled any synchronizations (wait, wait-alls) in the simulation so that it only matches the MPI sends with the receives and does nothing else. 
+
+- Rank 0 expects 192 messages from Rank 1 but it instead receives 192 messages from Rank 2.
+- Rank 1 receives 192 messages from rank 0 but there are no corresponding receives posted so the messages remain unmatched. -
+- Rank 2 is expecting 192 messages from Rank 0 but they don’t arrive (probably because they arrived at Rank 1).
+
+Is it possible that having no MPI data type resulted in missing messages that introduced these discrepancies? Or maybe the application is terminating earlier than usual? 
+
+I will try the version with MPI data types and let you know if the results are different.   
+
+Thanks,
+Misbah
+
+***** Commentaires
+On sait mainteneant pourquoi CODES n'est pas content. Quelque chose
+d'étrange se passe au niveau d'HPL. Est-ce que ca vient d'HPL, de
+DUMPI, de MPICH3 ou encore de ma machine ?
+
+***** Réponse
+#+BEGIN_EXAMPLE
+Hi Misbah!
+Thanks again for your time. What you have observed is weird. Can it come from my DUMPI installation? I used MPICH3 and in the doc you warn about it. As I generate DUMPI traces too, I had compiled DUMPI as follows : 
+
+../configure --enable-libdumpi --enable-test --prefix=/home/chevamax/logiciels CC=mpicc CXX=mpiCC CFLAGS="-DMPICH_SUPPRESS_PROTOTYPES=1 -DHAVE_PRAGMA_HP_SEC_DEF=1 -pthread -I/home/chevamax/logiciels/include/open-trace-format -L/home/chevamax/logiciels/lib"
+
+I try to use dumpi2otf (I know it's not finished) to visualize dumpi trace (as I found nothing graphical), so that's why I link libotf. Perhaps the CFLAGS's options break something. But I doubt that's come from here as I generate AMG traces and replay them without errors.
+
+When I execute HPL, it run smoothly with a correct terminaison (end tests pass and no warning/error messages), so I don't think it comes from an early terminaison of HPL.
+
+Maxime
+#+END_EXAMPLE
+**** Mail Arnaud
+***** Content
+
+Salut,
+
+  désolé pour cette réunion écourtée. Bon, au final, c'est cool Maxime,
+tu avances bien. Tu as pris CODES en main, tu sais générer et rejouer
+des traces DUMPI. Je pense qu'il doit y avoir moyen que CODES génère des
+traces de l'application à son tour (qu'on peut alors visualiser pour
+vérifier que ça correspond bien à notre intuition et que le simulateur
+ne fait pas n'importe quoi) et qu'on récupère autre chose en sortie que
+des stats internes sur ROSS. Si tu peux regarder ça, ça serait bien.
+
+Pour avancer dans notre compréhension de CODES et de ses performance, il
+faudrait des traces plus grandes. Quand on n'a pas de grosse machine
+sous la mains, ça n'est pas forcément évident... C'est pour ça que je
+mentionnais scalaExtrap, sous projet de scalatrace. Tu peux essayer mais
+j'ai peur que ça soit moins propre que CODES.
+
+Une autre approche serait d'utiliser SimGrid mais ça veut dire arriver à
+générer des traces DUMPI. C'est ce que disait Lucas après tout, on ne
+sait jamais, sur un coup de chance, ça pourrait marcher puisque SMPI
+fourni l'interface PMPI. ;)
+
+Je propose que tu utilises les deux jours qui restent de cette semaine
+pour explorer ces deux pistes (commence par SMPI, c'est moins risqué imho).
+
+Sinon, petite info complémentaire, Tom a fini ce qu'il avait à faire sur
+la préparation d'HPL pour SimGrid et ça marche plutôt bien puisqu'il a
+réussi à simuler l'ordre de grandeur qu'on souhaitait atteindre. La
+simulation est séquentielle mais il arrive à émuler HPL avec une matrice
+de rang 4.10^6 avec 4096 processus MPI. Ça prend 47 heures et nécessite
+16 Go de RAM. Je pense qu'il n'y a plus grand chose à gagner (à moins
+d'optimisant SimGrid lui même... il n'est pas exclu depuis la dernière
+fois qu'on a tout optimisé comme des fous que des régressions de
+performances aient été introduites car c'est assez difficile à
+tester/évaluer...). Sincèrement 2 jours pour cette échelle, c'est déjà
+acceptable pour plein de gens.
+
+Pour que ça prenne moins de deux jours, il faut sortir le time
+parallèle. Je sais que c'était l'objectif du stage mais il ne faut pas
+trop t'inquiéter là dessus. Évaluer l'existant avant de se lancer était
+essentiel, ne serait-ce que pour avoir la certitude que ça ne marche
+pas. Donc, je propose qu'on insiste encore sur CODES maintenant que tu
+as bien investi là dessus pendant au moins une semaine et en parallèle,
+on va pouvoir commencer à réfléchir à comment on pourrait bien lancer
+HPL/SimGrid en time parallèle.
+
+A+
+    Arnaud
+***** Commentaires
+Ok donc si je résume, mes objectifs pour la semaine sont :
+- Regarder si CODES peut générer des traces de son execution interne.
+- Faire de plus grandes traces avec CODES soit via G5k (comme on l'a
+  évoqué plusieurs fois) soit via ScalaExtrap.
+- Faire génrerer des traces DUMPI à SimGrid ? Je pense pas comprendre
+  ce point là.
