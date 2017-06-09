@@ -13494,3 +13494,60 @@ messages d'erreurs, des changements de types de données,...
 Donc je pense que la gestion des traces dans CODES arrive sous
 peu. Cependant dans la doc ROSS c'est un format à eux qui est utilisé,
 je pense pas qu'on puisse linker DUMPI avec.
+*** 2017-06-09 vendredi
+**** MAil Florence
+***** Content
+Salut Maxime
+
+Pour compléter, après en avoir discuté avec Arnaud, l’aspect « grandes
+traces pour CODES » peut se comprendre à 2 niveaux :
+1. des traces un peu plus importantes que celles utilisées jusqu’à
+   présent sur ta machine (4 coeurs ça ne permet pas forcément de voir
+   grand chose en simulation parallèle). Même pour la réplication de
+   ces expériences qui prennent de la ressource sur une machine dont
+   tu as besoin par ailleurs : là, Grid5000 peut vraiment t’aider.
+2. des traces comparables à celles qui sont utilisées dans les papiers
+   CODES, c’est à dire simulant des applications sur env. 10^6 noeuds :
+   là, même Grid5000 ne pourra pas suivre :-)
+
+En revanche si tu as besoin de faire quelques premières traces pour
+pouvoir extrapoler, l’étape G5K sera utile. Bref il me semble que
+lancer tes expériences sur G5K constitue une étape intermédiaire
+intéressante dans ce travail expérimental initial. Ce sera
+certainement utile aussi pour tester le time parallel si on arrive à
+le faire marcher.
+
+Bon courage !
+**** CODES/ROSS
+Il y a un autre mode de simulation sur CODES : sync=5 permet de faire
+du paralèle avec un GVT en temps réel.
+
+Je suis tenter de tester la version du GIT, mais je sais pas ci ca va
+être stable quoique tout a été merge sur le master. Je vais tenter sur
+la machine virtuelle.
+
+J'ai encore trouvé un article très intéréssant sur ROSS (et CODES)
+avec une évaluation très détaillée [[http://conferences.computer.org/pmbs/2016/papers/5218a087.pdf][papier]]
+Et un [[https://pdfs.semanticscholar.org/0a9c/8fef61634e392f9de6f34361cc1c690f7a00.pdf][papier]] sur TraceR au dessus de CODES. Cependant j'ai
+l'impression que TraceR fait tourner l'application au dessus de CODES
+et génère des traces OTF. En fait non, présentaion de l'outil au
+chapitre 5 de cette [[http://charm.cs.illinois.edu/newPapers/16-02/Jain_Thesis.pdf][thèse]].
+
+Pour lire les traces ROSS, il y a un [[https://github.com/caitlinross/ross-binary-reader][outils]]
+
+**** Réunion Florence
+Christian Stockage de traces : 
+- Serveur de l'IN2P3
+- Zenodo : upload trace, donne un DOI qui garantie que ca reste. Mais
+  c'est plus modifiable.
+
+TraceR peut être interessant pour se débarasser de DUMPI
+Faire une trace de ROSS et les visualisers.
+
+Grid'5000 : Faut le faire. Si ca marche pas demander à Pierre ou
+Baptiste. Hacspecis
+
+Du coup je suis allé voir Christian et Tom pour voir si ca leurs été
+déjà arrivé, mais non, ils ont jamais eu ce problème. Il faudrait que
+je test avec d'autres types de traces (OTF2,...) et que je la rejoue
+sur un autre simulateur par exemple.
