@@ -13551,3 +13551,241 @@ Du coup je suis allé voir Christian et Tom pour voir si ca leurs été
 déjà arrivé, mais non, ils ont jamais eu ce problème. Il faudrait que
 je test avec d'autres types de traces (OTF2,...) et que je la rejoue
 sur un autre simulateur par exemple.
+
+*** 2017-06-12 lundi
+
+**** Mailling list
+Hi Maxime,
+
+It could be a compatibility issue with the most recent version of
+DUMPI OR it could possibly be a variable overflow somewhere in dumpi
+or the simulation. I will have a closer look into it and get back to
+you if that’s the case. 
+
+Thanks,
+Misbah
+
+***** Commentaire
+Du coup il faut attendre pour HPL.
+
+**** TraceR
+[[https://github.com/LLNL/tracer][github]]
+Suivre les instructions, dans Readme.OTF
+La génération des traces OTF2 se fera avec ScoreP.
+
+***** HPL
+Une foi scoreP installé, j'ai réussi à compiler HPL via le makefile
+suivant :
+#+BEGIN_EXAMPLE
+#  
+#  -- High Performance Computing Linpack Benchmark (HPL)                
+#     HPL - 2.2 - February 24, 2016                          
+#     Antoine P. Petitet                                                
+#     University of Tennessee, Knoxville                                
+#     Innovative Computing Laboratory                                 
+#     (C) Copyright 2000-2008 All Rights Reserved                       
+#                                                                       
+#  -- Copyright notice and Licensing terms:                             
+#                                                                       
+#  Redistribution  and  use in  source and binary forms, with or without
+#  modification, are  permitted provided  that the following  conditions
+#  are met:                                                             
+#                                                                       
+#  1. Redistributions  of  source  code  must retain the above copyright
+#  notice, this list of conditions and the following disclaimer.        
+#                                                                       
+#  2. Redistributions in binary form must reproduce  the above copyright
+#  notice, this list of conditions,  and the following disclaimer in the
+#  documentation and/or other materials provided with the distribution. 
+#                                                                       
+#  3. All  advertising  materials  mentioning  features  or  use of this
+#  software must display the following acknowledgement:                 
+#  This  product  includes  software  developed  at  the  University  of
+#  Tennessee, Knoxville, Innovative Computing Laboratory.             
+#                                                                       
+#  4. The name of the  University,  the name of the  Laboratory,  or the
+#  names  of  its  contributors  may  not  be used to endorse or promote
+#  products  derived   from   this  software  without  specific  written
+#  permission.                                                          
+#                                                                       
+#  -- Disclaimer:                                                       
+#                                                                       
+#  THIS  SOFTWARE  IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,  INCLUDING,  BUT NOT
+#  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+#  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE UNIVERSITY
+#  OR  CONTRIBUTORS  BE  LIABLE FOR ANY  DIRECT,  INDIRECT,  INCIDENTAL,
+#  SPECIAL,  EXEMPLARY,  OR  CONSEQUENTIAL DAMAGES  (INCLUDING,  BUT NOT
+#  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#  DATA OR PROFITS; OR BUSINESS INTERRUPTION)  HOWEVER CAUSED AND ON ANY
+#  THEORY OF LIABILITY, WHETHER IN CONTRACT,  STRICT LIABILITY,  OR TORT
+#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+#  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+# ######################################################################
+#  
+# ----------------------------------------------------------------------
+# - shell --------------------------------------------------------------
+# ----------------------------------------------------------------------
+#
+SHELL        = /bin/sh
+#
+CD           = cd
+CP           = cp
+LN_S         = ln -s
+MKDIR        = mkdir
+RM           = /bin/rm -f
+TOUCH        = touch
+#
+# ----------------------------------------------------------------------
+# - Platform identifier ------------------------------------------------
+# ----------------------------------------------------------------------
+#
+ARCH         = linux
+#
+# ----------------------------------------------------------------------
+# - HPL Directory Structure / HPL library ------------------------------
+# ----------------------------------------------------------------------
+#
+TOPdir       = $(HOME)/Téléchargements/hplOTF
+INCdir       = $(TOPdir)/include
+BINdir       = $(TOPdir)/bin/$(ARCH)
+LIBdir       = $(TOPdir)/lib/$(ARCH)
+#
+HPLlib       = $(LIBdir)/libhpl.a 
+#
+# ----------------------------------------------------------------------
+# - Message Passing library (MPI) --------------------------------------
+# ----------------------------------------------------------------------
+# MPinc tells the  C  compiler where to find the Message Passing library
+# header files,  MPlib  is defined  to be the name of  the library to be 
+# used. The variable MPdir is only used for defining MPinc and MPlib.
+#
+MPdir        = /usr/lib/mpich
+MPinc        = -I $(MPdir)/include 
+MPlib        = -L $(MPdir)/lib
+#
+# ----------------------------------------------------------------------
+# - Linear Algebra library (BLAS or VSIPL) -----------------------------
+# ----------------------------------------------------------------------
+# LAinc tells the  C  compiler where to find the Linear Algebra  library
+# header files,  LAlib  is defined  to be the name of  the library to be 
+# used. The variable LAdir is only used for defining LAinc and LAlib.
+#
+LAdir        = /usr/lib/atlas-base
+LAinc        = 
+LAlib        = $(LAdir)/libf77blas.a $(LAdir)/libatlas.a -lblas
+#
+# ----------------------------------------------------------------------
+# - F77 / C interface --------------------------------------------------
+# ----------------------------------------------------------------------
+# You can skip this section  if and only if  you are not planning to use
+# a  BLAS  library featuring a Fortran 77 interface.  Otherwise,  it  is
+# necessary  to  fill out the  F2CDEFS  variable  with  the  appropriate
+# options.  **One and only one**  option should be chosen in **each** of
+# the 3 following categories:
+#
+# 1) name space (How C calls a Fortran 77 routine)
+#
+# -DAdd_              : all lower case and a suffixed underscore  (Suns,
+#                       Intel, ...),                           [default]
+# -DNoChange          : all lower case (IBM RS6000),
+# -DUpCase            : all upper case (Cray),
+# -DAdd__             : the FORTRAN compiler in use is f2c.
+#
+# 2) C and Fortran 77 integer mapping
+#
+# -DF77_INTEGER=int   : Fortran 77 INTEGER is a C int,         [default]
+# -DF77_INTEGER=long  : Fortran 77 INTEGER is a C long,
+# -DF77_INTEGER=short : Fortran 77 INTEGER is a C short.
+#
+# 3) Fortran 77 string handling
+#
+# -DStringSunStyle    : The string address is passed at the string loca-
+#                       tion on the stack, and the string length is then
+#                       passed as  an  F77_INTEGER  after  all  explicit
+#                       stack arguments,                       [default]
+# -DStringStructPtr   : The address  of  a  structure  is  passed  by  a
+#                       Fortran 77  string,  and the structure is of the
+#                       form: struct {char *cp; F77_INTEGER len;},
+# -DStringStructVal   : A structure is passed by value for each  Fortran
+#                       77 string,  and  the  structure is  of the form:
+#                       struct {char *cp; F77_INTEGER len;},
+# -DStringCrayStyle   : Special option for  Cray  machines,  which  uses
+#                       Cray  fcd  (fortran  character  descriptor)  for
+#                       interoperation.
+#
+F2CDEFS      = -DAdd_ -DF77_INTEGER=int -DStringSunStyle
+#
+# ----------------------------------------------------------------------
+# - HPL includes / libraries / specifics -------------------------------
+# ----------------------------------------------------------------------
+#
+HPL_INCLUDES = -I$(INCdir) -I$(INCdir)/$(ARCH) $(LAinc) $(MPinc) -I /home/chevamax/logiciels/include -I /home/chevamax/logiciels/include/scorep -DSCOREP_USER_ENABLE
+HPL_LIBS     = $(HPLlib) $(LAlib) $(MPlib) -lmpl
+#
+# - Compile time options -----------------------------------------------
+#
+# -DHPL_COPY_L           force the copy of the panel L before bcast;
+# -DHPL_CALL_CBLAS       call the cblas interface;
+# -DHPL_CALL_VSIPL       call the vsip  library;
+# -DHPL_DETAILED_TIMING  enable detailed timers;
+#
+# By default HPL will:
+#    *) not copy L before broadcast,
+#    *) call the BLAS Fortran 77 interface,
+#    *) not display detailed timing information.
+#
+HPL_OPTS     = -DHPL_CALL_CBLAS -DHPL_NO_MPI_DATATYPE
+# 
+# ----------------------------------------------------------------------
+#
+HPL_DEFS     = $(F2CDEFS) $(HPL_OPTS) $(HPL_INCLUDES) 
+#
+# ----------------------------------------------------------------------
+# - Compilers / linkers - Optimization flags ---------------------------
+# ----------------------------------------------------------------------
+#
+CC           = scorep --user --nocompiler --noopenmp --nopomp --nocuda --noopenacc --noopencl --nomemory /usr/bin/mpicc
+CCNOOPT      = $(HPL_DEFS) 
+CCFLAGS      = $(HPL_DEFS) -fomit-frame-pointer -O3 -funroll-loops
+#
+LINKER       = /usr/bin/mpicc
+LINKFLAGS    = $(CCFLAGS) -pthread
+#
+ARCHIVER     = ar
+ARFLAGS      = r
+RANLIB       = echo
+#
+# ----------------------------------------------------------------------
+#+END_EXAMPLE
+
+Bon, petit soucis, pas de traces en vue.
+Pourtant j'arrive à en généré sur l'exemple jacobi fourni. Via les
+commandes suivantes [[https://silc.zih.tu-dresden.de/scorep-current/quickstart.html][doc]] dans la partie "Simple Exemple" customisé
+comme suit :
+#+BEGIN_EXAMPLE
+scorep mpicc -g -O2 -c jacobi.c
+scorep mpicc -g -O2 -c main.c
+scorep mpicc -g -O2 -o jacobi jacobi.o main.o -lm
+#+END_EXAMPLE
+
+
+Pour HPL j'ai l'impression sur la sortie du make, que le lien se fait pas à la
+dernière commande. Quand je le rajoute(je met le linker = compilateur), j'obtiens une erreur...
+#+BEGIN_EXAMPLE
+scorep /usr/bin/mpicc   -DAdd_ -DF77_INTEGER=int -DStringSunStyle -DHPL_CALL_CBLAS -DHPL_NO_MPI_DATATYPE -I/home/chevamax/Téléchargements/hplOTF/include -I/home/chevamax/Téléchargements/hplOTF/include/linux  -I /usr/lib/mpich/include  -I /home/chevamax/logiciels/include -I /home/chevamax/logiciels/include/scorep -DSCOREP_USER_ENABLE  -fomit-frame-pointer -O3 -funroll-loops -pthread -O2 -g -o /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl HPL_pddriver.o         HPL_pdinfo.o           HPL_pdtest.o /home/chevamax/Téléchargements/hplOTF/lib/linux/libhpl.a  /usr/lib/atlas-base/libf77blas.a /usr/lib/atlas-base/libatlas.a -lblas -L /usr/lib/mpich/lib -lmpl
+/home/chevamax/logiciels/lib/libscorep_adapter_mpi_mgmt.a(libscorep_adapter_mpi_mgmt_la-scorep_mpi_init.o) : Dans la fonction « mpi_subsystem_init_mpp » :
+/home/chevamax/Téléchargements/scorep-3.1/build-mpi/../src/adapters/mpi/scorep_mpi_init.c:273 : référence indéfinie vers « scorep_hint_No_MPI_startup_symbols_found_in_application »
+/home/chevamax/Téléchargements/scorep-3.1/build-mpi/../src/adapters/mpi/scorep_mpi_init.c:275 : référence indéfinie vers « scorep_mpi_comm_init »
+/home/chevamax/Téléchargements/scorep-3.1/build-mpi/../src/adapters/mpi/scorep_mpi_init.c:278 : référence indéfinie vers « scorep_mpiprofile_init »
+collect2: error: ld returned 1 exit status
+ERROR: Execution failed: /usr/bin/mpicc /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl.scorep_init.o HPL_pddriver.o HPL_pdinfo.o HPL_pdtest.o `/home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocuda --noonline-access --noopencl --noopenacc --memory=libc --constructor`  -DAdd_ -DF77_INTEGER="int" -DStringSunStyle -DHPL_CALL_CBLAS -DHPL_NO_MPI_DATATYPE -I/home/chevamax/Téléchargements/hplOTF/include -I/home/chevamax/Téléchargements/hplOTF/include/linux -I /usr/lib/mpich/include -I /home/chevamax/logiciels/include -I /home/chevamax/logiciels/include/scorep -DSCOREP_USER_ENABLE -fomit-frame-pointer -O3 -funroll-loops -pthread -O2 -g /home/chevamax/Téléchargements/hplOTF/lib/linux/libhpl.a /usr/lib/atlas-base/libf77blas.a /usr/lib/atlas-base/libatlas.a -lblas -L /usr/lib/mpich/lib -lmpl `/home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocuda --noonline-access --noopencl --noopenacc --memory=libc --ldflags` `/home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocuda --noonline-access --noopencl --noopenacc --memory=libc --libs`   -o /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl
+Makefile:76 : la recette pour la cible « dexe.grd » a échouée
+make[2]: *** [dexe.grd] Erreur 1
+make[2] : on quitte le répertoire « /home/chevamax/Téléchargements/hplOTF/testing/ptest/linux »
+Make.top:64 : la recette pour la cible « build_tst » a échouée
+make[1]: *** [build_tst] Erreur 2
+make[1] : on quitte le répertoire « /home/chevamax/Téléchargements/hplOTF »
+Makefile:72 : la recette pour la cible « build » a échouée
+make: *** [build] Erreur 2
+#+END_EXAMPLE
