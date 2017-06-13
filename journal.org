@@ -14181,6 +14181,8 @@ make[1] : on quitte le répertoire « /home/chevamax/Téléchargements/hplOTF�
 Makefile:72 : la recette pour la cible « build » a échouée
 make: *** [build] Erreur 2
 #+END_EXAMPLE
+
+Je pense que la solution n'est pas compliqué, mais je vois pas ...
 *** 2017-06-13 mardi
 
 **** Organisation
@@ -14234,4 +14236,245 @@ Bon y'a des erreurs (ils trouve pas les types qui sont de ROSS)
 En installant ROSS et codes via les git c'est OK (via le guide
 d'installations) et tous les tests de CODES passent.
 
+****** Génération de trace d'execution AMG
+Rappel : pour lancer le replay c'est la commande suivante
+#+begin_src sh :results output :exports both
+mpirun -n 4 ../../codes/install/bin/model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../codes/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+BEGIN_EXAMPLE
+../../codes/install/bin/model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi -- ../../codes/src/network-workloads/conf/modelnet-mpi-test.conf 
 
+Tue Jun 13 16:08:13 2017
+
+ROSS Revision: 10d7a06b2d5a6864aba4ac779e1faf45d30ffd0d
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   56
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              3585
+	Network events                                           50000
+	Total events                                             53584
+
+
+ Trace dumpi-2017.06.06.15.44.54- job id 0 7 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 0 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 1 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 2 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 3 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 4 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 5 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 6 *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #5534: simulation 100% complete, max event queue size 349 (GVT = MAX).
+AVL tree size: 50
+ *** END SIMULATION ***
+
+
+	: Running Time = 2.8207 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 1556326
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                      873383
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              -27.89 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                  43172
+	Percent Remote Events                                     6.32 %
+
+	Total Roll Backs                                         83384
+	Primary Roll Backs                                       17601
+	Secondary Roll Backs                                     65783
+	Fossil Collect Attempts                                  22140
+	Total GVT Computations                                    5535
+
+	Net Events Processed                                    682943
+	Event Rate (events/sec)                               242115.8
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         53585
+	Memory Allocated                                         71503
+	Memory Wasted                                              905
+
+TW Network Statistics:
+	Remote sends                                            172594
+	Remote recvs                                            172594
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                            856
+	LP RNGs                                                     80
+	Total LP                                                  1064
+	Event struct                                               144
+	Event struct with Model                                    928
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.1531
+	AVL Tree (insert/delete)                                0.0868
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        2.4359
+	Event Cancel                                            0.9816
+	Event Abort                                             0.0000
+
+	GVT                                                     6.7328
+	Fossil Collect                                          0.1408
+	Primary Rollbacks                                       0.3477
+	Network Read                                            0.5445
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      6.7541
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    5535
+	Total All Reduce Calls                                   15938
+	Average Reduction / GVT                                   2.88
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1874483755.553380 ns avg runtime 1864157878.262912 
+ max comm time 934196495.679895 avg comm time 801670170.137912 
+ max send time 833924388.814755 avg send time 682196348.562385 
+ max recv time 10575231.157520 avg recv time 9956422.223068 
+ max wait time 934111212.046937 avg wait time 801587707.129983
+#+END_EXAMPLE
+
+Maintenant avec l'option de génération de traces interne : 
+#+begin_src sh :results output :exports both
+mpirun -n 4 ../../codes/install/bin/model-net-mpi-replay --model-stats=1 --event-trace=1 --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../codes/src/network-workloads/conf/modelnet-mpi-test.conf
+#+end_src
+#+BEGIN_EXAMPLE
+Tue Jun 13 16:15:29 2017
+
+ROSS Revision: 10d7a06b2d5a6864aba4ac779e1faf45d30ffd0d
+
+tw_net_start: Found world size to be 1 
+
+ Total nodes 1056 routers 264 groups 33 radix 16 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  1
+	Total Processors                                   [Nodes (1) x PE_per_Node (1)] 1
+	Total KPs                                          [Nodes (1) x KPs (16)] 16
+	Total LPs                                                 2376
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            608257
+	Network events                                           50000
+	Total events                                            658256
+
+
+ Trace dumpi-2017.06.06.15.44.54- job id 0 0 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 1 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 2 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 3 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 4 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 5 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 6 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 7 *** START SEQUENTIAL SIMULATION ***
+
+ *** END SIMULATION ***
+
+
+	: Running Time = 1.1639 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 1584781
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      0
+	Total GVT Computations                                       0
+
+	Net Events Processed                                   1584781
+	Event Rate (events/sec)                              1361592.8
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        658257
+	Memory Allocated                                        614927
+	Memory Wasted                                              431
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             72
+	LP RNGs                                                     80
+	Total LP                                                   280
+	Event struct                                               144
+	Event struct with Model                                    752
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0000
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0000
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.4642
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      2.7869
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       0
+	Total All Reduce Calls                                       0
+	Average Reduction / GVT                                   -nan
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1874976231.604664 ns avg runtime 1864651269.564517 
+ max comm time 934690185.088480 avg comm time 802163561.439517 
+ max send time 836361822.196838 avg send time 684671361.182584 
+ max recv time 11274260.048809 avg recv time 10598733.814624 
+ max wait time 934604649.570085 avg wait time 802080831.960749 
+ Average number of hops traversed 1.378377 average chunk latency 1.190289 us maximum chunk latency 31.277591 us avg message size 2011.793823 bytes finished messages 31490 finished chunks 145931 
+
+ Total packets generated 145931 finished 145931 
+#+END_EXAMPLE
+
+
+Ca fonctionne, j'ai des fichier binaires de sortie
+
+Maintenant l'outil de visu
