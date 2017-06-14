@@ -14616,4 +14616,9 @@ accessible
 https://github.com/caitlinross/ROSS-Vis/blob/master/README-vis.md
 (partie Outpu formating)
 
+**** TraceR
+Maintenant que j'ai des traces avec score-P je vais pouvoir installer
+TraceR.
+
+Evidemment, des erreurs...
 
