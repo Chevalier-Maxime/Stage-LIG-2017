@@ -14478,3 +14478,142 @@ TW GVT Statistics: MPI AllReduce
 Ca fonctionne, j'ai des fichier binaires de sortie
 
 Maintenant l'outil de visu
+
+*** 2017-06-14 mercredi
+
+**** Mail Arnaud
+
+**** Meeting Florence
+- Faire un graphique de tous les logiciels utilisé, leurs liens entre
+  eux (avec i/o).
+- Continuer avec AMG vu le temps investi, et on aura quand même un
+  résultat à la fin (le parallel fonctionne ou non avec ce benchamrck
+  sur CODES).
+- Pour les ggplot, c'est pas bon. Il faut donner de meilleurs noms aux
+  images, inclure la commande (et le logiciel) dans le titre, avoir
+  les 0 sur les graphiques. Il faut également faire plus de points vu
+  que y'a peut-être un outsider. Pour la correlation, il suffit de
+  tracer l'un par rapport à l'autre et voir la tête de la courbe. Il
+  faut aussi que j'ajoute le temps total (pas seulement le
+  running-time affiché).
+**** Aide de Vincent pour le makefile
+
+Vincent Danjean m'a aidé ce matin pour trouver d'où venait
+l'erreur. Et finalement c'est les librairies qui ne sont pas link dans
+le bon ordre par score-P. Il a donc, à la main remis dans le bon
+ordre, et m'a conseillé de faire un petit script pour modifier
+la sortie de scorep-config (en ajoutant la librairie qui est link trop
+tôt à la fin si elle est dans les sorties). J'ai donc pu générer des
+traces OTF2 ! Je vais pouvoir avancer sur la piste de traceR.
+
+Il m'a également vivement conseillé de faire un git lorsque j'installe
+un nouveau logiciel (notamment pour le build) afin d'avoir
+l'historique des mes modifications/configurations.
+
+***** Rapport de bug
+J'ai donc envoyé un [[support@score-p.org][mail]] pour rapporter le bug.
+****** Contenu
+#+BEGIN_EXAMPLE
+Hello,
+I was trying to link score-P to HPL, and I have got this error :
+scorep --mpp=mpi --verbose=2 --user --nocompiler --noopenmp --nopomp --nocuda --noopenacc --noopencl --nomemory /usr/bin/mpicc -DAdd_ -DF77_INTEGER=int -DStringSunStyle -DHPL_CALL_CBLAS -DHPL_NO_MPI_DATATYPE -I/home/chevamax/Téléchargements/hplOTF/include -I/home/chevamax/Téléchargements/hplOTF/include/linux -I /usr/lib/mpich/include -I /home/chevamax/logiciels/include -I /home/chevamax/logiciels/include/scorep -pthread -O2 -g -o /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl HPL_pddriver.o HPL_pdinfo.o HPL_pdtest.o /home/chevamax/Téléchargements/hplOTF/lib/linux/libhpl.a /usr/lib/atlas-base/libf77blas.a /usr/lib/atlas-base/libatlas.a -lblas -L /usr/lib/mpich/lib -lmpl
+Enabled instrumentation: user pthread
+Selected paradigms:
+thread=pthread
+mpp=mpi
+mutex=none
+
+Compiler name: /usr/bin/mpicc
+Flags before interposition lib: -DAdd_ -DF77_INTEGER="int" -DStringSunStyle -DHPL_CALL_CBLAS -DHPL_NO_MPI_DATATYPE -I/home/chevamax/Téléchargements/hplOTF/include -I/home/chevamax/Téléchargements/hplOTF/include/linux -I /usr/lib/mpich/include -I /home/chevamax/logiciels/include -I /home/chevamax/logiciels/include/scorep -pthread -O2 -g /home/chevamax/Téléchargements/hplOTF/lib/linux/libhpl.a /usr/lib/atlas-base/libf77blas.a /usr/lib/atlas-base/libatlas.a -lblas -L /usr/lib/mpich/lib -lmpl
+Flags after interposition lib: 
+Output file: /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl
+Input file(s): HPL_pddriver.o, HPL_pdinfo.o, HPL_pdtest.o
+/home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --adapter-init > /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl.scorep_init.c
+Executing: /home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --adapter-init
+gcc -c /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl.scorep_init.c -o /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl.scorep_init.o
+Executing: gcc -c /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl.scorep_init.c -o /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl.scorep_init.o
+/usr/bin/mpicc /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl.scorep_init.o HPL_pddriver.o HPL_pdinfo.o HPL_pdtest.o `/home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --constructor` -DAdd_ -DF77_INTEGER="int" -DStringSunStyle -DHPL_CALL_CBLAS -DHPL_NO_MPI_DATATYPE -I/home/chevamax/Téléchargements/hplOTF/include -I/home/chevamax/Téléchargements/hplOTF/include/linux -I /usr/lib/mpich/include -I /home/chevamax/logiciels/include -I /home/chevamax/logiciels/include/scorep -pthread -O2 -g /home/chevamax/Téléchargements/hplOTF/lib/linux/libhpl.a /usr/lib/atlas-base/libf77blas.a /usr/lib/atlas-base/libatlas.a -lblas -L /usr/lib/mpich/lib -lmpl `/home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --ldflags` `/home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --libs` -o /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl
+Executing: /home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --constructor
+Executing: /home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --ldflags
+Executing: /home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --libs
+Executing: /usr/bin/mpicc /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl.scorep_init.o HPL_pddriver.o HPL_pdinfo.o HPL_pdtest.o /home/chevamax/logiciels/lib/scorep/scorep_constructor.o -DAdd_ -DF77_INTEGER=int -DStringSunStyle -DHPL_CALL_CBLAS -DHPL_NO_MPI_DATATYPE -I/home/chevamax/Téléchargements/hplOTF/include -I/home/chevamax/Téléchargements/hplOTF/include/linux -I /usr/lib/mpich/include -I /home/chevamax/logiciels/include -I /home/chevamax/logiciels/include/scorep -pthread -O2 -g /home/chevamax/Téléchargements/hplOTF/lib/linux/libhpl.a /usr/lib/atlas-base/libf77blas.a /usr/lib/atlas-base/libatlas.a -lblas -L /usr/lib/mpich/lib -lmpl -L/home/chevamax/logiciels/lib -Wl,-rpath -Wl,/home/chevamax/logiciels/lib -Wl,--undefined,__wrap_pthread_create,-wrap,pthread_create,-wrap,pthread_join,-wrap,pthread_exit,-wrap,pthread_cancel,-wrap,pthread_detach,-wrap,pthread_mutex_init,-wrap,pthread_mutex_destroy,-wrap,pthread_mutex_lock,-wrap,pthread_mutex_unlock,-wrap,pthread_mutex_trylock,-wrap,pthread_cond_init,-wrap,pthread_cond_signal,-wrap,pthread_cond_broadcast,-wrap,pthread_cond_wait,-wrap,pthread_cond_timedwait,-wrap,pthread_cond_destroy -lscorep_adapter_user_event -lscorep_adapter_mpi_event -lscorep_adapter_pthread_event -lscorep_measurement -lotf2 -lcube4w -lcubewriter4 -lscorep_adapter_user_mgmt -lscorep_adapter_mpi_mgmt -lscorep_mpp_mpi -lscorep_online_access_mockup -lscorep_thread_create_wait_pthread -lscorep_mutex_pthread_wrap -lscorep_adapter_utils -lscorep_alloc_metric -lscorep_adapter_pthread_mgmt -lm -ldl -o /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl
+/home/chevamax/logiciels/lib/libscorep_adapter_mpi_mgmt.a(libscorep_adapter_mpi_mgmt_la-scorep_mpi_init.o) : Dans la fonction « mpi_subsystem_init_mpp » :
+/home/chevamax/Téléchargements/scorep-3.1/build-mpi/../src/adapters/mpi/scorep_mpi_init.c:273 : référence indéfinie vers « scorep_hint_No_MPI_startup_symbols_found_in_application »
+/home/chevamax/Téléchargements/scorep-3.1/build-mpi/../src/adapters/mpi/scorep_mpi_init.c:275 : référence indéfinie vers « scorep_mpi_comm_init »
+/home/chevamax/Téléchargements/scorep-3.1/build-mpi/../src/adapters/mpi/scorep_mpi_init.c:278 : référence indéfinie vers « scorep_mpiprofile_init »
+collect2: error: ld returned 1 exit status
+ERROR: Execution failed: /usr/bin/mpicc /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl.scorep_init.o HPL_pddriver.o HPL_pdinfo.o HPL_pdtest.o `/home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --constructor` -DAdd_ -DF77_INTEGER="int" -DStringSunStyle -DHPL_CALL_CBLAS -DHPL_NO_MPI_DATATYPE -I/home/chevamax/Téléchargements/hplOTF/include -I/home/chevamax/Téléchargements/hplOTF/include/linux -I /usr/lib/mpich/include -I /home/chevamax/logiciels/include -I /home/chevamax/logiciels/include/scorep -pthread -O2 -g /home/chevamax/Téléchargements/hplOTF/lib/linux/libhpl.a /usr/lib/atlas-base/libf77blas.a /usr/lib/atlas-base/libatlas.a -lblas -L /usr/lib/mpich/lib -lmpl `/home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --ldflags` `/home/chevamax/logiciels/bin/scorep-config --thread=pthread --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --libs` -o /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl
+
+and if I retry with this I get the same error :
+/usr/bin/mpicc /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl.scorep_init.o HPL_pddriver.o HPL_pdinfo.o HPL_pdtest.o /home/chevamax/logiciels/lib/scorep/scorep_constructor.o -DAdd_ -DF77_INTEGER=int -DStringSunStyle -DHPL_CALL_CBLAS -DHPL_NO_MPI_DATATYPE -I/home/chevamax/Téléchargements/hplOTF/include -I/home/chevamax/Téléchargements/hplOTF/include/linux -I /usr/lib/mpich/include -I /home/chevamax/logiciels/include -I /home/chevamax/logiciels/include/scorep -pthread -O2 -g /home/chevamax/Téléchargements/hplOTF/lib/linux/libhpl.a /usr/lib/atlas-base/libf77blas.a /usr/lib/atlas-base/libatlas.a -lblas -L /usr/lib/mpich/lib -lmpl -L/home/chevamax/logiciels/lib -Wl,-rpath -Wl,/home/chevamax/logiciels/lib -Wl,--undefined,__wrap_pthread_create,-wrap,pthread_create,-wrap,pthread_join,-wrap,pthread_exit,-wrap,pthread_cancel,-wrap,pthread_detach,-wrap,pthread_mutex_init,-wrap,pthread_mutex_destroy,-wrap,pthread_mutex_lock,-wrap,pthread_mutex_unlock,-wrap,pthread_mutex_trylock,-wrap,pthread_cond_init,-wrap,pthread_cond_signal,-wrap,pthread_cond_broadcast,-wrap,pthread_cond_wait,-wrap,pthread_cond_timedwait,-wrap,pthread_cond_destroy -lscorep_adapter_user_event -lscorep_adapter_mpi_event -lscorep_adapter_pthread_event -lscorep_measurement -lotf2 -lcube4w -lcubewriter4 -lscorep_adapter_user_mgmt -lscorep_adapter_mpi_mgmt -lscorep_mpp_mpi -lscorep_online_access_mockup -lscorep_thread_create_wait_pthread -lscorep_mutex_pthread_wrap -lscorep_adapter_utils -lscorep_alloc_metric -lscorep_adapter_pthread_mgmt -lm -ldl -o /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl
+/home/chevamax/logiciels/lib/libscorep_adapter_mpi_mgmt.a(libscorep_adapter_mpi_mgmt_la-scorep_mpi_init.o) : Dans la fonction « mpi_subsystem_init_mpp » :
+/home/chevamax/Téléchargements/scorep-3.1/build-mpi/../src/adapters/mpi/scorep_mpi_init.c:273 : référence indéfinie vers « scorep_hint_No_MPI_startup_symbols_found_in_application »
+/home/chevamax/Téléchargements/scorep-3.1/build-mpi/../src/adapters/mpi/scorep_mpi_init.c:275 : référence indéfinie vers « scorep_mpi_comm_init »
+/home/chevamax/Téléchargements/scorep-3.1/build-mpi/../src/adapters/mpi/scorep_mpi_init.c:278 : référence indéfinie vers « scorep_mpiprofile_init »
+
+And I figured out there is a problem in library dependencies :
+/usr/bin/mpicc /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl.scorep_init.o HPL_pddriver.o HPL_pdinfo.o HPL_pdtest.o /home/chevamax/logiciels/lib/scorep/scorep_constructor.o -DAdd_ -DF77_INTEGER=int -DStringSunStyle -DHPL_CALL_CBLAS -DHPL_NO_MPI_DATATYPE -I/home/chevamax/Téléchargements/hplOTF/include -I/home/chevamax/Téléchargements/hplOTF/include/linux -I /usr/lib/mpich/include -I /home/chevamax/logiciels/include -I /home/chevamax/logiciels/include/scorep -pthread -O2 -g /home/chevamax/Téléchargements/hplOTF/lib/linux/libhpl.a /usr/lib/atlas-base/libf77blas.a /usr/lib/atlas-base/libatlas.a -lblas -L /usr/lib/mpich/lib -lmpl -L/home/chevamax/logiciels/lib -Wl,-rpath -Wl,/home/chevamax/logiciels/lib -Wl,--undefined,__wrap_pthread_create,-wrap,pthread_create,-wrap,pthread_join,-wrap,pthread_exit,-wrap,pthread_cancel,-wrap,pthread_detach,-wrap,pthread_mutex_init,-wrap,pthread_mutex_destroy,-wrap,pthread_mutex_lock,-wrap,pthread_mutex_unlock,-wrap,pthread_mutex_trylock,-wrap,pthread_cond_init,-wrap,pthread_cond_signal,-wrap,pthread_cond_broadcast,-wrap,pthread_cond_wait,-wrap,pthread_cond_timedwait,-wrap,pthread_cond_destroy -lscorep_adapter_user_event -lscorep_adapter_pthread_event -lscorep_measurement -lotf2 -lcube4w -lcubewriter4 -lscorep_adapter_user_mgmt -lscorep_adapter_mpi_event -lscorep_adapter_mpi_mgmt -lscorep_mpp_mpi -lscorep_online_access_mockup -lscorep_thread_create_wait_pthread -lscorep_mutex_pthread_wrap -lscorep_adapter_utils -lscorep_alloc_metric -lscorep_adapter_pthread_mgmt -lm -ldl -o /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl 
+/home/chevamax/logiciels/lib/libscorep_adapter_mpi_mgmt.a(libscorep_adapter_mpi_mgmt_la-scorep_mpi_init.o) : Dans la fonction « mpi_subsystem_init_mpp » :
+/home/chevamax/Téléchargements/scorep-3.1/build-mpi/../src/adapters/mpi/scorep_mpi_init.c:273 : référence indéfinie vers « scorep_hint_No_MPI_startup_symbols_found_in_application »
+/home/chevamax/Téléchargements/scorep-3.1/build-mpi/../src/adapters/mpi/scorep_mpi_init.c:275 : référence indéfinie vers « scorep_mpi_comm_init »
+/home/chevamax/Téléchargements/scorep-3.1/build-mpi/../src/adapters/mpi/scorep_mpi_init.c:278 : référence indéfinie vers « scorep_mpiprofile_init »
+
+Here the two problematic libraries are linked like this -lscorep_adapter_mpi_event -lscorep_adapter_mpi_mgmt and there is an error. If I put like this -lscorep_adapter_mpi_mgmt -lscorep_adapter_mpi_event  I have no error :
+/usr/bin/mpicc /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl.scorep_init.o HPL_pddriver.o HPL_pdinfo.o HPL_pdtest.o /home/chevamax/logiciels/lib/scorep/scorep_constructor.o -DAdd_ -DF77_INTEGER=int -DStringSunStyle -DHPL_CALL_CBLAS -DHPL_NO_MPI_DATATYPE -I/home/chevamax/Téléchargements/hplOTF/include -I/home/chevamax/Téléchargements/hplOTF/include/linux -I /usr/lib/mpich/include -I /home/chevamax/logiciels/include -I /home/chevamax/logiciels/include/scorep -pthread -O2 -g /home/chevamax/Téléchargements/hplOTF/lib/linux/libhpl.a /usr/lib/atlas-base/libf77blas.a /usr/lib/atlas-base/libatlas.a -lblas -L /usr/lib/mpich/lib -lmpl -L/home/chevamax/logiciels/lib -Wl,-rpath -Wl,/home/chevamax/logiciels/lib -Wl,--undefined,__wrap_pthread_create,-wrap,pthread_create,-wrap,pthread_join,-wrap,pthread_exit,-wrap,pthread_cancel,-wrap,pthread_detach,-wrap,pthread_mutex_init,-wrap,pthread_mutex_destroy,-wrap,pthread_mutex_lock,-wrap,pthread_mutex_unlock,-wrap,pthread_mutex_trylock,-wrap,pthread_cond_init,-wrap,pthread_cond_signal,-wrap,pthread_cond_broadcast,-wrap,pthread_cond_wait,-wrap,pthread_cond_timedwait,-wrap,pthread_cond_destroy -lscorep_adapter_user_event -lscorep_adapter_pthread_event -lscorep_measurement -lotf2 -lcube4w -lcubewriter4 -lscorep_adapter_user_mgmt -lscorep_adapter_mpi_mgmt -lscorep_adapter_mpi_event -lscorep_mpp_mpi -lscorep_online_access_mockup -lscorep_thread_create_wait_pthread -lscorep_mutex_pthread_wrap -lscorep_adapter_utils -lscorep_alloc_metric -lscorep_adapter_pthread_mgmt -lm -ldl -o /home/chevamax/Téléchargements/hplOTF/bin/linux/xhpl
+
+And i got trace of HPL execution.
+
+So I have looked into scorep_config_ibrary_dependencies_inc.hpp and scorep_config_mpp.cpp but I just get an infinite loop...
+
+
+Regards,
+Maxime
+#+END_EXAMPLE
+***** TODO Script
+**** Reprise de lecture de traces interne CODES
+***** Logiciel
+****** Ross binary reader
+[[https://github.com/caitlinross/ross-binary-reader][git]]
+
+Il suffit de le clonner et faire make. Pour MAC il faut faire make
+-DMACOS (la version MAC n'a pas été testé).
+
+ensuite ca s'utilise comme ca :
+#+BEGIN_EXAMPLE
+ross-reader -f ross-stats-evtrace.bin -t <type>
+#+END_EXAMPLE
+
+Cependant j'arrive pas à avoir un CSV qui me parait correct. En effet,
+il contient beaucoups de valeurs négatives bien que fait sur
+AMG.
+******* Aide
+#+BEGIN_EXAMPLE
+Usage: ross-reader [OPTION...] 
+Reader for the binary data collection files from ROSS
+
+  -b, --bin-size=n           amount of virtual time in bin for binning event
+                             trace (default: 10000)
+  -c, --combine-events       bin event trace to reduce data size
+  -f, --filename=str         path of file to read
+  -t, --filetype=n           type of file to read; 0: GVT data, 1: real time
+                             data, 2: event data, 3: model
+  -?, --help                 Give this help list
+      --usage                Give a short usage message
+
+Mandatory or optional arguments to long options are also mandatory or optional
+for any corresponding short options.
+#+END_EXAMPLE
+
+
+
+
+****** Vis Ross
+Sur github je suis tombé sur ca :
+[[file:vis-ross.png][ross-vis]]
+
+J'ai donc chercher quel outil donnait ça, mais ca vient d'un dépot non
+accessible
+https://github.com/caitlinross/ROSS-Vis/blob/master/README-vis.md
+(partie Outpu formating)
+
+
