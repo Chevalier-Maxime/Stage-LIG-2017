@@ -14686,7 +14686,7 @@ CODES = /home/chevamax/Téléchargements/codes
 #CODES_LIBS = -L${CODES}/install-mod/lib -Wl,-rpath=${CODES}/install-mod/lib
 CODES_LIBS = -L${CODES}/install/lib
 CODES_LIBS += -L${ROSS}/install/lib -Wl,-rpath=${ROSS}/install/lib
-CODES_LIBS += -lcodes -lROSS -lm -ldumpi -lundumpi
+CODES_LIBS += -lcodes -lROSS -lm -lundumpi
 
 ifeq ($(ARCH),bgq)
 ARCH_FLAGS = -I/bgsys/drivers/ppcfloor
@@ -14732,3 +14732,673 @@ mpirun -np 8 ../traceR --sync=3 --nkp=16 --extramem=100000 --max-opt-lookahead=1
 #+end_src
 
 Mais soit c'est soit très long, soit ca marche pas ...
+
+En fait c'est à cause du =mpirun -n 8= que c'est long (même problème que
+précédement). En lancant la commande avec 4 ca fonctionne (rapidement)
+
+#+begin_src sh :results output :exports both
+mpirun -np 4 ../traceR --sync=3 --nkp=16 --extramem=100000 --max-opt-lookahead=1000000 --timer-frequency=1000 -- ../conf/tracer-torus.conf tracer_config
+#+end_src
+#+BEGIN_EXAMPLE
+Fri Jun 16 08:55:42 2017
+
+ROSS Revision: 10d7a06b2d5a6864aba4ac779e1faf45d30ffd0d
+
+tw_net_start: Found world size to be 4 
+Config file is ../conf/tracer-torus.conf
+Trace input file is tracer_config
+Found soft_delay as 1000.000000
+Found nic_delay as 400.000000
+Found rdma_delay as 1000.000000
+Copy cost per byte is 0.000000 ns
+Eager limit is 8192.000000 bytes
+Begin reading tracer_config
+Reading global_map.bin
+Read mapping of 96 ranks
+Job 0 - ranks 64, trace folder traces-64/traces.otf2, rank file job0, iters 1
+Job 1 - ranks 32, trace folder traces-32/traces.otf2, rank file job1, iters 1
+Done reading meta-information about jobs
+Loading map file for job 0 from job0
+Loading map file for job 1 from job1
+Read global definition for job 0 from traces-64/traces.otf2
+Clock Props: 2095146805 1000000000 0.477294
+Read global definition for job 1 from traces-32/traces.otf2
+Clock Props: 2095147102 1000000000 0.477293
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                  480
+	Simulation End Time                                3600000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            130721
+	Network events                                           50000
+	Total events                                             80720
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+PE0 - LP_GID:96 : START SIMULATION, TASKS COUNT: 98, FIRST TASK: 0, RUN TIME TILL NOW=0.000000 s, CURRENT SIM TIME 0.599557
+PE0 - LP_GID:0 : START SIMULATION, TASKS COUNT: 98, FIRST TASK: 0, RUN TIME TILL NOW=0.000000 s, CURRENT SIM TIME 1.005877
+[ 1 0 : time at task 0/98 0.000000 ]
+[ 0 0 : time at task 0/98 0.000000 ]
+[ 1 0 : Begin TRACER_WallTime_Loop 0.000008 ]
+[ 0 0 : Begin TRACER_WallTime_Loop 0.000010 ]
+[ 1 0 : Begin TRACER_WallTime_InLoop 0.000017 ]
+[ 0 0 : Begin TRACER_WallTime_InLoop 0.000021 ]
+[ 1 0 : Begin TRACER_WallTime_InLoop 0.003885 ]
+[ 1 0 : End TRACER_WallTime_Loop 0.008503 ]
+[ 0 0 : Begin TRACER_WallTime_InLoop 0.009334 ]
+GVT #233821: simulation 100% complete, max event queue size 1176 (GVT = MAX).
+AVL tree size: 0
+[ 0 0 : End TRACER_WallTime_Loop 0.018654 ]
+ *** END SIMULATION ***
+
+Job[0]PE[0]: FINALIZE in 0.018655 seconds.
+Job[1]PE[0]: FINALIZE in 0.018655 seconds.
+
+	: Running Time = 145.3910 seconds
+
+TW Library Statistics:
+	Total Events Processed                                76557544
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                    12392494
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                               80.69 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                 524608
+	Percent Remote Events                                     0.82 %
+
+	Total Roll Backs                                        956502
+	Primary Roll Backs                                      240438
+	Secondary Roll Backs                                    716064
+	Fossil Collect Attempts                                 935288
+	Total GVT Computations                                  233822
+
+	Net Events Processed                                  64165050
+	Event Rate (events/sec)                               441327.6
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        180721
+	Memory Allocated                                        138755
+	Memory Wasted                                              866
+
+TW Network Statistics:
+	Remote sends                                           1932628
+	Remote recvs                                           1932628
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             72
+	LP RNGs                                                     80
+	Total LP                                                   280
+	Event struct                                               144
+	Event struct with Model                                    656
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                9.2333
+	AVL Tree (insert/delete)                                1.8011
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                      161.3283
+	Event Cancel                                            2.6752
+	Event Abort                                             0.0000
+
+	GVT                                                   344.3377
+	Fossil Collect                                          8.4284
+	Primary Rollbacks                                      26.1925
+	Network Read                                           77.6476
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)    346.5709
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                  233822
+	Total All Reduce Calls                                  512629
+	Average Reduction / GVT                                   2.19
+LP-IO: writing output to tracer-out-4182-1497596142/
+LP-IO: data files:
+   tracer-out-4182-1497596142/torus-link-stats
+   tracer-out-4182-1497596142/torus-msg-stats
+   tracer-out-4182-1497596142/model-net-category-all
+   tracer-out-4182-1497596142/model-net-category-p2p
+   tracer-out-4182-1497596142/model-net-category-test
+Job 0 Time 0.000000 s
+Job 1 Time 0.000000 s
+Job 0 Finalize Time 0.018655 s
+Job 1 Finalize Time 0.018655 s
+ Average number of hops traversed 1.883388 average packet latency 730.779651 us maximum packet latency 3809.250790 us finished packets 7866024 finished hops 14814778 
+#+END_EXAMPLE
+
+***** Fichiers de sortie
+On voit les fichiers de sorties suivants :
+LP-IO: writing output to tracer-out-4182-1497596142/
+LP-IO: data files:
+   tracer-out-4182-1497596142/torus-link-stats
+   tracer-out-4182-1497596142/torus-msg-stats
+   tracer-out-4182-1497596142/model-net-category-all
+   tracer-out-4182-1497596142/model-net-category-p2p
+   tracer-out-4182-1497596142/model-net-category-test
+
+C'est le même type de fichiers que généré par CODES (surement ce
+dernier qui les créés d'ailleurs)
+
+*** 2017-06-16 vendredi
+
+Je crois avoir lié dumpi à traceR, du coup j'ai des traces dumpi
+générés, j'ai mis à jour le Makefile.common pour enlevé =-ldumpi=
+
+**** Test replay HPL
+avec le fichier =tracer_config= contenant :
+#+BEGIN_EXAMPLE
+NA
+1
+traces.otf2 NA 4 1
+#+END_EXAMPLE
+
+Commande : 
+#+begin_src sh :results output :exports both
+ mpirun -np 4 ../../../../tracer/tracer/traceR --sync=3 --nkp=16 --
+extramem=100000 --max-opt-lookahead=1000000 --timer-frequency=1000 -- ../../../../tracer/tracer/conf/tracer-torus.conf tracer_config
+#+end_src
+#+BEGIN_EXAMPLE
+Fri Jun 16 09:18:24 2017
+
+ROSS Revision: 10d7a06b2d5a6864aba4ac779e1faf45d30ffd0d
+
+tw_net_start: Found world size to be 4 
+Config file is ../../../../tracer/tracer/conf/tracer-torus.conf
+Trace input file is tracer_config
+Found soft_delay as 1000.000000
+Found nic_delay as 400.000000
+Found rdma_delay as 1000.000000
+Copy cost per byte is 0.000000 ns
+Eager limit is 8192.000000 bytes
+Begin reading tracer_config
+Using default linear mapping of jobs
+Job 0 - ranks 4, trace folder trace-4/traces.otf2, rank file job0, iters 1
+Done reading meta-information about jobs
+Read global definition for job 0 from trace-4/traces.otf2
+Clock Props: 2394456702 1000000000 0.417631
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                  480
+	Simulation End Time                                3600000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            130721
+	Network events                                           50000
+	Total events                                             80720
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+PE0 - LP_GID:0 : START SIMULATION, TASKS COUNT: 1, FIRST TASK: 0, RUN TIME TILL NOW=0.000000 s, CURRENT SIM TIME 1.005877
+[ 0 0 : time at task 0/1 0.000000 ]
+ *** END SIMULATION ***
+
+Job[0]PE[0]: FINALIZE in 9.460403 seconds.
+
+	: Running Time = 0.0001 seconds
+
+TW Library Statistics:
+	Total Events Processed                                       8
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      8
+	Total GVT Computations                                       2
+
+	Net Events Processed                                         8
+	Event Rate (events/sec)                               140350.9
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        180721
+	Memory Allocated                                        138755
+	Memory Wasted                                              866
+
+TW Network Statistics:
+	Remote sends                                                 0
+	Remote recvs                                                 0
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             72
+	LP RNGs                                                     80
+	Total LP                                                   280
+	Event struct                                               144
+	Event struct with Model                                    656
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0001
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0001
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.0001
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       2
+	Total All Reduce Calls                                       4
+	Average Reduction / GVT                                   2.00
+LP-IO: writing output to tracer-out-5773-1497597504/
+LP-IO: data files:
+   tracer-out-5773-1497597504/torus-link-stats
+   tracer-out-5773-1497597504/torus-msg-stats
+   tracer-out-5773-1497597504/model-net-category-all
+Job 0 Time 0.000000 s
+Job 0 Finalize Time 9.463603 s
+ Average number of hops traversed -nan average packet latency -nan us maximum packet latency 0.000000 us finished packets 0 finished hops 0 
+
+#+END_EXAMPLE
+
+C'est le même type de sortie qu'avec DUMPI.
+Cette version d'HPL a été compilé avec =-DUSE_NO_MPI_DATATYPE= je vais
+tester la version normale.
+
+***** script scorep
+Afin de compiler sans problème, il faut que je fasse le script qui
+inverse les librairies. Pour faire simple j'ai juste ajouté la
+librairie à la fin si elle doit y être.
+#+begin_src sh :results output :exports both
+#!/bin/bash
+variable=`./scorep-config-initial $*`
+
+if [[ $variable == *"-lscorep_adapter_mpi_mgmt"* ]] ; then
+	echo "$variable -lscorep_adapter_mpi_event"
+else
+	echo "$variable"
+fi
+#+end_src
+
+***** Autre version d'HPL
+On obtient la même chose (et pas d'erreur =UNDEFINED_DATA_TYPE=)
+#+BEGIN_EXAMPLE
+Fri Jun 16 10:56:40 2017
+
+ROSS Revision: 10d7a06b2d5a6864aba4ac779e1faf45d30ffd0d
+
+tw_net_start: Found world size to be 4 
+Config file is ../../../../tracer/tracer/conf/tracer-torus.conf
+Trace input file is tracer_config
+Found soft_delay as 1000.000000
+Found nic_delay as 400.000000
+Found rdma_delay as 1000.000000
+Copy cost per byte is 0.000000 ns
+Eager limit is 8192.000000 bytes
+Begin reading tracer_config
+Using default linear mapping of jobs
+Job 0 - ranks 4, trace folder traces.otf2, rank file job0, iters 1
+Done reading meta-information about jobs
+Read global definition for job 0 from traces.otf2
+Clock Props: 2394458590 1000000000 0.417631
+
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                  480
+	Simulation End Time                                3600000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            130721
+	Network events                                           50000
+	Total events                                             80720
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+PE0 - LP_GID:0 : START SIMULATION, TASKS COUNT: 1, FIRST TASK: 0, RUN TIME TILL NOW=0.000000 s, CURRENT SIM TIME 1.005877
+[ 0 0 : time at task 0/1 0.000000 ]
+ *** END SIMULATION ***
+
+Job[0]PE[0]: FINALIZE in 29.043954 seconds.
+
+	: Running Time = 0.0001 seconds
+
+TW Library Statistics:
+	Total Events Processed                                       8
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                      8
+	Total GVT Computations                                       2
+
+	Net Events Processed                                         8
+	Event Rate (events/sec)                                53691.3
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        180721
+	Memory Allocated                                        138755
+	Memory Wasted                                              866
+
+TW Network Statistics:
+	Remote sends                                                 0
+	Remote recvs                                                 0
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             72
+	LP RNGs                                                     80
+	Total LP                                                   280
+	Event struct                                               144
+	Event struct with Model                                    656
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.0000
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        0.0001
+	Event Cancel                                            0.0000
+	Event Abort                                             0.0000
+
+	GVT                                                     0.0003
+	Fossil Collect                                          0.0000
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.0000
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      0.0004
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                       2
+	Total All Reduce Calls                                       4
+	Average Reduction / GVT                                   2.00
+LP-IO: writing output to tracer-out-21192-1497603400/
+LP-IO: data files:
+   tracer-out-21192-1497603400/torus-link-stats
+   tracer-out-21192-1497603400/torus-msg-stats
+   tracer-out-21192-1497603400/model-net-category-all
+Job 0 Time 0.000000 s
+Job 0 Finalize Time 29.043954 s
+ Average number of hops traversed -nan average packet latency -nan us maximum packet latency 0.000000 us finished packets 0 finished hops 0 
+#+END_EXAMPLE
+
+***** Test AMG
+Pour voir si ca vient de mes fichiers de configuration, je vais tester
+avec AMG, que je sais faire fonctionner sur CODES.
+
+****** Compilation
+Avec le fichier Makefile.include suivant :
+#+BEGIN_EXAMPLE
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision: 2.4 $
+#EHEADER**********************************************************************
+
+
+# set the compiler here
+CC = scorep --user --nocompiler --noopenmp --nopomp --nocuda --noopenacc --noopencl --nomemory mpicc
+
+# set compile flags here
+# MPI only:
+#   add '-DTIMER_USE_MPI'  to 'INCLUDE_CFLAGS'
+# MPI with OpenMP:
+#   add '-DHYPRE_USING_OPENMP -DTIMER_USE_MPI'  to 'INCLUDE_CFLAGS'
+# Use assumed partition (for thousands of processors):
+#   add '-DHYPRE_NO_GLOBAL_PARTITION'  to 'INCLUDE_CFLAGS'
+# Use 64-bit integers for global variables (needed for large problems
+#	with more than 2 billion variables)
+#   add '-DHYPRE_LONG_LONG'  to 'INCLUDE_CFLAGS'
+INCLUDE_CFLAGS = -O2 -DTIMER_USE_MPI -DHYPRE_LONG_LONG -ldumpi -I/home/chevamax/logiciels/include -I/home/chevamax/logiciels/include/scorep -DSCOREP_USER_ENABLE
+
+# set link flags here
+#INCLUDE_LFLAGS = -lm -openmp -qsmp
+INCLUDE_LFLAGS = -lm -I/home/chevamax/logiciels/include -I/home/chevamax/logiciels/include/scorep -DSCOREP_USER_ENABLE
+#+END_EXAMPLE
+
+puis =make=
+****** Replay
+Après l'avoir lancé comme d'habitude, on obtient les traces.
+On defini le fichier =tracer_config= comme suit :
+#+BEGIN_EXAMPLE
+NA
+1
+traces.otf2 NA 8 1
+#+END_EXAMPLE
+
+puis :
+#+begin_src sh :results output :exports both
+export SCOREP_ENABLE_TRACING=1
+export SCOREP_ENABLE_PROFILING=0
+export SCOREP_REDUCE_PROBE_TEST=1
+export SCOREP_MPI_ENABLE_GROUPS=ENV,P2P,COLL,XNONBLOCK
+#+end_src
+
+Puis on lance avec la même commande que pour l'exemple
+#+begin_src sh :results output :exports both
+mpirun -np 4 ../../../tracer/tracer/traceR --sync=3 --nkp=16 --extramem=100000 --max-opt-lookahead=1000000 --timer-frequency=1000 -- ../../../tracer/tracer/conf/tracer-torus.conf tracer_config
+#+end_src
+#+BEGIN_EXAMPLE
+Fri Jun 16 14:12:25 2017
+
+ROSS Revision: 10d7a06b2d5a6864aba4ac779e1faf45d30ffd0d
+
+tw_net_start: Found world size to be 4 
+Config file is ../../../tracer/tracer/conf/tracer-torus.conf
+Trace input file is tracer_config
+Found soft_delay as 1000.000000
+Found nic_delay as 400.000000
+Found rdma_delay as 1000.000000
+Copy cost per byte is 0.000000 ns
+Eager limit is 8192.000000 bytes
+Begin reading tracer_config
+Using default linear mapping of jobs
+Job 0 - ranks 8, trace folder traces.otf2, rank file NA, iters 1
+Done reading meta-information about jobs
+Read global definition for job 0 from traces.otf2
+Clock Props: 2394458592 1000000000 0.417631
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                  480
+	Simulation End Time                                3600000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                            130721
+	Network events                                           50000
+	Total events                                             80720
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+PE0 - LP_GID:0 : START SIMULATION, TASKS COUNT: 20909, FIRST TASK: 0, RUN TIME TILL NOW=0.000000 s, CURRENT SIM TIME 1.005877
+[ 0 0 : time at task 0/20909 0.000000 ]
+[ 0 0 : time at task 1000/20909 0.262126 ]
+[ 0 0 : time at task 2000/20909 0.546452 ]
+[ 0 0 : time at task 3000/20909 0.599132 ]
+[ 0 0 : time at task 4000/20909 0.643499 ]
+[ 0 0 : time at task 5000/20909 0.710309 ]
+[ 0 0 : time at task 6000/20909 0.717222 ]
+[ 0 0 : time at task 7000/20909 0.720203 ]
+[ 0 0 : time at task 8000/20909 0.770486 ]
+[ 0 0 : time at task 9000/20909 0.838872 ]
+[ 0 0 : time at task 10000/20909 0.899136 ]
+[ 0 0 : time at task 11000/20909 0.991388 ]
+[ 0 0 : time at task 12000/20909 1.041096 ]
+[ 0 0 : time at task 13000/20909 1.101400 ]
+[ 0 0 : time at task 14000/20909 1.169700 ]
+[ 0 0 : time at task 15000/20909 1.219626 ]
+[ 0 0 : time at task 16000/20909 1.307032 ]
+[ 0 0 : time at task 17000/20909 1.365330 ]
+[ 0 0 : time at task 18000/20909 1.440008 ]
+[ 0 0 : time at task 19000/20909 1.525323 ]
+[ 0 0 : time at task 20000/20909 1.593650 ]
+GVT #36952: simulation 100% complete, max event queue size 33 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+Job[0]PE[0]: FINALIZE in 1.628255 seconds.
+
+	: Running Time = 9.5141 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 9413581
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                 147812
+	Total GVT Computations                                   36953
+
+	Net Events Processed                                   9413581
+	Event Rate (events/sec)                               989430.5
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                        180721
+	Memory Allocated                                        138755
+	Memory Wasted                                              866
+
+TW Network Statistics:
+	Remote sends                                                 0
+	Remote recvs                                                 0
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             72
+	LP RNGs                                                     80
+	Total LP                                                   280
+	Event struct                                               144
+	Event struct with Model                                    656
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.9677
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                       15.4955
+	Event Cancel                                            0.0195
+	Event Abort                                             0.0000
+
+	GVT                                                    22.6792
+	Fossil Collect                                          0.7903
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.8675
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)     22.7804
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                   36953
+	Total All Reduce Calls                                   73906
+	Average Reduction / GVT                                   2.00
+LP-IO: writing output to tracer-out-10109-1497615145/
+LP-IO: data files:
+   tracer-out-10109-1497615145/torus-link-stats
+   tracer-out-10109-1497615145/torus-msg-stats
+   tracer-out-10109-1497615145/model-net-category-all
+   tracer-out-10109-1497615145/model-net-category-p2p
+   tracer-out-10109-1497615145/model-net-category-coll
+   tracer-out-10109-1497615145/model-net-category-test
+Job 0 Time 0.000000 s
+Job 0 Finalize Time 1.639791 s
+ Average number of hops traversed 1.481972 average packet latency 58.099973 us maximum packet latency 728.833557 us finished packets 1368062 finished hops 2027430 
+#+END_EXAMPLE
+
+Ca fonctionne !
+Cependant, je sais pas si c'est les paramètres de la commande ou
+autre, mais le running time est plus important qu'avec seulement
+CODES (ici 9s au lieu de 3s). Il y a cependant un nouveau temps qui
+apparait : =Job[0]PE[0]: FINALIZE in 1.628255 seconds.= qui est très
+loin des 9 secondes. Je vais regarder dans la docs.
+Pour les 9 secondes c'est surement due au fait que j'utilise pas le
+même fichier de conf qu'avant. 
+******* Test avec l'ancien fichier de configuration
+Ca fonctionne pas, en même temps je compare un torus avec un réseau où
+tout le monde est relié.
+Je vais faire tourner le dumpi sur codes avec le fichier .conf actuel plutôt.
+Finalement j'arrive pas à les lancer sur les mêmes fichiers de
+configurations, qui utilisent le formalisme de CODES. C'est étrange,
+il faut que je me plonge dans cette partie.
