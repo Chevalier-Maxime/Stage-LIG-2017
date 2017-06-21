@@ -15179,7 +15179,7 @@ Job 0 Finalize Time 29.043954 s
  Average number of hops traversed -nan average packet latency -nan us maximum packet latency 0.000000 us finished packets 0 finished hops 0 
 #+END_EXAMPLE
 
-***** Test AMG
+**** Test AMG
 Pour voir si ca vient de mes fichiers de configuration, je vais tester
 avec AMG, que je sais faire fonctionner sur CODES.
 
@@ -15402,3 +15402,2217 @@ Je vais faire tourner le dumpi sur codes avec le fichier .conf actuel plutôt.
 Finalement j'arrive pas à les lancer sur les mêmes fichiers de
 configurations, qui utilisent le formalisme de CODES. C'est étrange,
 il faut que je me plonge dans cette partie.
+*** 2017-06-19 lundi 
+**** Article TraceR
+http://charm.cs.illinois.edu/newPapers/16-11/network_comparison_tracer.pdf
+TraceR est donc le succèsseur de BigSim
+**** Fichier de configuration
+Je vais faire mon propre fichier de ocnfiguration, pour qu'il
+ressemble plus à celui utilisé précédemment.
+
+Les deux expériences sont réalisées à partir de traces issues de deux
+éxécutions de AMG avec les paramètres suivants :
+#+begin_src sh :results output :exports both
+mpirun -np 8 ./amg2013 -laplace -n 40 40 40 -P 2 2 2
+#+end_src
+
+avec un AMG lié à dumpi et l'autre à score-P.
+***** Torus sur CODES avec dumpi
+****** Fichier de configuration
+#+BEGIN_EXAMPLE
+LPGROUPS
+{
+   MODELNET_GRP
+   {
+      repetitions="32";
+      nw-lp="1";
+      modelnet_torus="1";
+   }
+}
+PARAMS
+{
+   packet_size="512";
+   message_size="608";
+   modelnet_order=( "torus" );
+   # scheduler options
+   modelnet_scheduler="fcfs";
+   net_startup_ns="1.5";
+   net_bw_mbps="20000";
+   n_dims="3";
+   dim_length="4,4,2";
+   link_bandwidth="10.0";
+   buffer_size="8192";
+   chunk_size="256"; 
+}
+#+END_EXAMPLE
+****** Expérience
+#+begin_src sh :results output :exports both
+mpirun -n 4 ../../../codes/install/bin/model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=dumpi-2017.06.06.15.44.54- --workload_type=dumpi  -- ../../../codes/src/network-workloads/conf/modelnet-mpi-test-torus.conf
+#+end_src
+#+BEGIN_EXAMPLE
+Mon Jun 19 09:53:21 2017
+
+ROSS Revision: 10d7a06b2d5a6864aba4ac779e1faf45d30ffd0d
+
+tw_net_start: Found world size to be 4 
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   64
+	Simulation End Time                                300000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              4097
+	Network events                                           50000
+	Total events                                             54096
+
+
+ Trace dumpi-2017.06.06.15.44.54- job id 0 0 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 1 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 2 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 3 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 4 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 5 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 6 
+ Trace dumpi-2017.06.06.15.44.54- job id 0 7 *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+GVT #6888: simulation 100% complete, max event queue size 56 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+
+	: Running Time = 1.7373 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 1763360
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                  27556
+	Total GVT Computations                                    6889
+
+	Net Events Processed                                   1763360
+	Event Rate (events/sec)                              1015010.8
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         54097
+	Memory Allocated                                         62671
+	Memory Wasted                                              903
+
+TW Network Statistics:
+	Remote sends                                                 0
+	Remote recvs                                                 0
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             72
+	LP RNGs                                                     80
+	Total LP                                                   280
+	Event struct                                               144
+	Event struct with Model                                    752
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.1743
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        2.9278
+	Event Cancel                                            0.0038
+	Event Abort                                             0.0000
+
+	GVT                                                     4.1416
+	Fossil Collect                                          0.1519
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.1552
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      4.1598
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    6889
+	Total All Reduce Calls                                   13778
+	Average Reduction / GVT                                   2.00
+
+ Total bytes sent 63010396 recvd 63010396 
+ max runtime 1876319685.080132 ns avg runtime 1865993561.652330 
+ max comm time 936031328.742090 avg comm time 803505853.527330 
+ max send time 846181240.568358 avg send time 694303447.923512 
+ max recv time 17787084.068875 avg recv time 16653863.436874 
+ max wait time 935944548.454967 avg wait time 803423034.757047 
+ Average number of hops traversed 1.414950 average packet latency 7.820738 us maximum packet latency 67.713980 us finished packets 145931 finished hops 206485 
+#+END_EXAMPLE
+***** Torus sur traceR avec OTF2
+****** Fichier de configuration
+#+BEGIN_EXAMPLE
+LPGROUPS
+{
+   MODELNET_GRP
+   {
+      repetitions="32";
+      server="1";
+      modelnet_torus="1";
+   }
+}
+PARAMS
+{
+   #keep packet_size = chunk_size
+   packet_size="512";
+   chunk_size="256";
+   modelnet_order=( "torus" );
+   modelnet_scheduler="fcfs";
+   message_size="608";
+   n_dims="3";
+   dim_length="4,4,2";
+   link_bandwidth="10.0";
+   buffer_size="8192";
+   net_startup_ns="1.5";
+   net_bw_mbps="20000";
+}
+#+END_EXAMPLE
+****** Expérience
+#+begin_src sh :results output :exports both
+mpirun -np 4 ../../../tracer/tracer/traceR --sync=3 -- ../../../tracer/tracer/conf/max-test-torus.conf tracer_config
+#+end_src
+#+BEGIN_EXAMPLE
+Mon Jun 19 10:02:25 2017
+
+ROSS Revision: 10d7a06b2d5a6864aba4ac779e1faf45d30ffd0d
+
+tw_net_start: Found world size to be 4 
+Config file is ../../../tracer/tracer/conf/max-test-torus.conf
+Trace input file is tracer_config
+Found soft_delay as 100.000000
+Found nic_delay as 400.000000
+Found rdma_delay as 1000.000000
+Copy cost per byte is 0.000000 ns
+Eager limit is 8192.000000 bytes
+Begin reading tracer_config
+Using default linear mapping of jobs
+Job 0 - ranks 8, trace folder traces.otf2, rank file NA, iters 1
+Done reading meta-information about jobs
+Read global definition for job 0 from traces.otf2
+Clock Props: 2394458592 1000000000 0.417631
+
+ROSS Core Configuration: 
+	Total Nodes                                                  4
+	Total Processors                                   [Nodes (4) x PE_per_Node (1)] 4
+	Total KPs                                          [Nodes (4) x KPs (16)] 64
+	Total LPs                                                   64
+	Simulation End Time                                3600000000000.00
+	LP-to-PE Mapping                                   model defined
+
+
+ROSS Event Memory Allocation:
+	Model events                                              4097
+	Network events                                           50000
+	Total events                                             54096
+
+ *** START PARALLEL OPTIMISTIC SIMULATION WITH SUSPEND LP FEATURE ***
+
+PE0 - LP_GID:0 : START SIMULATION, TASKS COUNT: 20909, FIRST TASK: 0, RUN TIME TILL NOW=0.000000 s, CURRENT SIM TIME 1.005877
+[ 0 0 : time at task 0/20909 0.000000 ]
+[ 0 0 : time at task 5000/20909 0.701751 ]
+[ 0 0 : time at task 10000/20909 0.885756 ]
+[ 0 0 : time at task 15000/20909 1.202441 ]
+[ 0 0 : time at task 20000/20909 1.572817 ]
+GVT #6818: simulation 100% complete, max event queue size 75 (GVT = MAX).
+AVL tree size: 0
+ *** END SIMULATION ***
+
+Job[0]PE[0]: FINALIZE in 1.606808 seconds.
+
+	: Running Time = 1.8596 seconds
+
+TW Library Statistics:
+	Total Events Processed                                 1745458
+	Events Aborted (part of RBs)                                 0
+	Events Rolled Back                                           0
+	Event Ties Detected in PE Queues                             0
+	Efficiency                                              100.00 %
+	Total Remote (shared mem) Events Processed                   0
+	Percent Remote Events                                     0.00 %
+	Total Remote (network) Events Processed                      0
+	Percent Remote Events                                     0.00 %
+
+	Total Roll Backs                                             0
+	Primary Roll Backs                                           0
+	Secondary Roll Backs                                         0
+	Fossil Collect Attempts                                  27276
+	Total GVT Computations                                    6819
+
+	Net Events Processed                                   1745458
+	Event Rate (events/sec)                               938633.8
+	Total Events Scheduled Past End Time                         0
+
+TW Memory Statistics:
+	Events Allocated                                         54097
+	Memory Allocated                                         62664
+	Memory Wasted                                              910
+
+TW Network Statistics:
+	Remote sends                                                 0
+	Remote recvs                                                 0
+
+TW Data Structure sizes in bytes (sizeof):
+	PE struct                                                  608
+	KP struct                                                  144
+	LP struct                                                  128
+	LP Model struct                                             72
+	LP RNGs                                                     80
+	Total LP                                                   280
+	Event struct                                               144
+	Event struct with Model                                    752
+
+TW Clock Cycle Statistics (MAX values in secs at 1.0000 GHz):
+	Priority Queue (enq/deq)                                0.1900
+	AVL Tree (insert/delete)                                0.0000
+	LZ4 (de)compression                                     0.0000
+	Buddy system                                            0.0000
+	Event Processing                                        3.0674
+	Event Cancel                                            0.0036
+	Event Abort                                             0.0000
+
+	GVT                                                     4.4331
+	Fossil Collect                                          0.2639
+	Primary Rollbacks                                       0.0000
+	Network Read                                            0.1661
+	Statistics Computation                                  0.0000
+	Statistics Write                                        0.0000
+	Total Time (Note: Using Running Time above for Speedup)      4.4526
+
+TW GVT Statistics: MPI AllReduce
+	GVT Interval                                                16
+	GVT Real Time Interval (cycles)                    0
+	GVT Real Time Interval (sec)                        0.00000000
+	Batch Size                                                  16
+
+	Forced GVT                                                   0
+	Total GVT Computations                                    6819
+	Total All Reduce Calls                                   13638
+	Average Reduction / GVT                                   2.00
+LP-IO: writing output to tracer-out-11085-1497859345/
+LP-IO: data files:
+   tracer-out-11085-1497859345/torus-link-stats
+   tracer-out-11085-1497859345/torus-msg-stats
+   tracer-out-11085-1497859345/model-net-category-all
+   tracer-out-11085-1497859345/model-net-category-p2p
+   tracer-out-11085-1497859345/model-net-category-coll
+   tracer-out-11085-1497859345/model-net-category-test
+Job 0 Time 0.000000 s
+Job 0 Finalize Time 1.618344 s
+ Average number of hops traversed 1.419230 average packet latency 8.406251 us maximum packet latency 66.438092 us finished packets 146211 finished hops 207507 
+#+END_EXAMPLE
+***** Premières observations
+On a sur ces deux simulation, avec des traces et des logiciels de
+simulations différents, un running time à prioris équivalent. Je vais
+réaliser un script pour relancer ces experiences un grand nombre de
+fois afin de voir l'impacte de traceR. 
+****** Script
+#+begin_src sh :results output :exports both
+#!/bin/bash
+
+if [[ $LD_LIBRARY_PATH != *"/codes/install/lib"* ]] ; then
+	export LD_LIBRARY_PATH="/home/chevamax/Téléchargements/codes/install/lib:$LD_LIBRARY_PATH"	
+fi
+
+path_codes="/home/chevamax/Téléchargements/codes/install/bin"
+path_traces_dumpi="/home/chevamax/Téléchargements/AMG2013/test/Simulation"
+nom_trace_dumpi="dumpi-2017.06.06.15.44.54-"
+conf_dumpi="/home/chevamax/Téléchargements/codes/src/network-workloads/conf/modelnet-mpi-test-torus.conf"
+
+path_traces_otf2="/home/chevamax/Téléchargements/AMG2013OTF2/test/scorep-20170616_1358_2108523143396"
+nom_config_otf2="tracer_config"
+path_tracer="/home/chevamax/Téléchargements/tracer/tracer/traceR"
+conf_tracer="/home/chevamax/Téléchargements/tracer/tracer/conf/max-test-torus.conf"
+
+codes="mpirun -n 4 $path_codes/model-net-mpi-replay --sync=3 --num_net_traces=8 --workload_file=$path_traces_dumpi/$nom_trace_dumpi --workload_type=dumpi  -- $conf_dumpi"
+tracer="mpirun -np 4 $path_tracer --sync=3 -- $conf_tracer $path_traces_otf2/$nom_config_otf2"
+timer="/usr/bin/time"
+
+END=1
+output="resComparatif"
+temporaire="temp"
+temporaire2=""
+echo "<time> <trunningTime> <type>" >$output
+
+
+for i in $(seq 1 $END); do
+	$timer $codes >  $temporaire 2>> $temporaire
+	temporaire2="$temporaire2 $(grep "Running Time" $temporaire | cut -d = -f 2 -s | cut -d ' ' -f 2)"
+	temporaire2="$temporaire2 $(grep "elapsed" $temporaire | cut -d ' ' -f 3 | sed 's/\(.*[0-9]\)\(.*\)/\1/') C"
+	echo "$temporaire2" >>$output
+	
+	$timer $tracer >  $temporaire 2>> $temporaire
+	temporaire2="$(grep "Running Time" $temporaire | cut -d = -f 2 -s | cut -d ' ' -f 2)"
+	temporaire2="$temporaire2 $(grep "elapsed" $temporaire | cut -d ' ' -f 3 | sed 's/\(.*[0-9]\)\(.*\)/\1/') T"
+	echo "$temporaire2" >>$output
+done
+#+end_src
+
+Maintenant plus qu'a le lancer (et après utiliser R pour les ggplots avec
+des datas).
+**** SimGrid                                                     :SimGrid:
+***** Installation
+J'ai pris la version du git, mais après compilation et lancement des
+test, j'en ai 5 qui passent pas:
+	125 - msg-dht-chord-parallel-thread (Failed)
+	126 - msg-dht-chord-parallel-ucontext (Failed)
+	127 - msg-dht-chord-parallel-raw (Failed)
+	230 - tesh-msg-cloud-sharing (Failed)
+	242 - tesh-s4u-comm-waitany (SEGFAULT)
+
+Je vais donc dans un premier temps prendre la version stable des
+dépôts.
+**** TODO Réunion Arnaud
+
+*** 2017-06-20 mardi
+**** Compilation exemple tracer avec simgrid
+Il semblerais que le lien se fasse pas bien entre les deux, je vais
+tenter de recompiler scoreP avec l'option =-fPIC= (problème de librairie partagés)
+Mais bien sur ca ne fonctionne plus ...
+Du coup je fais ca sur ma machine virtuelle pour voir.
+scorep s'installe bien, j'ai download traceR (mais je vais pas le
+compiler, on en a pas besoin tout de suite pour le test). J'installe
+également SimGrid.
+
+Pour l'instant j'ai fait avec --enable-shared et pas -fPIC
+
+J'ai du ajouter l'option -std=c++11 après smpicxx pour que ca
+compile. (exemple de tracer, sans le lien à scoreP pour le momment.
+
+Il semblerais que l'option --enable-shared ne suffise pas.
+
+J'avais l'erreur suivante : 
+#+BEGIN_EXAMPLE
+Il faut refabriquer la cible « stencil4d-sg ».
+scorep --user --nocompiler --noopenmp --nopomp --nocuda --noopenacc --noopencl --nomemory smpicxx -O2 -DWRITE_OTF2_TRACE=1 -DSCOREP_USER_ENABLE -I/home/chevamax/logiciels/include -I/home/chevamax/logiciels/include/scorep   -o stencil4d-sg stencil4d.C
+Ajout du processus fils 0x55a46fcceac0 (stencil4d-sg) PID 5715 à la chaîne.
+Processus fils actif 0x55a46fcceac0 (stencil4d-sg) PID 5715 
+/usr/bin/ld: /home/chevamax/logiciels/lib/libscorep_measurement.a(libscorep_measurement_core_la-scorep_location.o): relocation R_X86_64_TPOFF32 against symbol `scorep_in_measurement' can not be used when making a shared object; recompilé avec -fPIC
+/usr/bin/ld: /home/chevamax/logiciels/lib/libscorep_measurement.a(libscorep_measurement_core_la-SCOREP_Events.o): relocation R_X86_64_PC32 against symbol `scorep_is_unwinding_enabled' can not be used when making a shared object; recompilé avec -fPIC
+/usr/bin/ld : échec de l'édition de liens finale : Mauvaise valeur
+collect2: error: ld returned 1 exit status
+ERROR: Execution failed: smpicxx stencil4d-sg.scorep_init.o stencil4d_1497949157_89827.o `/home/chevamax/logiciels/bin/scorep-config --thread=none --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --constructor`  -O2 -DWRITE_OTF2_TRACE="1" -DSCOREP_USER_ENABLE -I/home/chevamax/logiciels/include -I/home/chevamax/logiciels/include/scorep `/home/chevamax/logiciels/bin/scorep-config --thread=none --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --ldflags` `/home/chevamax/logiciels/bin/scorep-config --thread=none --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --libs`   -o stencil4d-sg
+#+END_EXAMPLE
+
+J'ai maintenant l'erreur suivante : (avec --enable-shared)
+#+BEGIN_EXAMPLE
+corep --user --nocompiler --noopenmp --nopomp --nocuda --noopenacc --noopencl --nomemory smpicxx -std=c++11 -O2 -DWRITE_OTF2_TRACE=1 -Iopt/scorep/include -Iopt/scorep/include/scorep -DSCOREP_USER_ENABLE  -o stencil4d-sg stencil4d.C
+/usr/bin/ld: /opt/scorep/lib/scorep/scorep_constructor.o: réadressage de R_X86_64_32 en vertu de « .rodata.str1.8 » ne peut être utilisé lors de la création d'un objet partagé; recompilez avec -fPIC
+/opt/scorep/lib/scorep/scorep_constructor.o : erreur lors de l'ajout de symboles : Mauvaise valeur
+collect2: error: ld returned 1 exit status
+ERROR: Execution failed: smpicxx stencil4d-sg.scorep_init.o stencil4d_1497965965_723836.o `/opt/scorep/bin/scorep-config --thread=none --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --constructor`  -std=c++11 -O2 -DWRITE_OTF2_TRACE="1" -Iopt/scorep/include -Iopt/scorep/include/scorep -DSCOREP_USER_ENABLE `/opt/scorep/bin/scorep-config --thread=none --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --ldflags` `/opt/scorep/bin/scorep-config --thread=none --mpp=mpi --mutex=none --nocompiler --nocuda --noonline-access --user --noopencl --noopenacc --nomemory --libs`   -o stencil4d-sg
+Makefile:13 : la recette pour la cible « stencil4d-sg » a échouée
+make: *** [stencil4d-sg] Erreur 1
+#+END_EXAMPLE
+
+Je sais pas si c'est une évolution, mais on va retenter.
+*** 2017-06-21 mercredi
+**** Reprise de l'installation
+Avec scoreP 
+#+begin_src sh :results output :exports both
+make uninstall-recursive
+make distclean
+CC=mpicc CFLAGS="-O2 -fPIC" CXX=mpicxx CXXFLAGS="-O2 -fPIC" FC=mpif90 F77=mpif77 ../configure --without-gui --enable-shared --with-mpi=mpich3
+#+end_src
+
+Le programme de test se lance encore en mode normal (sans lien avec
+scoreP) et avec mpirun.
+Sans scoreP, et avec simGrid, ca se termine (même si j'ai pleins
+d'erreurs simgrid à la fin (Probable bug), mais ca doit venir de la
+version git.
+Et les deux combinés j'ai une erreur de scoreP (donc pour la
+compilation avec -fPIC et --enable-shared a fonctionné).
+
+#+BEGIN_EXAMPLE
+smpirun -np 256 -platform ~/Téléchargements/simgrid/examples/platforms/cluster.xml ./stencil4d-sg 4 4 4 4 128000
+You requested to use 256 ranks, but there is only 100 processes in your hostfile...
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'surf/precision' to '1e-9'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/model' to 'SMPI'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/TCP-gamma' to '4194304'
+[0.000000] [smpi_kernel/INFO] You did not set the power of the host running the simulation.  The timings will certainly not be accurate.  Use the option "--cfg=smpi/host-speed:<flops>" to set its value.Check http://simgrid.org/simgrid/latest/doc/options.html#options_smpi_bench for more information.
+Running Jacobi on 256 processors with (4, 4, 4, 4) process grid
+Completed 2 iterations
+Time elapsed per iteration: 1.036060
+smpimain: ../../build-mpi/../src/measurement/paradigm/mpi/scorep_ipc_mpi.c:179: SCOREP_IpcGroup_GetSize: Assertion `SCOREP_Status_IsMppInitialized()' failed.
+./stencil4d-sg --cfg=smpi/privatization:1 --cfg=surf/precision:1e-9 --cfg=network/model:SMPI --cfg=network/TCP-gamma:4194304 /home/chevamax/Téléchargements/simgrid/examples/platforms/cluster.xml smpitmp-appw5NgzH
+Generated hostfile smpitmp-hostfYcfAgy kept.
+Execution failed with code 134.
+#+END_EXAMPLE
+
+J'ai l'impression que scoreP à pas le temps de s'initialiser que
+SimGrid à déjà fini.
+
+
+L'assertion a le code suivant ;
+#+BEGIN_EXAMPLE
+bool
+SCOREP_Status_IsMppInitialized( void )
+{
+    return scorep_process_local_status.mpp_is_initialized;
+}
+#+END_EXAMPLE
+
+Ce booleen est positionné à vrai dans =SCOREP_Status_OnMppInit(void)= du
+même fichier.
+Cett fonction est appelé par =scorep_init_mpp(
+SCOREP_SynchronizationMode syncMode )= du fichier =SCOREP_RuntimeManagement.c=
+elle même appelé à deux endroits :
+- =SCOREP_InitMeasurement= du même fichier (doc ci dessous)
+#+BEGIN_EXAMPLE
+/**
+ * Initialize the measurement system from the adapter layer. This function
+ * needs to be called at least once by an (arbitrary) adapter before any other
+ * measurement API function is called. Calling other API functions before is
+ * seen as undefined behaviour. The first call to this function triggers the
+ * initialization of all adapters in use.
+ *
+ * For performance reasons the adapter should keep track of it's
+ * initialization status and call this function only once.
+ *
+ * Calling this function several times does no harm to the measurement system.
+ *
+ * Each arising error leads to a fatal abortion of the program.
+ *
+ * @note The MPI adapter needs special treatment, see
+ * SCOREP_InitMppMeasurement().
+ *
+ * @see SCOREP_FinalizeMeasurement()
+ */
+#+END_EXAMPLE
+- =SCOREP_InitMppMeasurement= du même fichier
+
+On va regarder le second dans un premier temps vu que c'est celui qui
+est utilisé quand le système utilise MPI.
+
+- =SCOREP_InitMppMeasurement=
+#+BEGIN_EXAMPLE
+Searching 4754 files for "SCOREP_InitMppMeasurement" (case sensitive)
+
+/home/chevamax/Téléchargements/scorep/include/scorep/SCOREP_Tau.h:
+   68   *
+   69   * @note The MPI adapter needs special treatment, see
+   70:  * SCOREP_InitMppMeasurement().
+   71   *
+   72   * @see SCOREP_FinalizeMeasurement()
+
+/home/chevamax/Téléchargements/scorep/src/adapters/mpi/SCOREP_Mpi_Env.c:
+  164      {
+  165          /* complete initialization of measurement core and MPI event handling */
+  166:         SCOREP_InitMppMeasurement();
+  167      }
+  168  
+  ...
+  254      {
+  255          /* complete initialization of measurement core and MPI event handling */
+  256:         SCOREP_InitMppMeasurement();
+  257      }
+  258  
+
+/home/chevamax/Téléchargements/scorep/src/adapters/shmem/SCOREP_Shmem.c:
+   56          SCOREP_EXIT_WRAPPED_REGION();                                       \
+   57                                                                              \
+   58:         SCOREP_InitMppMeasurement();                                        \
+   59                                                                              \
+   60          /* Enable SHMEM event generation */                                 \
+   ..
+   97          SCOREP_EXIT_WRAPPED_REGION();                                       \
+   98                                                                              \
+   99:         SCOREP_InitMppMeasurement();                                        \
+  100                                                                              \
+  101          /* Enable SHMEM event generation */                                 \
+  ...
+  139          SCOREP_EXIT_WRAPPED_REGION();                                       \
+  140                                                                              \
+  141:         SCOREP_InitMppMeasurement();                                        \
+  142                                                                              \
+  143          /* Enable SHMEM event generation */                                 \
+  ...
+  173          SCOREP_EXIT_WRAPPED_REGION();                                       \
+  174                                                                              \
+  175:         SCOREP_InitMppMeasurement();                                        \
+  176                                                                              \
+  177          /* Enable SHMEM event generation */                                 \
+
+/home/chevamax/Téléchargements/scorep/src/adapters/tau/SCOREP_Tau.c:
+  164   *
+  165   * @note The MPI adapter needs special treatment, see
+  166:  * SCOREP_InitMppMeasurement().
+  167   *
+  168   * @see SCOREP_FinalizeMeasurement()
+
+/home/chevamax/Téléchargements/scorep/src/measurement/SCOREP_RuntimeManagement.c:
+  293      SCOREP_TIME( scorep_subsystems_initialize, ( ) );
+  294  
+  295:     /* Register finalization handler, also called in SCOREP_InitMppMeasurement() and
+  296       * SCOREP_FinalizeMppMeasurement(). We need to make sure that our handler is
+  297       * called before the MPI one. */
+  ...
+  339      if ( !SCOREP_Status_IsMpp() )
+  340      {
+  341:         SCOREP_TIME_START_TIMING( SCOREP_InitMppMeasurement );
+  342  
+  343          scorep_init_mpp( SCOREP_SYNCHRONIZATION_MODE_BEGIN );
+  344  
+  345:         SCOREP_TIME_STOP_TIMING( SCOREP_InitMppMeasurement );
+  346      }
+  347  
+  ...
+  390   */
+  391  void
+  392: SCOREP_InitMppMeasurement( void )
+  393  {
+  394      UTILS_DEBUG_ENTRY();
+  395  
+  396:     SCOREP_TIME_START_TIMING( SCOREP_InitMppMeasurement );
+  397  
+  398      if ( SCOREP_Thread_InParallel() )
+  ...
+  416      SCOREP_RegisterExitHandler();
+  417  
+  418:     SCOREP_TIME_STOP_TIMING( SCOREP_InitMppMeasurement );
+  419  }
+  420  
+
+/home/chevamax/Téléchargements/scorep/src/measurement/scorep_runtime_management.h:
+   48   * available after the first call to SCOREP_CreateExperimentDir(). In the MPI
+   49   * case a valid and unique name is available on all processes after the call
+   50:  * to SCOREP_CreateExperimentDir() from within SCOREP_InitMppMeasurement().
+   51   *
+   52   * @note The name is a temporary name used during measurement. At
+
+/home/chevamax/Téléchargements/scorep/src/measurement/scorep_runtime_management_timings.h:
+   65      SCOREP_TIMING_TRANSFORM_OP( SCOREP_InitMeasurement )                \
+   66      SCOREP_TIMING_TRANSFORM_OP( scorep_synchronize )                    \
+   67:     SCOREP_TIMING_TRANSFORM_OP( SCOREP_InitMppMeasurement )             \
+   68      SCOREP_TIMING_TRANSFORM_OP( MeasurementDuration )                   \
+   69      SCOREP_TIMING_TRANSFORM_OP( scorep_trigger_exit_callbacks )         \
+
+/home/chevamax/Téléchargements/scorep/src/measurement/include/SCOREP_RuntimeManagement.h:
+   98   *
+   99   * @note The MPI adapter needs special treatment, see
+  100:  * SCOREP_InitMppMeasurement().
+  101   *
+  102   * @see SCOREP_FinalizeMeasurement()
+  ...
+  126   */
+  127  void
+  128: SCOREP_InitMppMeasurement( void );
+  129  
+  130  /**
+
+18 matches across 8 files
+#+END_EXAMPLE
+(pas de chance !)
+
+
+En metant scoreP en mode verbose (via la variable d'environnement
+=SCOREP_VERBOSE=1=) On obtient les outputs suivants :
+
+Avec Simgrid : 
+#+BEGIN_EXAMPLE
+smpirun -np 81 -platform ~/Téléchargements/simgrid/examples/platforms/cluster.xml ./stencil4d-sg 3 3 3 3 128000
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'surf/precision' to '1e-9'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/model' to 'SMPI'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/TCP-gamma' to '4194304'
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[0.000000] [smpi_kernel/INFO] You did not set the power of the host running the simulation.  The timings will certainly not be accurate.  Use the option "--cfg=smpi/host-speed:<flops>" to set its value.Check http://simgrid.org/simgrid/latest/doc/options.html#options_smpi_bench for more information.
+Running Jacobi on 81 processors with (3, 3, 3, 3) process grid
+Completed 2 iterations
+Time elapsed per iteration: 0.367047
+smpimain: ../../build-mpi/../src/measurement/paradigm/mpi/scorep_ipc_mpi.c:179: SCOREP_IpcGroup_GetSize: Assertion `SCOREP_Status_IsMppInitialized()' failed.
+./stencil4d-sg --cfg=smpi/privatization:1 --cfg=surf/precision:1e-9 --cfg=network/model:SMPI --cfg=network/TCP-gamma:4194304 /home/chevamax/Téléchargements/simgrid/examples/platforms/cluster.xml smpitmp-appAJhcRR
+Generated hostfile smpitmp-hostfVmkQuI kept.
+Execution failed with code 134.
+Makefile:16 : la recette pour la cible « run-sg » a échouée
+make: *** [run-sg] Erreur 134
+#+END_EXAMPLE
+
+Sans simgrid :
+#+BEGIN_EXAMPLE
+[Score-P] experiment directory: /home/chevamax/Téléchargements/tracer/tracer/stencil4d-otf/scorep-measurement-tmp
+Running Jacobi on 81 processors with (3, 3, 3, 3) process grid
+Completed 2 iterations
+Time elapsed per iteration: 14.588024
+[Score-P] final experiment directory: /home/chevamax/Téléchargements/tracer/tracer/stencil4d-otf/scorep-20170621_1518_40350806045968
+core-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] running in verbose mode
+[Score-P] successfully initialized SUBSTRATES subsystem
+[Score-P] successfully initialized METRIC subsystem
+[Score-P] successfully initialized USER subsystem
+[Score-P] successfully initialized MPI subsystem
+[Score-P] successfully initialized location for SUBSTRATES subsystem
+[Score-P] successfully initialized location for TASK subsystem
+[Score-P] successfully initialized location for METRIC subsystem
+[Score-P] successfully initialized location for USER subsystem
+[Score-P] initialized via constructor
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized USER subsystem
+[Score-P] finalized MPI subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] finalized METRIC subsystem location
+[Score-P] finalized TASK subsystem location
+[Score-P] finalized SUBSTRATES subsystem location
+[Score-P] finalized MPI subsystem
+[Score-P] finalized USER subsystem
+[Score-P] finalized METRIC subsystem
+[Score-P] finalized SUBSTRATES subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+[Score-P] de-registered MPI subsystem
+[Score-P] de-registered METRIC subsystem
+#+END_EXAMPLE
+
+On obtient beaucoups de traces, mais c'est les 81 processus. Je sais
+pas comment c'est géré dans SimGrid, mais comme y'a qu'un affichage,
+on va partir du principe que ca bug soit à =initialized via constructor=
+soit avant =finalized METRIC subsystem location=.
+
+La première option me donne rien quand je recherche, car la fonction
+qui affiche ca est appelé dans les =makefiles=, ou dans
+=scorep/src/tools/config/scorep_config.cpp= . 
+La seconde est appelé dans le fichier =SCOREP_RuntimeManagement.c= dans
+la fonction =scorep_finalize= à la ligne 683.
+
+Donc j'ai l'impression qu'il y a un soucis quelque part dans cette
+fonction quand on link à SimGrid. 
+Mantenant il faut que je trouve, qui appelle les fonctions ci dessus
+- =SCOREP_InitMeasurement=
+- =SCOREP_InitMppMeasurement=
