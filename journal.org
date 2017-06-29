@@ -4691,7 +4691,7 @@ INCLUDE_LFLAGS = -lm
 #+END_EXAMPLE
 
 et modifier le makefile du sous dossier test avec les liens dans
-LFLAGS (ou les mettre dans le CFLAGS ci-dessus)
+LFLAGS (ou les mettre dans le LFLAGS ci-dessus)
 #+BEGIN_EXAMPLE
 -L<path to dumpi lib> -ldumpi
 #+END_EXAMPLE
@@ -8482,7 +8482,9 @@ Ensuite il faut modifier le fichier configure, et remplacer à la ligne
 #+begin_src sh :results output :exports both
 mkdir build
 cd build
-../configure --enable-libdumpi --enable-test --prefix=/home/chevamax/logiciels CC=mpicc CXX=mpiCC CFLAGS="-DMPICH_SUPPRESS_PROTOTYPES=1 -DHAVE_PRAGMA_HP_SEC_DEF=1 -pthread -I/home/chevamax/logiciels/include/open-trace-format -L/home/chevamax/logiciels/lib"
+../configure --enable-libdumpi --enable-test --prefix=/home/chevamax/logiciels CC=mpicc \
+CXX=mpiCC CFLAGS="-DMPICH_SUPPRESS_PROTOTYPES=1 -DHAVE_PRAGMA_HP_SEC_DEF=1\
+ -pthread -I/home/chevamax/logiciels/include/open-trace-format -L/home/chevamax/logiciels/lib"
 #+end_src
 
 Puis ajouter le code ci dessous au fichier
@@ -17616,3 +17618,122 @@ fonction quand on link à SimGrid.
 Mantenant il faut que je trouve, qui appelle les fonctions ci dessus
 - =SCOREP_InitMeasurement=
 - =SCOREP_InitMppMeasurement=
+**** Arnaud
+On a regarder un peu avec Arnaud, mais le fait de faire en partagé
+c'est pas utile, vu qu'on veut du static pour SimGrid. Si j'y arrive
+pas il faut que je demande à Vincent, ou dans un premier temps ajouter
+des printf à stencil4d pour voir ce qui se lance. Sinon faut tester
+avec DUMPI.
+Du coup on a tout désinstallé pour compiler avec -fPIC seulement.
+*** 2017-06-22 jeudi
+**** Arnaud et Vincent
+Le diagnostic de Vincent et que SimGrid doit faire des copies de
+chaque lib pour chaque processus utilisant ScoreP. (Ce qu'il ne fait
+pas actuellement).
+Si on utilise MMAP, il faut que scoreP soit en static, mais avec du
+-fPIC pour que le .a soit quand même partagé.
+
+En modifiant le scorep-config et en enlevant le -shared ajouté pas
+SimGrid ca compile, mais ca ne se lance pas à cause du dlopen.
+
+**** Analyse de la sortie du Makefile
+Après une configuration de scoreP avec les paramètres suivants :
+../configure CC=mpicc CFLAGS="-O2 -fPIC" CXX=mpicxx CXXFLAGS="-O2
+-fPIC" FC=mpif90 F77=mpif77 --without-gui --with-mpi=mpich3
+
+Et un grep -v "fPIC" sur la sortie du make V=1, j'observe qu'il y a 84
+correspondances au symbole : "libtool: compile:  " donc 76 mpicc, 1
+mpif77 et 7 gcc.
+
+Du coup je sais pas trop comment résoudre ca, en cherchant dans les
+Makefiles surement.
+
+Je pense tenter DUMPI avant cela, car finalement l'OTF2 n'apporte pas
+grand chose (SimGrid ne le prend pas en entrée). Bien que ca soit
+surement plus facile de convertir de l'OTF2 que de DUMPI.
+
+
+Avec DUMPI, j'ai aussi un problème fPIC, je vais donc le recompiler.
+En recompilant dumpi avec fPIC, et en ajoutant fPIC ou non à AMG j'ai
+le même tupe d'erreur pour la =libHYPRE_utilities.a= Mais c'est peut
+être à cause d'une erreur lors du build des utilities, car le type
+=useconds_t= de smpi.h est inconnu.
+
+Je vais tester sur des exemples plus petits, pour voir si tout marche
+bien avant de me lancer sur ce genre de compilation.
+
+Mon dumpi génére pas de trace, c'est un premier problème ... Je vais
+regarder l'outil d'Arnaud pour gérer les softs.
+
+
+
+Quand je compile AMG avec SimGrid il y a un soucis avec smpi.h utilisé
+par le fichier timer.c . Dans smpi.h il y a le type useconds_t et
+clockid_t qui ne sont pas connus par timer.c
+
+Si je compie une première fois avec mpicc, puis je suprime
+l'executable et recompile avec smpicc ca compile, mais il y a un segfault
+
+
+AMG + Simgrid seulement :
+Si je fais mpicc, puis rm de amg2013 puis smpicc j'ai cette erreur :
+#+BEGIN_EXAMPLE
+smpirun -np 8 -platform /home/chevamax/simgrid/examples/platforms/cluster.xml ./amg2013 -laplace -n 40 40 40 -P 2 2 2
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'surf/precision' to '1e-9'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/model' to 'SMPI'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/TCP-gamma' to '4194304'
+[0.000000] [smpi_kernel/INFO] You did not set the power of the host running the simulation.  The timings will certainly not be accurate.  Use the option "--cfg=smpi/host-speed:<flops>" to set its value.Check http://simgrid.org/simgrid/latest/doc/options.html#options_smpi_bench for more information.
+Segmentation fault.
+Try to enable SMPI variable privatization with --cfg=smpi/privatization:yes.
+./amg2013 --cfg=smpi/privatization:1 --cfg=surf/precision:1e-9 --cfg=network/model:SMPI --cfg=network/TCP-gamma:4194304 /home/chevamax/simgrid/examples/platforms/cluster.xml smpitmp-appKnaKRP
+Generated hostfile smpitmp-hostfBQPAEH kept.
+Execution failed with code 139.
+#+END_EXAMPLE
+
+Si je change le makefile de utilities et je je remplace smpicc par mpicc j'ai cette erreur :
+#+BEGIN_EXAMPLE
+smpirun -np 8 -platform /home/chevamax/simgrid/examples/platforms/cluster.xml --cfg=smpi/privatization:yes ./amg2013 -laplace -n 40 40 40 -P 2 2 2
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'surf/precision' to '1e-9'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/model' to 'SMPI'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/TCP-gamma' to '4194304'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'smpi/privatization' to 'yes'
+[0.000000] [smpi_kernel/INFO] You did not set the power of the host running the simulation.  The timings will certainly not be accurate.  Use the option "--cfg=smpi/host-speed:<flops>" to set its value.Check http://simgrid.org/simgrid/latest/doc/options.html#options_smpi_bench for more information.
+  3D 7-point Laplace problem on a cube
+  (nx_global, ny_global, nz_global) = (80, 80, 80)
+  (Px, Py, Pz) = (2, 2, 2)
+  (cx, cy, cz) = (1.000000, 1.000000, 1.000000)
+
+Segmentation fault.
+./amg2013 --cfg=smpi/privatization:1 --cfg=surf/precision:1e-9 --cfg=network/model:SMPI --cfg=network/TCP-gamma:4194304 --cfg=smpi/privatization:yes /home/chevamax/simgrid/examples/platforms/cluster.xml smpitmp-appO8IQzH
+Generated hostfile smpitmp-hostflt5krY kept.
+Execution failed with code 139.
+#+END_EXAMPLE
+Où le programme ce lance mais s'arrête. Je pense qu'il faut régler le
+soucis de compilation avec smpicc (ou peut être compiler toutes les
+librairies via mpicc -fPIC 
+
+
+*** 2017-06-28 mercredi
+
+Je suis plus trop à jour dans mon journal... Alors j'ai réalisé un
+script qui permet de faire des rééxécution de traces d'AMG (lancé via
+les commandes suivante :
+- mpirun -n  8 ./amg -laplace -n 40 40 40 -P 2 2 2
+- mpirun -n 27 ./amg -laplace -n 40 40 40 -P 3 3 3
+- mpirun -n 64 ./amg -laplace -n 40 40 40 -P 4 4 4
+). Chaque commande et lancé pour généré du DUMPI et du OTF2 (5 fois
+chaque type pour chaque commande). J'ai ensuite fait un petit script
+qui génére un csv avec les informations (running time et time) pour
+l'exploiter en R. Les premières remarque montrent que TraceR s'exécute
+beaucoup plus rapidement que CODES (alors qu'il est basé sur ce
+dernier) ce qui semble louche. Je vais donc regarder si y'a pas un
+soucis de configuration.
+
+modification des fichier timer.c (ajout de typedef unsigned int
+=clockid_t=) et mpi.h (ajout de =typedef unsigned int useconds_t=)
+
+
+Le lien avec DUMPI et SimGrid ne fonctionne pas (le programme
+s'exécute, mais les traces ne sont pas générées) alors qu'avec le même
+DUMPI et mpicc j'ai des traces. Du coup je sais pas trop d'où ca peut
+venir

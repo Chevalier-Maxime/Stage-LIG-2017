@@ -1,0 +1,41 @@
+---
+title: "Comparaison Codes TraceR"
+output: html_document
+---
+## R Markdown
+
+### Premières observations
+
+Lancement d'un script qui rejoue une trace OTF2 sur TraceR, puis une trace DUMPI sur CODES, etc. Les deux types de traces, bien que résultantes d'exécutions d'AMG, ont été lancées avec les mêmes paramètres.
+
+AMG à donc été lancé avec les paramètres suivants:
+- mpirun -n  8 ./amg -laplace -n 40 40 40 -P 2 2 2
+- mpirun -n 27 ./amg -laplace -n 40 40 40 -P 3 3 3
+- mpirun -n 64 ./amg -laplace -n 40 40 40 -P 4 4 4
+
+```{r, echo=FALSE, warning=FALSE}
+data <- read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/script/Simu2/resComparatif", header=TRUE, sep=" ")
+
+convert <- function(rTime) {
+  as.numeric(strsplit(as.character(rTime),split=":")[[1]][1])*60+as.numeric(strsplit(as.character(rTime),split=":")[[1]][2])
+}
+
+data2 = data.frame(data[c(1,3,4)], apply(data[2],1, convert))
+```
+
+```{r, echo=FALSE, warning=FALSE}
+library(ggplot2)
+ggplot(data2, aes(x=size,y=data2[1], color=type)) +geom_point(size=0.02) + aes(ymin=0) + xlab("simulation (4 traces par taille)")+ylab("temps en secondes") + ggtitle("Running time annoncé") 
+#data$count =  1:nrow(data)/2
+```
+
+
+
+```{r, echo=FALSE, warning=FALSE}
+ggplot(data2, aes(x=size,y=data2[4],alpha(0.05), color=type)) +geom_point(size=0.02) + aes(ymin=0) +xlab("simulation")+ylab("temps en secondes") + ggtitle("Temps total via /usr/bin/time")
+
+
+```
+
+C'est étonnant cette différence entre les deux.
+

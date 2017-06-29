@@ -1,0 +1,87 @@
+#!/bin/bash
+
+if [[ $LD_LIBRARY_PATH != *"/codes/install/lib"* ]] ; then
+	export LD_LIBRARY_PATH="/home/chevamax/Téléchargements/codes/install/lib:$LD_LIBRARY_PATH"	
+fi
+
+path_codes="/home/chevamax/Téléchargements/codes/install/bin"
+path_traces_dumpi="/home/chevamax/Téléchargements/AMG2013/test/Simulation"
+nom_trace_dumpi8=( "dumpi-2017.06.06.15.44.54-" "dumpi-2017.06.27.10.09.48-" "dumpi-2017.06.27.10.10.52-" "dumpi-2017.06.27.10.11.31-" "dumpi-2017.06.27.10.12.18-" )
+nom_trace_dumpi27=( "dumpi-2017.06.27.10.18.24-" "dumpi-2017.06.27.10.19.56-" "dumpi-2017.06.27.10.21.26-" "dumpi-2017.06.27.10.22.34-" "dumpi-2017.06.27.10.23.40-" )
+nom_trace_dumpi64=( "dumpi-2017.06.27.10.27.51-" "dumpi-2017.06.27.10.32.05-" "dumpi-2017.06.27.10.34.17-" "dumpi-2017.06.27.10.36.26-" "dumpi-2017.06.27.10.38.34-" )
+conf_dumpi="/home/chevamax/Téléchargements/codes/src/network-workloads/conf/dfly-216.conf"
+
+path_traces_otf2="/home/chevamax/Téléchargements/AMG2013OTF2/test"
+nom_trace_otf2_8=( "scorep-20170616_1358_2108523143396" "scorep-20170627_1139_26686699355388" "scorep-20170627_1139_26725058299756" "scorep-20170627_1140_26771788279392" "scorep-20170627_1140_26811756225948" )
+nom_trace_otf2_27=( "scorep-20170627_1141_26944177966216" "scorep-20170627_1142_27084549712366" "scorep-20170627_1143_27221655328136" "scorep-20170627_1144_27361452410976" "scorep-20170627_1145_27494946089756" )
+nom_trace_otf2_64=( "scorep-20170627_1148_27984515621524" "scorep-20170627_1152_28485346313392" "scorep-20170627_1155_28989414411717" "scorep-20170627_1159_29496432349468" "scorep-20170627_1202_29981632422984" )
+nom_config_otf2="tracer_config"
+path_tracer="/home/chevamax/Téléchargements/tracer/tracer/traceR"
+conf_tracer="/home/chevamax/Téléchargements/tracer/tracer/conf/dfly-216.conf"
+
+END=18
+output="resComparatif"
+temporaire="temp"
+temporaire2=""
+echo "time runningTime type size" >$output
+
+codes="mpirun -n 4 $path_codes/model-net-mpi-replay --disable-output=1 --sync=3 --num_net_traces=8 --workload_file=$path_traces_dumpi/$nom_trace_dumpi8 --workload_type=dumpi  -- $conf_dumpi"
+tracer="mpirun -np 4 $path_tracer --disable-output=1 --sync=3 -- $conf_tracer $path_traces_otf2/$nom_trace_otf2_8/$nom_config_otf2"
+timer="/usr/bin/time"
+
+nbTraces=5
+nbTaille=3
+
+for i in $(seq 1 $END); do #nb répétitions
+    for j in $(seq 0 $nbTraces-1); do #taille tes tableaux a parcourir
+	#8
+	    temporaire="dumpi_8_$i-$j"
+	    codes="mpirun -n 4 $path_codes/model-net-mpi-replay --disable-output=1 --sync=3 --num_net_traces=8 --workload_file=$path_traces_dumpi/${nom_trace_dumpi8[$j]} --workload_type=dumpi  -- $conf_dumpi"
+	    $timer $codes >  $temporaire 2>> $temporaire
+	    temporaire2="$(grep "Running Time" $temporaire | cut -d = -f 2 -s | cut -d ' ' -f 2)"
+	    temporaire2="$temporaire2 $(grep "elapsed" $temporaire | cut -d ' ' -f 3 | sed 's/\(.*[0-9]\)\(.*\)/\1/') C"
+	    echo "$temporaire2 8" >>$output
+
+	    temporaire="otf_8_$i-$j"
+	    tracer="mpirun -np 4 $path_tracer --disable-output=1 --sync=3 -- $conf_tracer $path_traces_otf2/${nom_trace_otf2_8[$j]}/$nom_config_otf2"
+	    $timer $tracer >  $temporaire 2>> $temporaire
+	    temporaire2="$(grep "Running Time" $temporaire | cut -d = -f 2 -s | cut -d ' ' -f 2)"
+	    temporaire2="$temporaire2 $(grep "elapsed" $temporaire | cut -d ' ' -f 3 | sed 's/\(.*[0-9]\)\(.*\)/\1/') T"
+	    echo "$temporaire2 8" >>$output
+
+	    
+	    #27-----------------------------------------------
+	    temporaire="dumpi_27_$i-$j"
+	     codes="mpirun -n 4 $path_codes/model-net-mpi-replay --extramem=100000 --disable-output=1 --sync=3 --num_net_traces=27 --workload_file=$path_traces_dumpi/${nom_trace_dumpi27[$j]} --workload_type=dumpi  -- $conf_dumpi"
+	    $timer $codes >  $temporaire 2>> $temporaire
+	    temporaire2="$(grep "Running Time" $temporaire | cut -d = -f 2 -s | cut -d ' ' -f 2)"
+	    temporaire2="$temporaire2 $(grep "elapsed" $temporaire | cut -d ' ' -f 3 | sed 's/\(.*[0-9]\)\(.*\)/\1/') C"
+	    echo "$temporaire2 27" >>$output
+
+	    temporaire="otf_27_$i-$j"
+	    tracer="mpirun -np 4 $path_tracer --extramem=100000 --disable-output=1 --sync=3 -- $conf_tracer $path_traces_otf2/${nom_trace_otf2_27[$j]}/$nom_config_otf2"
+	    $timer $tracer >  $temporaire 2>> $temporaire
+	    temporaire2="$(grep "Running Time" $temporaire | cut -d = -f 2 -s | cut -d ' ' -f 2)"
+	    temporaire2="$temporaire2 $(grep "elapsed" $temporaire | cut -d ' ' -f 3 | sed 's/\(.*[0-9]\)\(.*\)/\1/') T"
+	    echo "$temporaire2 27" >>$output
+
+	    
+	    #64---------------------------------------------
+	    temporaire="dumpi_64_$i-$j"
+	     codes="mpirun -n 4 $path_codes/model-net-mpi-replay  --extramem=100000 --disable-output=1 --sync=3 --num_net_traces=64 --workload_file=$path_traces_dumpi/${nom_trace_dumpi64[$j]} --workload_type=dumpi  -- $conf_dumpi"
+	    $timer $codes >  $temporaire 2>> $temporaire
+	    temporaire2="$(grep "Running Time" $temporaire | cut -d = -f 2 -s | cut -d ' ' -f 2)"
+	    temporaire2="$temporaire2 $(grep "elapsed" $temporaire | cut -d ' ' -f 3 | sed 's/\(.*[0-9]\)\(.*\)/\1/') C"
+	    echo "$temporaire2 64" >>$output
+
+	    temporaire="otf_64_$i-$j"
+	    tracer="mpirun -np 4 $path_tracer --extramem=100000 --disable-output=1 --sync=3 -- $conf_tracer $path_traces_otf2/${nom_trace_otf2_64[$j]}/$nom_config_otf2"
+	    $timer $tracer >  $temporaire 2>> $temporaire
+	    temporaire2="$(grep "Running Time" $temporaire | cut -d = -f 2 -s | cut -d ' ' -f 2)"
+	    temporaire2="$temporaire2 $(grep "elapsed" $temporaire | cut -d ' ' -f 3 | sed 's/\(.*[0-9]\)\(.*\)/\1/') T"
+	    echo "$temporaire2 64" >>$output
+
+	    echo "$(rm -r dragon*)"
+	    echo "$(rm -r tracer-out-*)"
+    done
+done
