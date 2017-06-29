@@ -17729,11 +17729,77 @@ beaucoup plus rapidement que CODES (alors qu'il est basé sur ce
 dernier) ce qui semble louche. Je vais donc regarder si y'a pas un
 soucis de configuration.
 
-modification des fichier timer.c (ajout de typedef unsigned int
+**** Meeting Arnaud + Florence
+On a corrigé un "bug" pour compiler AMG avec SimGrid.
+Pour le bug on a modifié les fichier timer.c (ajout de typedef unsigned int
 =clockid_t=) et mpi.h (ajout de =typedef unsigned int useconds_t=)
 
+Pour faciliter l'exploitation des données en R, je dois installer la
+librairie *tidyverse*, et utiliser la méthode *lubridate* (pour
+transformer facilement les dates).
+
+La manière dont j'ai exécuté AMG (en gardant la même charge de travail
+pour chaque process) fait que mon eval de performance est en "weak
+scaling" (la charge de travail augmente linéairement). Il serait plus
+intéréssant de faire du "strong scaling" mais c'est plus compliqué à
+mettre en oeuvre.
+
+Il faut que j'amèliore mes scripts en donnant en entrée un CSV avec
+les expériences/paramètres, qu'un script les exécutes et que ca génère
+des fichiers, que je peux ensuite parser pour générer un autre CSV à
+analyser (avec R).
+
+Je dois aussi prendre en compte CODES/TRACER en séquentiel, et
+introduire SimGrid(générer des traces et les rejouer). Il faut aussi
+que je regarde le temps d'execution des programmes, et le temps
+annoncé par les simulateurs pour voir si ils sont fiables.
+
+Pour le parallèle il faut que je distingue les distingues par nombre
+de LP.
+
+Il faut aussi que je prenne un fichier de configuration de réseau de
+type model-net-simplenet et le faire passer à l'echelle.
+
+Il faut également que je mette à jour mon schéma de récapitulation
+(avec des couleurs (initial vs final), Simulateur en haut et visu en bas)
+
+Enfin, on a discuté du rapport :
+- Planning : insister sur la recherche, et les évolutions de planning
+- Structuration de tache : aide de l'équipe du lab.
+
+
+**** Dumpi + SimGrid + AMG
 
 Le lien avec DUMPI et SimGrid ne fonctionne pas (le programme
 s'exécute, mais les traces ne sont pas générées) alors qu'avec le même
 DUMPI et mpicc j'ai des traces. Du coup je sais pas trop d'où ca peut
-venir
+venir.
+En fait ca vient du fait que smpicc ajoute pas les librairies. Via un
+ldd, on voit que DUMPI n'est pas lié (de même si on tente avec
+d'autres librairies)
+**** Librairie R
+
+Il y a un soucis d'installation, je ne sais pas trops pourquoi, du
+coup j'ai fait autrement.
+*** 2017-06-29 jeudi
+**** R
+En réinstallant la dernière version de R, je n'ai toujours pas pu
+installer le package... (des dépendances ne s'installent pas)
+**** AMG DUMPI SIMGRID
+En ajoutant =-Wl,--no-as-needed -ldumpi= aux paramètres de compilation
+d'AMG, on fait le lien avec la librairie, cependant j'obtiens un
+segfault.
+***** Valgrind
+Florence m'a conseillé d'utiliser valgrind pour voir d'ou provient mon
+segfault. Cependant, j'ai l'impression que quelque chose cloche
+lorsque je l'utilise car je tombe sur l'erreur suivante :
+- =the SIGRT32 signal is used internally by Valgind cr_libinit.c:139
+  cri_init: sigaction() failed: Invalid argument= 
+Ensuite quand je fais continue avec GDB, ca vient d'un dlopen. D'après
+internet, mpich et Ubuntu ne fonctionne pas bien ensemble (sur de
+vieux topic donc on peut espérer que se soit résolu)
+****** Rappel lien avec GDB
+J'ajoute l'option =-wrapper "valgrind --vgdb=yes --vgdb-error=0"= au
+lancement de smpirun. Une fois chargé, j'ouvre un autre terminal ou je
+lance gdb, puis la commande =set non-stop off= puis la commande indiqué
+par valgrind (target remote ...)
