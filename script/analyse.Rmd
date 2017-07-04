@@ -20,7 +20,9 @@ convert <- function(rTime) {
   as.numeric(strsplit(as.character(rTime),split=":")[[1]][1])*60+as.numeric(strsplit(as.character(rTime),split=":")[[1]][2])
 }
 
-data2 = data.frame(data[c(1,3,4)], apply(data[2],1, convert))
+data$sim="Par"
+data2 = data.frame(data[c(1,3,4,5)], apply(data[2],1, convert))
+colnames(data2)[5] <- "runningTime"
 ```
 
 ```{r, echo=FALSE, warning=FALSE}
@@ -38,4 +40,20 @@ ggplot(data2, aes(x=size,y=data2[4],alpha(0.05), color=type)) +geom_point(size=0
 ```
 
 C'est étonnant cette différence entre les deux.
+
+
+```{r, echo=FALSE, warning=TRUE}
+
+seqential = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/script/res300617-143957/res300617-143957.csv", header=TRUE, sep=" ")
+
+seqential$sim="Seq"
+seqential2 = data.frame(seqential[c(1,3,4,5)], apply(seqential[2],1, convert))
+colnames(seqential2)[5] <- "runningTime"
+
+df <- rbind(seqential2, data2)
+
+ggplot(df, aes(x=size,y=runningTime, color=type, shape= factor(sim))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation") + scale_y_log10() + scale_shape_discrete(name=c("Simulation"), labels=c("Parallèle","Sequentiel")) + scale_color_discrete(name="Simulateur", labels=c("Codes", "TraceR")) + labs(subtitle="Sur 4 noeuds physiques, topologie dragonfly 216")
+```
+
+
 

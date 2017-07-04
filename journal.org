@@ -17712,7 +17712,6 @@ Où le programme ce lance mais s'arrête. Je pense qu'il faut régler le
 soucis de compilation avec smpicc (ou peut être compiler toutes les
 librairies via mpicc -fPIC 
 
-
 *** 2017-06-28 mercredi
 
 Je suis plus trop à jour dans mon journal... Alors j'ai réalisé un
@@ -17803,3 +17802,69 @@ J'ajoute l'option =-wrapper "valgrind --vgdb=yes --vgdb-error=0"= au
 lancement de smpirun. Une fois chargé, j'ouvre un autre terminal ou je
 lance gdb, puis la commande =set non-stop off= puis la commande indiqué
 par valgrind (target remote ...)
+**** Script
+
+J'ai fait un fichier csv qui contient les infos pour lancer les
+expériences. Il a la forme suivante :
+=simulateur pathS nbProcess pathTrace nbTrace confReseau=
+Dans le script suivant je fais un shuffle des entrées pour répartir
+les incidents qui pourraient arriver.
+*** 2017-06-30 vendredi
+**** Script
+J'ai testé mon script, il fonctionne (Vincent m'a aidé sur un point
+car j'avais un problème de redirection). Le seul soucis à mon avis
+c'est que si j'ai des erreurs, je le saurais pas immédiatement, vu que
+time redirige sur la sortie des erreurs, je dois toutes les envoyers
+dans les fichiers.
+
+Ce nouveau script est bien plus facile à lire et à coder, séparer les
+tâches est une très bonne idée ! :)
+
+Maintenant il faut que je fasse le script qui lit les fichiers et les
+mets dans un CSV.
+
+Le script est fait, c'est =resExpeToCsv=. Pour le moment j'ai juste mis
+ce que j'avait deja fait. Il faut que j'ajoute SimGrid, mais
+normalement je gère si c'est parallèle ou séquentiel.
+
+Prochaine étape le model-net-simplenet.conf.
+
+**** Meeting Arnaud
+Arnaud à tenter de comprendre pourquoi il y a un seg fault, et c'est
+surement qu'il faut compiler DUMPI avec simgrid (pour que DUMPI
+utilise mpi.h de SimGrid). Mais pour cela il faut faire un "hack" du
+coup il va regarder avec un membre de l'équipe qui l'a déjà fait.
+Sinon, il m'a aussi demandé de rajouter le nombre de process MPI dans
+mon CSV.
+
+** 2017-07 juillet
+*** 2017-07-03 lundi
+**** Meeting Florence
+Les scripts avancent bien, je vais ajouter simGrid puis ensuite c'est
+objectif grid5k.
+**** Configuration Simulation
+J'arrive pas à utiliser simplenet sur TraceR, même le fichier fourni
+me retourne une erreure. Je vais passer à SimGrid.
+**** SimGrid
+J'arrive plus a lancer AMG avec SimGrid... 
+J'avais oublié d'ajouter --cfg=smpi/privatization:yes
+
+J'ai lancé 5 exécutions de chaque traces (car amg fait de l'aléa pour
+setup la matrice) sur 8 27 et 64 process via la commande :
+
+smpirun -np $i -platform
+~/Téléchargements/simgrid/examples/platforms/cluster.xml ./amg2013
+-laplace -n 40 40 40 -P ${tab["$i"]} ${tab["$i"]} ${tab["$i"]}
+--cfg=smpi/privatization:yes --cfg=tracing:yes
+--cfg=tracing/filename:amg_${i}_${j}.trace
+
+en fait j'ai l'impression que j'ai pas tracer correctement, en
+utilisant simplement -trace ca a l'air mieux, je vais faire ca!
+
+smpirun -trace -np $i -platform
+~/Téléchargements/simgrid/examples/platforms/cluster.xml ./amg2013
+-laplace -n 40 40 40 -P ${tab["$i"]} ${tab["$i"]} ${tab["$i"]}
+--cfg=smpi/privatization:yes
+--cfg=tracing/filename:amg_${i}_${j}.trace
+
+***** Rejeu
