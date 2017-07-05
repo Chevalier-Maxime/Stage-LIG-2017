@@ -50,9 +50,15 @@ seqential$sim="Seq"
 seqential2 = data.frame(seqential[c(1,3,4,5)], apply(seqential[2],1, convert))
 colnames(seqential2)[5] <- "runningTime"
 
-df <- rbind(seqential2, data2)
+simgrid = read.csv(file="/home/chevamax/Téléchargements/AMG2013SG/test/sim030717-2/sim030717-2.csv", header=TRUE, sep=" ")
+simgrid2 = data.frame(simgrid[c(1,3,4,5)], apply(simgrid[2],1, convert))
+colnames(simgrid2)[1] <- "time"
+colnames(simgrid2)[5] <- "runningTime"
+simgrid2$sim="Seq"
 
-ggplot(df, aes(x=size,y=runningTime, color=type, shape= factor(sim))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation") + scale_y_log10() + scale_shape_discrete(name=c("Simulation"), labels=c("Parallèle","Sequentiel")) + scale_color_discrete(name="Simulateur", labels=c("Codes", "TraceR")) + labs(subtitle="Sur 4 noeuds physiques, topologie dragonfly 216")
+df <- rbind(seqential2, data2, subset(simgrid2, select =-c(nbProcess)))
+
+ggplot(df, aes(x=size,y=runningTime, color=type, shape= factor(sim))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_shape_discrete(name=c("Simulation"), labels=c("Parallèle","Sequentiel")) + scale_color_discrete(name="Simulateur", labels=c("Codes", "TraceR","SimGrid(Exécution réelle)")) + labs(subtitle="Sur 4 noeuds physiques(parallèle), topologie dragonfly 216")
 ```
 
 
