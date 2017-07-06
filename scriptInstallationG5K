@@ -1,90 +1,227 @@
 #!/bin/sh
-apt-get install mpich cmake doxygen libtool m4 automake autoconf libatlas-base-dev libmpich-dev gfortran flex bison pkg-config git zlib1g-dev -yes
 
-DOWNLOAD = $HOME
-INSTALL = $HOME/install
+dpkg --configure -a
+if ! apt-get install -y mpich cmake doxygen libtool m4 automake autoconf libatlas-base-dev libmpich-dev gfortran flex bison pkg-config git zlib1g-dev; then
+    echo "apt-get error, fix it and retry"
+    exit
+else
+    clear
+    echo "apt-get succed !!"
+    echo "Installing DUMPI..."
+    sleep 3
+fi
+
+
+
+export DOWNLOAD=$HOME
+export INSTALLPATH=$HOME/install
 
 #Dumpi
 cd $DOWNLOAD
-git clone https://github.com/sstsimulator/sst-dumpi
+if ! git clone https://github.com/sstsimulator/sst-dumpi; then
+    echo "DUMPI : git clone error, check your connection status"
+    exit
+fi
+
 cd sst-dumpi
 mkdir build
-./bootstrap.sh
+if ! ./bootstrap.sh; then
+    echo "DUMPI : ./bootstrap.sh error"
+    exit
+fi
 cd build
-../configure --enable-libdumpi --prefix=$INSTALL CC=mpicc CXX=mpiCC CFLAGS="-DMPICH_SUPPRESS_PROTOTYPES=1 -DHAVE_PRAGMA_HP_SEC_DEF=1 -pthread -I/usr/include/mpich"
-make && make install
+if ! ../configure --enable-libdumpi --prefix=$INSTALLPATH CC=mpicc CXX=mpiCC CFLAGS="-DMPICH_SUPPRESS_PROTOTYPES=1 -DHAVE_PRAGMA_HP_SEC_DEF=1 -pthread -I/usr/include/mpich"; then
+    echo "DUMPI : ../configure error"
+    exit
+fi  
+
+if ! make; then
+    echo "DUMPI : make error"
+    exit
+fi
+
+if ! make install; then
+    echo "DUMPI : make install error"
+    exit
+fi
+
+clear
+echo "DUMPI : installation succeed"
+echo "Installing ROSS..."
+sleep 3
 
 
 #ROSS
 cd $DOWNLOAD
-git clone -b master --single-branch https://github.com/carothersc/ROSS.git
+if ! git clone -b master --single-branch https://github.com/carothersc/ROSS.git; then
+    echo "ROSS : git clone error"
+    exit
+fi
+
 cd ROSS
 mkdir build
 cd build
-ARCH=x86_64 CC=mpicc CXX=mpicxx cmake -DCMAKE_INSTALL_PREFIX=$INSTALL ..
-make -j 3
-make install
+if ! ARCH=x86_64 CC=mpicc CXX=mpicxx cmake -DCMAKE_INSTALL_PREFIX=$INSTALLPATH ..; then
+    echo "ROSS : cmake error"
+    exit
+fi
+
+if ! make -j 3; then
+    echo "ROSS make error"
+    exit
+fi
+
+if ! make install; then
+    echo "ROSS make install error"
+    exit
+fi
+clear
+echo "ROSS : installation succeed"
+echo "Installing CODES"
+sleep 3
 
 ##OK jusqu'ici
 
 #CODES
 cd $DOWNLOAD
-git clone https://xgitlab.cels.anl.gov/codes/codes.git
+if ! git clone https://xgitlab.cels.anl.gov/codes/codes.git; then
+    echo "CODES : git clone error"
+    exit
+fi
+
 cd codes
-./prepare.sh
+if ! ./prepare.sh; then
+    echo "CODES : prepare.sh error"
+    exit
+fi
+
 mkdir build
 cd build
-../configure --with-dumpi=$INSTALL --prefix=$INSTALL CC=mpicc PKG_CONFIG_PATH=$INSTALL/lib/pkgconfig CXXFLAGS="-I/usr/include/mpich"
-make && make install
-make tests && make check
+if ! ../configure --with-dumpi=$INSTALLPATH --prefix=$INSTALLPATH CC=mpicc PKG_CONFIG_PATH=$INSTALLPATH/lib/pkgconfig CXXFLAGS="-I/usr/include/mpich"; then
+    echo "CODES : configure error"
+    exit
+fi
+
+if ! make; then
+    echo "CODES : make error"
+    exit
+fi
+if ! make install; then
+    echo "CODES : make install error"
+    exit
+fi
+
+if ! make tests; then
+    echo "CODES : make test error"
+    exit
+fi
+if ! make check; then
+    echo "CODES : check test errors, would you continue installation ? [Y/n]"
+    read -r b
+    if [ $b == "n" ]; then
+	exit
+    fi
+fi
+
+clear
+echo "CODES : installation succeed"
+echo "Installing AMG linked with DUMPI..."
+sleep 3
 
 #AMGDUMPI
 cd $DOWNLOAD
-wget https://portal.nersc.gov/project/CAL/doe-miniapps-srcs/amg20130624.tgz
+if ! wget https://portal.nersc.gov/project/CAL/doe-miniapps-srcs/amg20130624.tgz; then
+    echo "AMGDUMPI : wget error"
+    exit
+fi
+
 tar xzf amg20130624.tgz
 mv AMG2013 AMG2013DUMPI
 cd AMG2013DUMPI
 sed -i '/INCLUDE_CFLAGS = /c\INCLUDE_CFLAGS = -O2 -DTIMER_USE_MPI -DHYPRE_LONG_LONG' Makefile.include
 sed -i '0,/INCLUDE_LFLAGS/! c\INCLUDE_LFLAGS = -lm -L$(HOME)/install/lib -ldumpi' Makefile.include
-make
+
+if ! make; then
+    echo "AMGDUMPI : make error"
+    exit
+fi
+
+clear
+echo "AMGDUMPI : installation succeed"
+echo "Installing SCOREP..."
+sleep 3
 
 ##OK jusqu'ici
 
 #SCOREP
 cd $DOWNLOAD
-wget http://www.vi-hps.org/upload/packages/scorep/scorep-3.1.tar.gz
+if ! wget http://www.vi-hps.org/upload/packages/scorep/scorep-3.1.tar.gz; then
+    echo "SCOREP : wget error"
+    exit
+fi
+
 tar -xvzf scorep-3.1.tar.gz
 mv scorep-3.1 scorep
 cd scorep
-CC=mpicc CFLAGS="-O2" CXX=mpicxx CXXFLAGS="-O2" FC=mpif90 F77=mpif77 ./configure --without-gui --prefix=$INSTALL --with-mpi=mpich3
-make && make install
+if ! CC=mpicc CFLAGS="-O2" CXX=mpicxx CXXFLAGS="-O2" FC=mpif90 F77=mpif77 ./configure --without-gui --prefix=$INSTALLPATH --with-mpi=mpich3; then
+    echo "SCOREP configure error"
+    exit
+fi
 
-export PATH=$INSTALL/bin:$PATH
+if ! make; then
+    echo "SCOREP : make error"
+    exit
+fi
+if ! make install; then
+    echo "SCOREP : make install error"
+    exit
+fi
+
+clear
+echo "SCOREP : installation succeed"
+echo "Installing AMG linked with SCOREP..."
+sleep 3
+
+echo 'export PATH=$INSTALLPATH/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+
 #AMGSCOREP
 cd $DOWNLOAD
 tar xzf amg20130624.tgz
 mv AMG2013 AMG2013SCOREP
 cd AMG2013SCOREP
 sed -i '/CC =/c\CC = scorep --user --nocompiler --noopenmp --nopomp --nocuda --noopencl --nomemory mpicc' Makefile.include
-sed -i '/INCLUDE_CFLAGS = /c\INCLUDE_CFLAGS = -O2 -DTIMER_USE_MPI -DHYPRE_LONG_LONG -I$(INSTALL)/include -I$(INSTALL)/include/scorep -DSCOREP_USER_ENABLE' Makefile.include
-sed -i '0,/INCLUDE_LFLAGS/! c\INCLUDE_LFLAGS = -lm -I$(INSTALL)/include -I$(INSTALL)/include/scorep -DSCOREP_USER_ENABLE' Makefile.include
-make
+sed -i '/INCLUDE_CFLAGS = /c\INCLUDE_CFLAGS = -O2 -DTIMER_USE_MPI -DHYPRE_LONG_LONG -I$(INSTALLPATH)/include -I$(INSTALLPATH)/include/scorep -DSCOREP_USER_ENABLE' Makefile.include
+sed -i '0,/INCLUDE_LFLAGS/! c\INCLUDE_LFLAGS = -lm -I$(INSTALLPATH)/include -I$(INSTALLPATH)/include/scorep -DSCOREP_USER_ENABLE' Makefile.include
+if ! make; then
+    echo "AMGSCOREP : make error"
+    exit
+fi
+
+clear
+echo "AMGSCOREP : installation succeed"
+echo "Installing TRACER..."
+sleep 3
 
 ##OK jusqu'ici
 
 #TRACER
 cd $DOWNLOAD
-git clone https://github.com/LLNL/tracer.git
+if ! git clone https://github.com/LLNL/tracer.git; then
+    echo "TRACER : git clone error"
+    exit
+fi
+
 cd tracer/tracer
 sed -i '/CC = cc -std=gnu99/c\CC = cc' Makefile.common
 sed -i '/CC = mpicc -std=gnu99/c\CC = mpicc' Makefile.common
 sed -i '/BASE_DIR = /c\BASE_DIR = $(DOWNLOAD)/tracer' Makefile.common
-sed -i '/ROSS = /c\ROSS = $(INSTALL)' Makefile.common
-sed -i '/CODES = /c\CODES = $(INSTALL)' Makefile.common
+sed -i '/ROSS = /c\ROSS = $(INSTALLPATH)' Makefile.common
+sed -i '/CODES = /c\CODES = $(INSTALLPATH)' Makefile.common
 sed -i '/CODES_LIBS = /c\CODES_LIBS = -L${CODES}/lib -L${ROSS}/lib -Wl,-rpath=${ROSS}/lib -lcodes -lROSS -lm -lundumpi' Makefile.common
 sed -i '/CODES_LIBS += /c\' Makefile.common
 sed -i '/CODES_CFLAGS =/c\CODES_CFLAGS = -I${CODES}/include -I${ROSS}/include' Makefile.common
-sed -i '/CODES_LIBS += /c\' tracer-driver.h
+sed -i '/CODES_LIBS += /c\' Makefile.common
 rm tracer-driver.h
 echo "#ifndef _TRACER_DRIVER_H_
 #define _TRACER_DRIVER_H_
@@ -533,11 +670,17 @@ sed -i '1303creturn NULL;' tracer-driver.C
 sed -i '1633cif(!t->isNonBlocking) return NULL;' tracer-driver.C
 sed -i '1664creturn NULL;' tracer-driver.C
 
-make
+if ! make; then
+    echo "TRACER : make error"
+    echo "Check if this script doesn't corrumpt data by replacing tracer-driver.h, and modifying some lignes in tracer-driver.C"
+    exit
+fi
+echo 'export PATH=$DOWNLOAD/tracer/tracer:$PATH' >> ~/.bashrc
+source ~/.bashrc
 
-export PATH=$DOWNLOAD/tracer/tracer:$PATH
-
-
+clear
+echo "TRACER : installation succeed"
+echo "INSTALLATION SUCCEED"
 
 
 

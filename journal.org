@@ -17868,3 +17868,91 @@ smpirun -trace -np $i -platform
 --cfg=tracing/filename:amg_${i}_${j}.trace
 
 ***** Rejeu
+J'ai pas trouvé comment rejouer les traces
+*** 2017-07-06 jeudi
+J'ai pas mis a jour ce journal, j'ai réalisé un script d'installation
+automatique de tous les softs afin de pouvoir le déployer sur
+Grid5000.
+Il fonctionne maintenant (test sur une machine virtuelle vierge).
+J'ai également envoyé un rapport à mon tutueur pédagogique, car
+j'étais en retard.
+**** Mail Arnaud : Replay SimGrid
+***** Content
+Salut Maxime,
+
+Le 03/07/2017 16:08, Maxime Chevalier a écrit :
+> j'ai généré des traces avec SimGrid, mais je trouve pas comment les
+> rejouer, du coup je me demande si j'ai bien compris. SimGrid peut
+> rejouer des traces ?
+
+Désolé pour la réponse tardive. J'ai pas encore tenté smpi/dumpi avec
+Martin mais je pense faire ça cet après-midi.
+
+Pour le rejeu. Oui, SMPI peut produire des traces avec...
+
+#+begin_src sh :results output :exports both
+smpirun --help
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Usage: /home/alegrand/bin/smpirun [OPTIONS] -platform <xmldesc>
+-hostfile <hostfile> program [program-options]
+Options:
+  -keep-temps                # don't remove the generated files after
+execution
+  -wrapper <command>         # use command to run the program (e.g.
+"valgrind")
+  -map                       # display the machine on which each process
+rank is mapped
+  -np <numprocs>             # use that amount of processes from the
+hostfile.
+                             # By default, all processes of the hostfile
+are used.
+  -no-privatize              # Disable the globals privatization, that
+is activated by default
+  -trace-ti                  # activate time independant tracing (for
+replay, default in smpi_simgrid.txt)
+  -trace                     # activate tracing (Paje, default in
+smpi_simgrid.trace)
+  -trace-comment <comment>   # put a comment on the top of the trace file
+  -trace-comment-file <file> # put file contents on the top of the trace
+file as comment
+  -trace-grouped             # group MPI processes by location
+  -trace-resource            # trace resource utilization
+  -trace-viva                # generate configuration for Viva's GraphView
+  -trace-file <tracefile>    # name of the tracefile (simgrid_smpi.trace)
+  -ext <value>               # additional parameter (reserved)
+
+  -version                   # Displays the SimGrid version (human readable)
+  -git-version               # Displays the git hash of SimGrid
+
+or (deprecated usage):
+  /home/alegrand/bin/smpirun [-keep-temps] [-np <numprocs>] [-bandwidth
+<bytes/sec>] [-latency <secs>] program [program-options]
+
+#+end_example
+
+Donc smpirun -trace-ti produit des traces avec des volumes de calculs
+et de comm. Tu peux ensuite rejouer ces traces (voir
+examples/smpi/replay).
+
+> Ou c'est pour cela que vous optimisez le code pour faire de grosses
+> simulations (comme Tom et HPL) ?
+
+Le rejeu de trace va normalement plus vite (c'est plus simple) que
+l'émulation de base (suru un code non préparé pour SimGrid). Je pense
+que l'émulation optimisée peut aller plus vite que le rejeu de trace
+car on ne gère plus de fichier du tout mais ça reste à démontrer. Donc,
+tente de générer des traces TIT de AMG et de les rejouer ça sera
+instructif de toutes façons.
+
+À bientôt,
+
+    Arnaud
+***** Commentaire
+Ok, je vais tester ca et l'ajouter au graphique. J'ai déjà mis le
+temps d'exécution de simGrid sur le graphique (mais il est biaisé car
+je générais des traces).
+**** Prochaine étape
+Pour demain je prévois de m'occuper de Grid 5000.
