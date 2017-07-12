@@ -1,0 +1,27 @@
+#/bin/bash
+
+if [ -z $1 ]; then echo "You must provide folder path"; exit; fi
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+newfile="replayTrace.csv"
+
+#OLDIFS=$IFS
+#IFS=" "
+IdT=1
+IdC=1
+IdSG=1
+
+#fait un cut sur le début et passer les lignes.
+while read ligne
+ do
+  current="$(cut -d \" \" )"
+done < find $1 -name "*"
+
+#IFS=$OLDIFS
+
+rm $newfile
+rm dragonfly*
+rm -r tracer-out*
+rm ross.csv

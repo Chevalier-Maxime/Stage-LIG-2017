@@ -1,0 +1,79 @@
+#!/bin/bash
+echo "./lancementSimulation CSVfile TracerConfFile CodesConfFile nbProcess"
+
+if [ -z $1 ]; then echo "You must provide a csv file"; exit; fi
+if [ -z $2 ]; then echo "You must provide conf file for Tracer"; exit; fi
+if [ -z $3 ]; then echo "You must provide conf file for Codes"; exit; fi
+if [ -z $4 ]; then echo "You must provide the number of process for the simulation"; exit; fi
+
+if [[ $LD_LIBRARY_PATH != *"/codes/install/lib"* ]] ; then
+	export LD_LIBRARY_PATH="/home/chevamax/Téléchargements/codes/install/lib:$LD_LIBRARY_PATH"	
+fi
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+newfile="expShuffleTemp"
+folderExp="res$(date +%d%m%y-%H%M%S)"
+mkdir $folderExp
+
+(tail -n +2 $1 | shuf) > $newfile #On mélange et on enlève l'entête
+
+cp $1 "./$folderExp"
+
+#OLDIFS=$IFS
+#IFS=" "
+IdT=1
+IdC=1
+IdSG=1
+timer="/usr/bin/time"
+
+nbProcess=$4
+
+while read simulateur pathS pathTrace nbTrace #confReseau
+ do
+  case "$simulateur" in
+   "T")
+       if [ $nbProcess -eq 1 ]
+       then
+         #Sequentiel
+	 tracer="$pathS --extramem=100000 --disable-output=1 --synch=1 -- $2 $pathTrace"
+       else
+         #Parallèle
+	 tracer="mpirun -n $nbProcess $pathS --extramem=100000 --disable-output=1 --synch=3 -- $2 $pathTrace"
+       fi
+       $timer $tracer < /dev/null > "$folderExp/tracer_${nbTrace}_${IdT}" 2>> "$folderExp/tracer_${nbTrace}_${IdT}"
+       IdT=$(($IdT + 1))
+   ;;
+
+   "C")
+       if [ $nbProcess -eq 1 ]
+       then
+         #Sequentiel
+	 codes="$pathS --extramem=100000 --disable-output=1 --synch=3 --num_net_traces=$nbTrace --workload_file=$pathTrace --workload_type=dumpi -- $3"
+       else
+         #Parallèle
+	 codes="mpirun -n $nbProcess $pathS --extramem=100000 --disable-output=1 --synch=3 --num_net_traces=$nbTrace --workload_file=$pathTrace --workload_type=dumpi -- $3"
+       fi
+       $timer $codes < /dev/null > "$folderExp/codes_${nbTrace}_${IdC}" 2>> "$folderExp/codes_${nbTrace}_${IdC}"
+       IdC=$(($IdC + 1))
+   ;;
+
+   "SG")
+      echo "Simgrid not supported yet"
+   ;;
+
+
+   *) echo -e "${RED}Error${NC}: simulator unknown, or malformed input file :"
+      echo "$simulateur $pathS $nbProcess $pathTrace $nbTrace $confReseau : will not be simulated"
+      exit
+      ;;
+  esac
+done < $newfile
+
+#IFS=$OLDIFS
+
+rm $newfile
+rm dragonfly*
+rm -r tracer-out*
+rm ross.csv

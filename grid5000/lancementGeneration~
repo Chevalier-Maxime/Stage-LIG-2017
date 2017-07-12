@@ -1,0 +1,67 @@
+#!/bin/bash
+
+if [ -z $1 ]; then echo "You must provide a csv file"; exit; fi
+
+export SCOREP_ENABLE_TRACING=1
+export SCOREP_ENABLE_PROFILING=0
+export SCOREP_REDUCE_PROBE_TEST=1
+export SCOREP_MPI_ENABLE_GROUPS=ENV,P2P,COLL,XNONBLOCK
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+newfile="genShuffleTemp"
+folderExp="gen$(date +%d%m%y-%H%M%S)"
+mkdir $folderExp
+
+(tail -n +2 $1 | shuf) > $newfile #On mélange et on enlève l'entête
+
+cp $1 "./$folderExp"
+
+#OLDIFS=$IFS
+#IFS=" "
+IdT=1
+IdC=1
+IdSG=1
+timer="/usr/bin/time"
+
+cd $folderExp
+
+while read amg type nbProcess dim1 dim2 dim3 tailleProbleme
+ do
+  case "$type" in
+      "T")  
+       nomDossier="amg_${IdT}_T_${dim1}_${dim2}_${dim3}"
+       mkdir $nomDossier
+       cd $nomDossier
+       tracer="mpirun -n $nbProcess $amg -laplace -n $tailleProbleme $tailleProbleme $tailleProbleme -P $dim1 $dim2 $dim3"
+       $timer $tracer < /dev/null > $nomDossier 2>> $nomDossier
+       IdT=$(($IdT + 1))
+       cd ..
+   ;;
+
+   "C")
+       nomDossier="amg_${IdC}_C_${dim1}_${dim2}_${dim3}"
+       mkdir $nomDossier
+       cd $nomDossier
+       tracer="mpirun -n $nbProcess $amg -laplace -n $tailleProbleme $tailleProbleme $tailleProbleme -P $dim1 $dim2 $dim3"
+       $timer $tracer < /dev/null > $nomDossier 2>> $nomDossier
+       IdC=$(($IdC + 1))
+       cd ..
+   ;;
+
+   "SG")
+      echo "Simgrid not supported yet"
+   ;;
+
+
+   *) echo -e "${RED}Error${NC}: simulator unknown, or malformed input file :"
+      echo "$amg $type $nbProcess $dim1 $dim2 $dim3 $tailleProbleme : will not be simulated"
+      exit
+      ;;
+  esac
+done < ../$newfile
+
+#IFS=$OLDIFS
+
+echo "Fin de la génération de traces"
