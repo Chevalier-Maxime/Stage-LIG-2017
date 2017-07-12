@@ -17956,3 +17956,53 @@ temps d'exécution de simGrid sur le graphique (mais il est biaisé car
 je générais des traces).
 **** Prochaine étape
 Pour demain je prévois de m'occuper de Grid 5000.
+*** 2017-07-07 vendredi
+**** Script
+J'ai fait un script pour générer des traces amg à partir d'un fichier
+CSV
+Pour rappel j'ai un script pour :
+- Installer les logiciels
+- générer des traces à partir d'un CSV
+- exécuter des replay à partir d'un CSV
+
+Il faut donc que je face un dernier script, qui créer un fichier CSV
+pour éxécuter les replay à partir des traces générées par le deuxième
+script.
+*** 2017-07-10 lundi
+Mon PC personnel ne fonctionne plus, je m'en suis rendu compte dans le weekend. J'ai pu récupérer les fichiers lié au stage.
+Je suis en attente d'avoir les droits sur ma station de travail afin de pouvoir tester mes scripts
+**** Script
+J'ai mis à jours mes scripts. Je ne demande plus le fichier de configurations dans le CSV mais au lancement du script de simulation. 
+De cette manière il est facile de rejouer des traces sur des fichiers de configuration différents.
+J'ai cependant un problème, je ne sais pas comment choisir/où informer sur combien de process doit tourner la simulation. Dois-je
+lancer toutes les simulations avec le même nombre de process pour pouvoir les comparer ? Dois-je lancer avec le même nombre de process qu'a l'éxécution (ce qui ne 
+me parrait pas perforamant du tout) ? Ou bien adapter le nombre de process au nombre de trace ? Si oui comment ?
+**** Grid 5000
+J'ai des questions par rapport à Grid 5000 :
+- Je vais utiliser MPICH3, et il y a un tuto sur OpenMP, le même genre de manipulation est-il possible avec MPICH ? Dois-je configurer quelque chose si je reste
+dans le même site ?
+- Le dossier personnel est limité à 25Go, mais si je fais de grosses expériences, il va surement me falloir plus. J'ai
+vu qu'il y a possibilité d'avoir plus d'espaces, il va falloir que je regarde ca. En attendant pour mes petits tests de la plateforme,
+il va falloir que je récupères mes fichiers, et je me demande si scp sera suffisant (ils disent que c'est pas un bon outils pour transférer beaucoups de données.
+- Il a l'air d'être possible de sauvegarder une image du systeme sur grid 5000 avec la commande suivante :
+#+BEGIN_EXAMPLE
+node:ssh root@$(head -1 $OAR_NODEFILE) tgz-g5k > $HOME/public/jessie-openmpi.tgz
+#+END_EXAMPLE
+Si ca fonctionne ca me fera gagner du temps (j'aurais à faire l'image qu'une seule fois puis juste la redéployer).
+**** SimGrid + DUMPI
+Arnaud et Augustin Degomme ont fait de grandes avancées sur le lien entre les deux. Apparement, DUMPI compile, mais ils ont pas testé plus loins
+et il est très probable que ca crash à l'execution. Mais ca avance !
+*** 2017-07-11 mardi
+J'ai une nouvelle machine, ou j'ai pu tout installer avec mon script.
+Je vais continuer les tests sur les petits script et passer à
+Grid5000, il est temps!
+- Script installation OK!
+- Script generation OK!
+- Script simulation OK!
+- Script resExpeToCSV OK!
+
+Plus qu'a s'inscrire sur Grid 5000
+
+Compte OK!
+Cependant, le tuto que je tente de suivre n'a pas l'air de fonctionner
+(peut-être ais-je fait quelque chose de travers).
