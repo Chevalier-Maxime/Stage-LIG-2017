@@ -18006,3 +18006,32 @@ Plus qu'a s'inscrire sur Grid 5000
 Compte OK!
 Cependant, le tuto que je tente de suivre n'a pas l'air de fonctionner
 (peut-être ais-je fait quelque chose de travers).
+*** 2017-07-13 jeudi
+Commande pour copier sur sont HOME de grid5000 :
+#+begin_src sh :results output :exports both
+scp scriptInstallatnG5K machevalier@access.grenoble.grid5000.fr:/home/machevalier
+#+end_src
+
+J'ai toujours pas trouvé comment faire pour que ca aille directement
+dans la machine distante.
+
+Bon on va tenter de tout installer dans le /usr/local pour que ca le
+prenne en compte lors de la création de l'image. Je vais quand même
+télécharger dans le /home
+
+En fait ca fonctionne pas, j'ai pas accès à mon HOME de grenoble sur
+mon noeud (à Grenoble). Et j'arrive pas à faire de scp entre les
+deux. Je comprend vraiment rien! Mon fichier est pourtant disponible
+sur le frontend.
+
+Après la copie, une fois sur le node, il faut :
+#+begin_src 
+scp -r machevalier@fgrenoble:/home/machevalier root@genepi-9.grenoble.grid5000.fr:~/
+#+end_src
+
+puis suivre le tuto jusqu'a tgz-g5k, où il ne faut pas être sur le
+node mais sur le frontend.
+
+Tout s'est installé, mais aucuns des tests de CODES a réussi, je me
+demande donc si ca marche. Peut être un problème de variable
+d'environnement, ou le fait de devoir passer par oarsh et non ssh.
