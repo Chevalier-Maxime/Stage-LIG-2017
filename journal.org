@@ -18035,3 +18035,42 @@ node mais sur le frontend.
 Tout s'est installé, mais aucuns des tests de CODES a réussi, je me
 demande donc si ca marche. Peut être un problème de variable
 d'environnement, ou le fait de devoir passer par oarsh et non ssh.
+*** 2017-07-17 lundi
+Il manque /usr/bin/time sur l'image de grid5000. Il faut donc penser à
+faire un apt-get install time pour que les scripts fonctionnent
+ensuite.
+
+Il faut que je copie les fichiers de configuration sur mon HOME de
+grenoble.
+J'ai quand même une question, comment savoir que mon mpirun d'execute
+bien sur tous mes noeuds ?
+
+Pour le rapport : 
+https://github.com/Ezibenroc/simulating_mpi_applications_at_scale/blob/master/report/report.org
+
++ notes écrites sur cahier pendant la réunion avec Arnaud et Florence.
+
+Pour faire des ssh entre les machines :
+Sur la frontend :
+#+begin_src sh :results output :exports both
+ssh-agent  > /tmp/sshagent
+source /tmp/sshagent
+ssh-add .ssh/id_rsa
+#+end_src
+
+puis se connecter aux machines via :
+
+#+begin_src sh :results output :exports both
+ssh -A root@genepi-9
+#+end_src
+
+Une foi que c'est fait le mpirun se lance bien de partout !
+Cependant, j'ai l'impression que les traces sont dispatchées (j'ai pas
+eu le temps de voir) ou se trouve le reste, mais il me manquait la
+moitié.
+
+De plus j'ai pas pu lancé la commande dans le répertoire /tmp, ce que
+je trouve louche.
+
+Dans tous les cas, il faut que je modifie mes scripts, et qu'ensuite
+je fasse mon CSV.
