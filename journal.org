@@ -18061,7 +18061,8 @@ ssh-add .ssh/id_rsa
 puis se connecter aux machines via :
 
 #+begin_src sh :results output :exports both
-ssh -A root@genepi-9
+scp $OAR_NODEFILE root@$(head -1 $OAR_NODEFILE):nodes
+ssh -A root@$(head -1 $OAR_NODEFILE)
 #+end_src
 
 Une foi que c'est fait le mpirun se lance bien de partout !
@@ -18074,3 +18075,58 @@ je trouve louche.
 
 Dans tous les cas, il faut que je modifie mes scripts, et qu'ensuite
 je fasse mon CSV.
+*** 2017-07-18 mardi
+**** Taille experience G5K
+entree :
+#+BEGIN_EXAMPLE
+amg type nbProcess dim1 dim2 dim3 tailleProbleme
+amg2013dumpi C 8 2 2 2 40
+amg2013dumpi C 27 3 3 3 40
+amg2013dumpi C 64 4 4 4 40
+amg2013scorep T 8 2 2 2 40
+amg2013scorep T 27 3 3 3 40
+amg2013scorep T 64 4 4 4 40
+#+END_EXAMPLE
+
+Impossible de refaire les expériences, ssh ne fait plus comme hier
+alors que j'ai refait les mêmes commandes (avec le -A et la copie
+**** Brutal method
+***** Method 1: Copy ssh keys
+#+begin_src sh :results output :exports both
+for i  in `cat $OAR_NODE_FILE  | uniq` ; do scp ~/.ssh/id_rsa root@$i:.ssh/ ; done
+for i  in `cat $OAR_NODE_FILE  | uniq` ; do scp $OAR_NODE_FILE root@$i:/tmp/hostfile ; done
+#+end_src
+***** Method 2: enable forwarding by default
+First set up ssh-agent. 
+
+#+begin_src sh :results output :exports both
+ssh-agent  > /tmp/sshagent
+source /tmp/sshagent
+ssh-add .ssh/id_rsa
+#+end_src
+
+Then add in your .ssh/config
+#+BEGIN_EXAMPLE
+Host *
+  ForwardAgent yes
+#+END_EXAMPLE
+
+#+begin_src sh :results output :exports both
+for i  in `cat $OAR_NODE_FILE  | uniq` ; do scp ~/.ssh/config root@$i:.ssh/ ; done
+#+end_src
+
+Then ssh normally without the ~-A~.
+
+**** Retour sur execution de MPIRUN
+Après un mpirun d'amg lié à dumpi, j'ai les traces qui sont
+dispatchées entre les noeuds, et un fichier .meta par noeud. il faut
+donc que je test si c'est meta sont les mêmes.
+
+Il faut également que je vois le resultat avec traceR.
+
+***** dumpi
+Avec dumpi on peut rassembler les fichiers puis ca fonctionne.
+
+***** scorep
+Ca fonctionne pas, je pense que c'est parce que les noeuds n'écrivent
+pas sur la même partition.
