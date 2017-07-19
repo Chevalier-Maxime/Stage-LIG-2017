@@ -1,0 +1,4 @@
+amg type nbProcess dim1 dim2 dim3 tailleProbleme
+amg2013dumpi C 8 2 2 2 40
+amg2013dumpi C 27 3 3 3 40
+amg2013dumpi C 64 4 4 4 40

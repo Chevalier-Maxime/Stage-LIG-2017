@@ -18113,6 +18113,9 @@ Host *
 
 #+begin_src sh :results output :exports both
 for i  in `cat $OAR_NODE_FILE  | uniq` ; do scp ~/.ssh/config root@$i:.ssh/ ; done
+scp $OAR_NODEFILE root@$(head -1 $OAR_NODEFILE):nodes
+for i  in `cat $OAR_NODE_FILE  | uniq` ; do ssh root@$i apt-get install time htop ; done
+ssh root@$(head -1 $OAR_NODEFILE)
 #+end_src
 
 Then ssh normally without the ~-A~.
@@ -18130,3 +18133,9 @@ Avec dumpi on peut rassembler les fichiers puis ca fonctionne.
 ***** scorep
 Ca fonctionne pas, je pense que c'est parce que les noeuds n'écrivent
 pas sur la même partition.
+
+*** 2017-07-19 mercredi
+J'ai fait en sorte d'automatiser le rapatriement des fichiers pour
+DUMPI. J'ai pu faire une execution normale (seulement avec du dumpi).
+Je pense que je vais ajouter SimGrid, puis lancer seulement
+CODES/SimGrid sur G5K.

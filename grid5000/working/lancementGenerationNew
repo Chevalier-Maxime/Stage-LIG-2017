@@ -1,0 +1,98 @@
+#!/bin/bash
+
+if [ -z $1 ]; then echo "You must provide a csv file"; exit; fi
+if [ -z $2 ]; then echo "You must provide a mpi machinefile"; exit; fi
+
+export SCOREP_ENABLE_TRACING=1
+export SCOREP_ENABLE_PROFILING=0
+export SCOREP_REDUCE_PROBE_TEST=1
+export SCOREP_MPI_ENABLE_GROUPS=ENV,P2P,COLL,XNONBLOCK
+
+for i in $(uniq $2); do ssh root@$i "cd /tmp ; mkdir tests" ; done 
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+newfile="genShuffleTemp"
+folderExp="gen$(date +%d%m%y-%H%M%S)"
+mkdir $folderExp
+
+(tail -n +2 $1 | shuf) > $newfile #On mélange et on enlève l'entête
+
+cp $1 "./$folderExp"
+
+csvForSimulation="entreeSimulation.csv"
+echo "simulateur pathS pathTrace nbTrace" > $folderExp/$csvForSimulation
+#OLDIFS=$IFS
+#IFS=" "
+IdT=1
+IdC=1
+IdSG=1
+timer="/usr/bin/time"
+
+cd $folderExp
+
+while read amg type nbProcess dim1 dim2 dim3 tailleProbleme
+ do
+  case "$type" in
+      "T")  
+       nomDossier="amg_${IdT}_T_${dim1}_${dim2}_${dim3}"
+       mkdir $nomDossier
+       cd $nomDossier
+       tracer="mpirun -n $nbProcess -machinefile $2 $amg -laplace -n $tailleProbleme $tailleProbleme $tailleProbleme -P $dim1 $dim2 $dim3"
+       ##currentDirectory=$PWD
+       ##cd /tmp/tests
+       ##$timer $tracer < /dev/null > $currentDirectory/$nomDossier 2>> $currentDirectory/$nomDossier
+       $timer $tracer < /dev/null > $nomDossier 2>> $nomDossier
+       ##for i in $(uniq $2 | tail -n +2); do ssh root@$i "rsync -azh $i:/tmp/tests ." ; done
+       ##mv * $currentDirectory
+       ##cd $currentDirectory
+       cd scorep*
+       echo "NA
+1
+$PWD/traces.otf2 NA $nbProcess 1" > tracer_config
+       #Le premier nbProcess faut le choisir en fait pour la simulation ...
+       echo "T traceR $PWD/tracer_config $nbProcess" >> ../../$csvForSimulation
+       IdT=$(($IdT + 1))
+       cd ../..
+   ;;
+
+   "C")
+       nomDossier="amg_${IdC}_C_${dim1}_${dim2}_${dim3}"
+       mkdir $nomDossier
+       cd $nomDossier
+       tracer="mpirun -n $nbProcess -machinefile $2 $amg -laplace -n $tailleProbleme $tailleProbleme $tailleProbleme -P $dim1 $dim2 $dim3"
+       currentDirectory=$PWD
+       cd /tmp/tests
+       $timer $tracer < /dev/null > $currentDirectory/$nomDossier 2>> $currentDirectory/$nomDossier
+       ##$timer $tracer < /dev/null > $nomDossier 2>> $nomDossier
+       for i in $(uniq $2 | tail -n +2); do rsync -azh root@$i:/tmp/tests /tmp/tests < /dev/null ; ssh root@$i "cd /tmp/tests ; rm -f *" < /dev/null ; done
+       if [ -d ./tests ]; then #Il faudrait tester que le dossier ne soit pas vide egalement
+	   mv ./tests/* .
+           rm -rf ./tests
+       fi
+       mv * $currentDirectory
+       cd $currentDirectory
+       nomTraceDumpi="$(find . -name "dumpi*.meta" | head -n 1 | cut -d / -f 2)"
+       nomTraceDumpi=${nomTraceDumpi%.*}-
+       #Le premier nbProcess faut le choisir en fait pour la simulation ...
+       echo "C model-net-mpi-replay $PWD/$nomTraceDumpi $nbProcess" >> ../$csvForSimulation
+       IdC=$(($IdC + 1))
+       cd ..
+   ;;
+
+   "SG")
+      echo "Simgrid not supported yet"
+   ;;
+
+
+   *) echo -e "${RED}Error${NC}: simulator unknown, or malformed input file :"
+      echo "$amg $type $nbProcess $dim1 $dim2 $dim3 $tailleProbleme : will not be simulated"
+      exit
+      ;;
+  esac
+done < ../$newfile
+
+#IFS=$OLDIFS
+rm ../$newfile
+echo "Fin de la génération de traces"

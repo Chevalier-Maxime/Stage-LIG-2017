@@ -1,0 +1,36 @@
+#!/bin/bash
+
+if [ -z $1 ]; then echo "You must provide a folder's path"; exit; fi
+
+output="$(basename $1).csv"
+echo "runningTime time type size nbProcess" > $output
+for filename in $1/*; do
+    if [[ $filename == *".csv"* ]]; then continue ; fi
+
+    temp="$(grep "Running Time" $filename | cut -d = -f 2 -s | cut -d ' ' -f 2)"
+    temp="$temp $(grep "elapsed" $filename | cut -d ' ' -f 3 | sed 's/\(.*[0-9]\)\(.*\)/\1/')"
+    #Simulateur
+    if grep -q "model-net-mpi-replay" $filename; then
+        #Code simulator
+	temp="$temp C"
+	#number of traces
+	temp="$temp $(grep "num_net_traces=" $filename | cut -d ' ' -f 5 | cut -d = -f 2)"
+	#nbProcess
+	temp="$temp $(grep "world size" $filename | cut -d ' ' -f 7)"
+    else if grep -q "tracer" $filename; then
+	     #TraceR simulator
+	     temp="$temp T"
+	     #number of traces
+	     temp="$temp $(grep "ranks" $filename | cut -d ' ' -f 5 | cut -d , -f 1)"
+	     #nbProcess
+	     temp="$temp $(grep "world size" $filename | cut -d ' ' -f 7)"
+	 else
+	     echo "Simulateur unknown, $filename ignored"
+	     continue
+	 fi
+    fi
+   
+    echo "$temp" >>$output
+done
+
+mv $output $1
