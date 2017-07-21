@@ -2,6 +2,7 @@
 
 if [ -z $1 ]; then echo "You must provide a csv file"; exit; fi
 if [ -z $2 ]; then echo "You must provide a mpi machinefile"; exit; fi
+if [ -z $3 ]; then echo "You must provide a simgrid platform file"; exit; fi
 
 export SCOREP_ENABLE_TRACING=1
 export SCOREP_ENABLE_PROFILING=0
@@ -82,7 +83,15 @@ $PWD/traces.otf2 NA $nbProcess 1" > tracer_config
    ;;
 
    "SG")
-      echo "Simgrid not supported yet"
+       nomDossier="amg_${IdSG}_SG_${dim1}_${dim2}_${dim3}"
+       mkdir $nomDossier
+       cd $nomDossier
+       tracer="smpirun -trace-ti -np $nbProcess -platform $3 $amg -laplace -n $tailleProbleme $tailleProbleme $tailleProbleme -P $dim1 $dim2 $dim3 --cfg=smpi/privatization:yes"
+       $timer $tracer < /dev/null > $nomDossier 2>> $nomDossier
+       cat smpi_simgrid.txt_files/* > sg_amg_${dim1}_${dim2}_${dim3}.txt
+       echo "SG smpirun $PWD/sg_amg_${dim1}_${dim2}_${dim3}.txt $nbProcess" >> ../$csvForSimulation
+       IdSG=$(($IdSG + 1))
+       cd ..
    ;;
 
 

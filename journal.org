@@ -18091,6 +18091,13 @@ amg2013scorep T 64 4 4 4 40
 Impossible de refaire les expériences, ssh ne fait plus comme hier
 alors que j'ai refait les mêmes commandes (avec le -A et la copie
 **** Brutal method
+#+begin_src sh :results output :exports both
+ssh g5k
+ssh grenoble
+oarsub -I -t deploy -l nodes=1,walltime=2
+kadeploy3 -a /home/machevalier/public/jessie-mpich.dsc -f $OAR_NODEFILE -k
+#+end_src
+
 ***** Method 1: Copy ssh keys
 #+begin_src sh :results output :exports both
 for i  in `cat $OAR_NODE_FILE  | uniq` ; do scp ~/.ssh/id_rsa root@$i:.ssh/ ; done
@@ -18114,7 +18121,7 @@ Host *
 #+begin_src sh :results output :exports both
 for i  in `cat $OAR_NODE_FILE  | uniq` ; do scp ~/.ssh/config root@$i:.ssh/ ; done
 scp $OAR_NODEFILE root@$(head -1 $OAR_NODEFILE):nodes
-for i  in `cat $OAR_NODE_FILE  | uniq` ; do ssh root@$i apt-get install time htop ; done
+#for i  in `cat $OAR_NODE_FILE  | uniq` ; do ssh root@$i apt-get install time htop ; done
 ssh root@$(head -1 $OAR_NODEFILE)
 #+end_src
 
@@ -18415,13 +18422,15 @@ System Size * Iterations / Solve Phase Time: 6.964585e+06
 #+END_EXAMPLE
 
 
-*** 
+**** Simgrid Replay
 
 Sequential run, using raw contexts (no threads).
 #+begin_src sh :results output :exports both
 cd /home/chevamax/simgrid/examples/smpi
 cat ~/Documents/te/smpi_simgrid.txt_files/1500541871.850796_rank-* > toto.txt
-/usr/bin/time ../../smpi_script/bin/smpirun -ext ./replay/smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform /home/chevamax/simgrid/examples/smpi/../platforms/cluster.xml ./replay/smpi_replay ./toto.txt --cfg=smpi/display-timing:1 2>&1
+/usr/bin/time ../../smpi_script/bin/smpirun -ext ./replay/smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical\
+ --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform /home/chevamax/simgrid/examples/smpi/../platforms/cluster.xml\
+ ./replay/smpi_replay ./toto.txt --cfg=smpi/display-timing:1 2>&1
 #+end_src
 
 #+RESULTS:
@@ -18444,7 +18453,9 @@ Parallel run, using pthreads (see http://simgrid.gforge.inria.fr/simgrid/latest/
 #+begin_src sh :results output :exports both
 cd /home/chevamax/simgrid/examples/smpi
 cat ~/Documents/te/smpi_simgrid.txt_files/1500541871.850796_rank-* > toto.txt
-/usr/bin/time ../../smpi_script/bin/smpirun -ext ./replay/smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform /home/chevamax/simgrid/examples/smpi/../platforms/cluster.xml ./replay/smpi_replay ./toto.txt --cfg=smpi/display-timing:1 --cfg=contexts/factory:thread --cfg=contexts/nthreads:4 2>&1 
+/usr/bin/time ../../smpi_script/bin/smpirun -ext ./replay/smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical\
+ --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform /home/chevamax/simgrid/examples/smpi/../platforms/cluster.xml \
+./replay/smpi_replay ./toto.txt --cfg=smpi/display-timing:1 --cfg=contexts/factory:thread --cfg=contexts/nthreads:4 2>&1 
 #+end_src
 
 #+RESULTS:

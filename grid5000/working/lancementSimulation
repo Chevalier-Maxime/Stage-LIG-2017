@@ -4,8 +4,9 @@ echo "./lancementSimulation CSVfile TracerConfFile CodesConfFile nbProcess"
 if [ -z $1 ]; then echo "You must provide a csv file"; exit; fi
 if [ -z $2 ]; then echo "You must provide conf file for Tracer"; exit; fi
 if [ -z $3 ]; then echo "You must provide conf file for Codes"; exit; fi
-if [ -z $4 ]; then echo "You must provide the number of process for the simulation"; exit; fi
-if [ -z $5 ]; then echo "You must provide the number of process for the simulationrepetition"; exit; fi
+if [ -z $4 ]; then echo "You must provide conf file for SimGrid"; exit; fi
+if [ -z $5 ]; then echo "You must provide the number of process for the simulation"; exit; fi
+if [ -z $6 ]; then echo "You must provide the number of process for the simulationrepetition"; exit; fi
 
 if [[ $LD_LIBRARY_PATH != *"/codes/install/lib"* ]] ; then
 	export LD_LIBRARY_PATH="/home/chevamax/Téléchargements/codes/install/lib:$LD_LIBRARY_PATH"	
@@ -29,8 +30,8 @@ IdC=1
 IdSG=1
 timer="/usr/bin/time"
 
-nbProcess=$4
-for j in `seq 1 $5`; do
+nbProcess=$5
+for j in `seq 1 $6`; do
 while read simulateur pathS pathTrace nbTrace #confReseau
  do
   case "$simulateur" in
@@ -61,7 +62,10 @@ while read simulateur pathS pathTrace nbTrace #confReseau
    ;;
 
    "SG")
-      echo "Simgrid not supported yet"
+      #Only sequential
+       simgrid="smpirun -ext smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no -np $nbTrace -platform $4 smpi_replay $pathTrace --cfg=smpi/display-timing:1"
+       $timer $simgrid < /dev/null > "$folderExp/simgrid_${nbTrace}_${IdSG}" 2>> "$folderExp/simgrid_${nbTrace}_${IdSG}"
+       IdSG=$(($IdSG + 1))
    ;;
 
 
