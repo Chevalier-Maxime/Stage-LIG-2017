@@ -1,0 +1,118 @@
+---
+title: "Grid5000"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Expérience
+### Augmentation de la quantitée de calcul
+
+Il y a dans cette expériences 3 générations différentes : 
+ - 2x2x2 = trace de 8 processus
+ - 3x3x3 = trace de 27 processus
+ - 4x4x4 = trace de 64 processus
+ 
+On va s'intéréssé à l'augmentation de la charge de calcul pour chaque processus dans un premier temps :
+
+#### Grille de 40x40x40 par processus
+
+```{r}
+data40par4 = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/grid5000/codes more work/2_40_par_4", header=TRUE, sep=" ")
+data40par1 = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/grid5000/codes more work/2_40_par_1", header=TRUE, sep=" ")
+data40seq = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/grid5000/codes more work/2_40_seq", header=TRUE, sep=" ")
+
+convert <- function(rTime) {
+  as.numeric(strsplit(as.character(rTime),split=":")[[1]][1])*60+as.numeric(strsplit(as.character(rTime),split=":")[[1]][2])
+}
+
+data40par4$sim="Par"
+data40par4 = data.frame(data40par4[c(1,3,4,5,6)], apply(data40par4[2],1, convert))
+colnames(data40par4)[6] <- "time"
+
+data40par1$sim="Par"
+data40par1 = data.frame(data40par1[c(1,3,4,5,6)], apply(data40par1[2],1, convert))
+colnames(data40par1)[6] <- "time"
+
+data40seq$sim="Seq"
+data40seq = data.frame(data40seq[c(1,3,4,5,6)], apply(data40seq[2],1, convert))
+colnames(data40seq)[6] <- "time"
+
+library(ggplot2)
+
+df <- rbind(data40par4, data40par1, data40seq )
+
+ggplot(df, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216, grille de calcul d'un processus 40x40x40") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
+```
+
+#### Grille de 60x60x60 par processus
+
+```{r}
+data60par4 = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/grid5000/codes more work/60_par_4", header=TRUE, sep=" ")
+data60par1 = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/grid5000/codes more work/60_par_1", header=TRUE, sep=" ")
+data60seq = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/grid5000/codes more work/60_seq", header=TRUE, sep=" ")
+
+data60par4$sim="Par"
+data60par4 = data.frame(data60par4[c(1,3,4,5,6)], apply(data60par4[2],1, convert))
+colnames(data60par4)[6] <- "time"
+
+data60par1$sim="Par"
+data60par1 = data.frame(data60par1[c(1,3,4,5,6)], apply(data60par1[2],1, convert))
+colnames(data60par1)[6] <- "time"
+
+data60seq$sim="Seq"
+data60seq = data.frame(data60seq[c(1,3,4,5,6)], apply(data60seq[2],1, convert))
+colnames(data60seq)[6] <- "time"
+
+df60 <- rbind(data60par4, data60par1, data60seq )
+
+ggplot(df60, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216, grille de calcul d'un processus 60x60x60") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
+```
+
+#### Grille de 80x80x80 par processus
+
+```{r}
+data80par4 = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/grid5000/codes more work/80_par_4", header=TRUE, sep=" ")
+data80par1 = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/grid5000/codes more work/80_par_1", header=TRUE, sep=" ")
+data80seq = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/grid5000/codes more work/80_seq", header=TRUE, sep=" ")
+
+data80par4$sim="Par"
+data80par4 = data.frame(data80par4[c(1,3,4,5,6)], apply(data80par4[2],1, convert))
+colnames(data80par4)[6] <- "time"
+
+data80par1$sim="Par"
+data80par1 = data.frame(data80par1[c(1,3,4,5,6)], apply(data80par1[2],1, convert))
+colnames(data80par1)[6] <- "time"
+
+data80seq$sim="Seq"
+data80seq = data.frame(data80seq[c(1,3,4,5,6)], apply(data80seq[2],1, convert))
+colnames(data80seq)[6] <- "time"
+
+df80 <- rbind(data80par4, data80par1, data80seq )
+
+ggplot(df80, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216, grille de calcul d'un processus 80x80x80") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
+```
+#### Grille de 100x100x100 par processus
+
+```{r}
+data100par4 = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/grid5000/codes more work/100_par_4", header=TRUE, sep=" ")
+data100par1 = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/grid5000/codes more work/100_par_1", header=TRUE, sep=" ")
+data100seq = read.csv(file="/home/chevamax/Documents/Stage-LIG-2017/grid5000/codes more work/100_seq", header=TRUE, sep=" ")
+
+data100par4$sim="Par"
+data100par4 = data.frame(data100par4[c(1,3,4,5,6)], apply(data100par4[2],1, convert))
+colnames(data100par4)[6] <- "time"
+
+data100par1$sim="Par"
+data100par1 = data.frame(data100par1[c(1,3,4,5,6)], apply(data100par1[2],1, convert))
+colnames(data100par1)[6] <- "time"
+
+data100seq$sim="Seq"
+data100seq = data.frame(data100seq[c(1,3,4,5,6)], apply(data100seq[2],1, convert))
+colnames(data100seq)[6] <- "time"
+
+df100 <- rbind(data100par4, data100par1, data100seq )
+
+ggplot(df100, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216, grille de calcul d'un processus 100x100x100") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
+```
