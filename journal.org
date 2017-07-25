@@ -18874,3 +18874,66 @@ runningTime time type size nbProcess
 4.9684 0:05.56 C 8 1
 
 #+END_EXAMPLE
+*** 2017-07-25 mardi
+Je suis aller demander de l'aide sur l'IRC pour Simgrid.
+Apparement tout vient d'être cassé alors je repars sur la version
+3.15, et pour ajouter le support des allgather, il faut modifier le
+fichier =.../simgrid/src/instr/instr_TI_trace.cpp= en supprimant la
+ligne 208, et en ajoutant 
+#+BEGIN_EXAMPLE
+case TRACING_ALLGATHER: // rank allgather sendcount recvcounts (sendtype) (recvtype)
+        fprintf(trace_file, "%s allGather %d %d %s %s", process_id, extra->send_size, extra->recv_size, extra->datatype1, extra->datatype2);
+        break;
+#+END_EXAMPLE
+
+avant le case =TRACING_WAITANY:= (ligne 203-204)
+
+Résultat: Le replay fonctionne pas sur cette version :
+
+#+BEGIN_EXAMPLE
+Starting program: /home/chevamax/Téléchargements/simgrid315/examples/smpi/replay/smpi_replay --cfg=surf/precision:1e-9 --cfg=network/model:SMPI --cfg=network/TCP-gamma:4194304 --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no --cfg=smpi/display-timing:1 --cfg=smpi/privatize-global-variables:yes ../simgrid315/examples/platforms/cluster.xml smpitmp-appDLiIu1
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'surf/precision' to '1e-9'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/model' to 'SMPI'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/TCP-gamma' to '4194304'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'smpi/simulate-computation' to 'no'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'smpi/display-timing' to '1'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'smpi/privatize-global-variables' to 'yes'
+[0.000000] [smpi_kernel/INFO] You did not set the power of the host running the simulation.  The timings will certainly not be accurate.  Use the option "--cfg=smpi/host-speed:<flops>" to set its value.Check http://simgrid.org/simgrid/latest/doc/options.html#options_smpi_bench for more information.
+[node-4.acme.org:4:(5) 0.000000] [xbt_exception/CRITICAL] Uncaught exception std::out_of_range: _Map_base::at
+[node-4.acme.org:4:(5) 0.000000] [xbt_exception/CRITICAL] Current backtrace:
+[node-4.acme.org:4:(5) 0.000000] [xbt_exception/CRITICAL]   -> simgrid::xbt::backtrace() at /home/chevamax/Téléchargements/simgrid315/src/xbt/backtrace.cpp:79, 0x7ffff7ab503f
+[node-4.acme.org:4:(5) 0.000000] [xbt_exception/CRITICAL]   -> simgrid::xbt::handler() at /home/chevamax/Téléchargements/simgrid315/src/xbt/exception.cpp:101, 0x7ffff7adcf98
+[node-4.acme.org:4:(5) 0.000000] [xbt_exception/CRITICAL]   -> std::rethrow_exception(std::__exception_ptr::exception_ptr) at ??:?, 0x7ffff6bb56b6
+[node-4.acme.org:4:(5) 0.000000] [xbt_exception/CRITICAL]   -> std::terminate() at ??:?, 0x7ffff6bb5701
+[node-4.acme.org:4:(5) 0.000000] [xbt_exception/CRITICAL]   -> __cxa_throw at ??:?, 0x7ffff6bb5919
+[node-4.acme.org:4:(5) 0.000000] [xbt_exception/CRITICAL]   -> std::__throw_out_of_range(char const*) at ??:?, 0x7ffff6bde2cf
+[node-4.acme.org:4:(5) 0.000000] [xbt_exception/CRITICAL]   -> at at /usr/include/c++/5/bits/hashtable_policy.h:646, 0x7ffff7a358eb
+[node-4.acme.org:4:(5) 0.000000] [xbt_exception/CRITICAL]   -> simgrid::xbt::replay_runner(int, char**) at /home/chevamax/Téléchargements/simgrid315/src/xbt/xbt_replay.cpp:153, 0x7ffff7a44628
+[node-4.acme.org:4:(5) 0.000000] [xbt_exception/CRITICAL]   -> smpi_replay_run at /home/chevamax/Téléchargements/simgrid315/src/smpi/smpi_replay.cpp:956, 0x7ffff797f3ba
+
+Program received signal SIGABRT, Aborted.
+0x00007ffff72f4428 in __GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:54
+54	../sysdeps/unix/sysv/linux/raise.c: Aucun fichier ou dossier de ce type.
+#+END_EXAMPLE
+
+Soit je tente sans le fix, soit avec la dernière release (moins
+performante de 30%).
+
+
+Lancement simgrid : 
+#+BEGIN_EXAMPLE
+smpirun -trace-ti -np 8 -platform ~/simgrid/examples/platforms/cluster.xml /home/chevamax/install/bin/amg2013sg -laplace -n 40 40 40 -P 2 2 2 --cfg=smpi/privatization:yes ----tracing/filename:amgtest_ti.txt
+#+END_EXAMPLE
+
+Replay :
+#+BEGIN_EXAMPLE
+smpirun -ext ./smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform ./conf.xml ./smpi_replay ./amg8.txt --cfg=smpi/display-timing:1 --cfg=smpi/coll_selector:mvapich2
+#+END_EXAMPLE
+
+
+Replay via dl/tests
+#+BEGIN_EXAMPLE
+ ../simgrid315/install/bin/smpirun -ext ../simgrid315/examples/smpi/replay/smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform ../simgrid315/examples/platforms/cluster.xml ../simgrid315/examples/smpi/replay/smpi_replay ./trace.txt --cfg=smpi/display-timing:1 --cfg=smpi/privatize-global-variables:yes
+#+END_EXAMPLE
