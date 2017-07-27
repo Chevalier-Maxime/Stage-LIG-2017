@@ -18937,3 +18937,632 @@ Replay via dl/tests
 #+BEGIN_EXAMPLE
  ../simgrid315/install/bin/smpirun -ext ../simgrid315/examples/smpi/replay/smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform ../simgrid315/examples/platforms/cluster.xml ../simgrid315/examples/smpi/replay/smpi_replay ./trace.txt --cfg=smpi/display-timing:1 --cfg=smpi/privatize-global-variables:yes
 #+END_EXAMPLE
+*** 2017-07-26 mercredi
+Du coup AMG ne fonctionne pas sur Simgrid 3.15 (le replay en tout cas)
+#+BEGIN_EXAMPLE
+../simgrid315_2/install/bin/smpirun -ext ../simgrid315_2/examples/smpi/replay/smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform ../simgrid315_2/examples/platforms/cluster.xml ../simgrid315_2/examples/smpi/replay/smpi_replay ./toto.txt --cfg=smpi/display-timing:1 --cfg=smpi/privatize-global-variables:yes
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'surf/precision' to '1e-9'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/model' to 'SMPI'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/TCP-gamma' to '4194304'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'smpi/simulate-computation' to 'no'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'smpi/display-timing' to '1'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'smpi/privatize-global-variables' to 'yes'
+[0.000000] [smpi_kernel/INFO] You did not set the power of the host running the simulation.  The timings will certainly not be accurate.  Use the option "--cfg=smpi/host-speed:<flops>" to set its value.Check http://simgrid.org/simgrid/latest/doc/options.html#options_smpi_bench for more information.
+[node-2.acme.org:2:(3) 0.000000] [xbt_exception/CRITICAL] Uncaught exception std::out_of_range: _Map_base::at
+[node-2.acme.org:2:(3) 0.000000] [xbt_exception/CRITICAL] Current backtrace:
+[node-2.acme.org:2:(3) 0.000000] [xbt_exception/CRITICAL]   -> simgrid::xbt::backtrace() at /home/chevamax/Téléchargements/simgrid315_2/src/xbt/backtrace.cpp:79, 0x7efd6600efff
+[node-2.acme.org:2:(3) 0.000000] [xbt_exception/CRITICAL]   -> simgrid::xbt::handler() at /home/chevamax/Téléchargements/simgrid315_2/src/xbt/exception.cpp:101, 0x7efd66036f58
+[node-2.acme.org:2:(3) 0.000000] [xbt_exception/CRITICAL]   -> std::rethrow_exception(std::__exception_ptr::exception_ptr) at ??:?, 0x7efd6510f6b6
+[node-2.acme.org:2:(3) 0.000000] [xbt_exception/CRITICAL]   -> std::terminate() at ??:?, 0x7efd6510f701
+[node-2.acme.org:2:(3) 0.000000] [xbt_exception/CRITICAL]   -> __cxa_throw at ??:?, 0x7efd6510f919
+[node-2.acme.org:2:(3) 0.000000] [xbt_exception/CRITICAL]   -> std::__throw_out_of_range(char const*) at ??:?, 0x7efd651382cf
+[node-2.acme.org:2:(3) 0.000000] [xbt_exception/CRITICAL]   -> at at /usr/include/c++/5/bits/hashtable_policy.h:646, 0x7efd65f8f8db
+[node-2.acme.org:2:(3) 0.000000] [xbt_exception/CRITICAL]   -> simgrid::xbt::replay_runner(int, char**) at /home/chevamax/Téléchargements/simgrid315_2/src/xbt/xbt_replay.cpp:153, 0x7efd65f9e618
+[node-2.acme.org:2:(3) 0.000000] [xbt_exception/CRITICAL]   -> smpi_replay_run at /home/chevamax/Téléchargements/simgrid315_2/src/smpi/smpi_replay.cpp:956, 0x7efd65ee5d8a
+../simgrid315_2/examples/smpi/replay/smpi_replay --cfg=surf/precision:1e-9 --cfg=network/model:SMPI --cfg=network/TCP-gamma:4194304 --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no --cfg=smpi/display-timing:1 --cfg=smpi/privatize-global-variables:yes --cfg=smpi/privatize-global-variables:yes ../simgrid315_2/examples/platforms/cluster.xml smpitmp-appfWzLxv
+Generated hostfile smpitmp-hostf8KUVH7 kept.
+Execution failed with code 134.
+#+END_EXAMPLE
+
+Avec ou sans le fix j'ai cette erreur.
+**** Resultats 40x40x40
+***** seq
+#+BEGIN_EXAMPLE
+runningTime time type size nbProcess
+24.6929 0:31.39 C 125 1
+24.7836 0:31.48 C 125 1
+24.8603 0:31.57 C 125 1
+24.9572 0:31.64 C 125 1
+24.7696 0:31.53 C 125 1
+24.9415 0:31.63 C 125 1
+25.1872 0:31.87 C 125 1
+24.7298 0:31.46 C 125 1
+24.7886 0:31.49 C 125 1
+24.8719 0:31.56 C 125 1
+2.7874 0:03.96 C 27 1
+2.7997 0:03.98 C 27 1
+2.8097 0:03.99 C 27 1
+2.7425 0:03.92 C 27 1
+2.7505 0:03.93 C 27 1
+2.7416 0:03.92 C 27 1
+2.7373 0:03.92 C 27 1
+2.7362 0:03.93 C 27 1
+2.7521 0:03.93 C 27 1
+2.7496 0:03.93 C 27 1
+9.4101 0:12.40 C 64 1
+9.4600 0:12.45 C 64 1
+9.4933 0:12.50 C 64 1
+9.3900 0:12.38 C 64 1
+9.3646 0:12.36 C 64 1
+9.4317 0:12.47 C 64 1
+9.3964 0:12.38 C 64 1
+9.4553 0:12.44 C 64 1
+9.3836 0:12.37 C 64 1
+9.3983 0:12.39 C 64 1
+0.4408 0:00.96 C 8 1
+0.4368 0:00.95 C 8 1
+0.4376 0:00.95 C 8 1
+0.4406 0:00.95 C 8 1
+0.4368 0:00.95 C 8 1
+0.4451 0:00.96 C 8 1
+0.4413 0:00.96 C 8 1
+0.4380 0:00.95 C 8 1
+0.4372 0:00.95 C 8 1
+0.4368 0:00.95 C 8 1
+#+END_EXAMPLE
+***** 4
+#+BEGIN_EXAMPLE
+runningTime time type size nbProcess
+35.5841 0:39.02 C 125 4
+36.6150 0:40.07 C 125 4
+35.8937 0:39.36 C 125 4
+36.7632 0:40.27 C 125 4
+36.7362 0:40.21 C 125 4
+36.7667 0:40.23 C 125 4
+35.7869 0:39.16 C 125 4
+35.8078 0:39.20 C 125 4
+35.8014 0:39.20 C 125 4
+36.2774 0:39.67 C 125 4
+3.4981 0:04.64 C 27 4
+3.5095 0:04.65 C 27 4
+3.4688 0:04.68 C 27 4
+3.5172 0:04.73 C 27 4
+3.5461 0:04.67 C 27 4
+3.5447 0:04.66 C 27 4
+3.5186 0:04.60 C 27 4
+3.4930 0:04.69 C 27 4
+3.5236 0:04.60 C 27 4
+3.5149 0:04.68 C 27 4
+15.4361 0:23.24 C 64 4
+15.4041 0:18.23 C 64 4
+15.5041 0:18.29 C 64 4
+15.3258 0:18.36 C 64 4
+15.2967 0:18.17 C 64 4
+15.5951 0:18.37 C 64 4
+15.4036 0:18.15 C 64 4
+15.3938 0:18.16 C 64 4
+15.1808 0:18.06 C 64 4
+15.4516 0:18.22 C 64 4
+0.5517 0:01.10 C 8 4
+0.5566 0:01.03 C 8 4
+0.5561 0:01.00 C 8 4
+0.5538 0:01.03 C 8 4
+0.5544 0:00.99 C 8 4
+0.5543 0:00.97 C 8 4
+0.5526 0:01.02 C 8 4
+0.5498 0:01.09 C 8 4
+0.5595 0:01.10 C 8 4
+0.5488 0:01.06 C 8 4
+#+END_EXAMPLE
+***** 8
+#+BEGIN_EXAMPLE
+42.5722 0:44.79 C 125 8
+41.9630 0:44.17 C 125 8
+41.0102 0:43.21 C 125 8
+41.8381 0:44.14 C 125 8
+42.3046 0:44.55 C 125 8
+41.6324 0:43.85 C 125 8
+42.0402 0:44.31 C 125 8
+41.8459 0:44.08 C 125 8
+42.6285 0:44.85 C 125 8
+41.7660 0:43.97 C 125 8
+3.5720 0:04.84 C 27 8
+3.5697 0:04.86 C 27 8
+3.5347 0:04.78 C 27 8
+3.5480 0:04.80 C 27 8
+3.5331 0:04.83 C 27 8
+3.5644 0:04.79 C 27 8
+3.5850 0:04.82 C 27 8
+3.5932 0:04.93 C 27 8
+3.5664 0:04.80 C 27 8
+3.5553 0:04.79 C 27 8
+16.2249 0:17.98 C 64 8
+15.7732 0:17.47 C 64 8
+15.8315 0:17.56 C 64 8
+16.0817 0:17.81 C 64 8
+16.0722 0:17.79 C 64 8
+15.8874 0:17.58 C 64 8
+16.1174 0:17.86 C 64 8
+16.1487 0:17.93 C 64 8
+16.2592 0:18.03 C 64 8
+16.2538 0:18.01 C 64 8
+0.5626 0:06.65 C 8 8
+0.5648 0:01.14 C 8 8
+0.5653 0:01.17 C 8 8
+0.5585 0:01.19 C 8 8
+0.5638 0:01.16 C 8 8
+0.5691 0:01.17 C 8 8
+0.5662 0:01.13 C 8 8
+0.5625 0:01.14 C 8 8
+0.5658 0:01.13 C 8 8
+0.5627 0:01.16 C 8 8
+#+END_EXAMPLE
+***** AMG reel
+#+BEGIN_EXAMPLE
+runningTime time type size nbProcess
+0 0:16.43 AMG 125 125
+0 0:18.37 AMG 125 125
+0 0:17.54 AMG 125 125
+0 0:16.57 AMG 125 125
+0 0:16.89 AMG 125 125
+0 0:16.90 AMG 125 125
+0 0:17.89 AMG 125 125
+0 0:16.72 AMG 125 125
+0 0:16.53 AMG 125 125
+0 0:17.92 AMG 125 125
+0 0:16.17 AMG 27 27
+0 0:17.42 AMG 27 27
+0 0:15.18 AMG 27 27
+0 0:16.22 AMG 27 27
+0 0:16.95 AMG 27 27
+0 0:14.75 AMG 27 27
+0 0:17.25 AMG 27 27
+0 0:16.03 AMG 27 27
+0 0:15.82 AMG 27 27
+0 0:17.22 AMG 27 27
+0 0:12.17 AMG 64 64
+0 0:16.50 AMG 64 64
+0 0:13.70 AMG 64 64
+0 0:16.73 AMG 64 64
+0 0:14.68 AMG 64 64
+0 0:17.59 AMG 64 64
+0 0:15.52 AMG 64 64
+0 0:17.82 AMG 64 64
+0 0:16.64 AMG 64 64
+0 0:15.09 AMG 64 64
+0 0:00.67 AMG 8 8
+0 0:00.68 AMG 8 8
+0 0:00.68 AMG 8 8
+0 0:00.67 AMG 8 8
+0 0:00.66 AMG 8 8
+0 0:00.70 AMG 8 8
+0 0:00.66 AMG 8 8
+0 0:00.68 AMG 8 8
+0 0:00.66 AMG 8 8
+0 0:00.65 AMG 8 8
+#+END_EXAMPLE
+***** Simgrid (real execution)
+#+BEGIN_EXAMPLE
+runningTime time type size nbProcess
+0 12:39.97 SG 125 1
+0 0:35.76 SG 27 1
+0 2:39.16 SG 64 1
+0 0:06.65 SG 8 1
+0 12:39.69 SG 125 1
+0 12:40.14 SG 125 1
+0 12:41.26 SG 125 1
+0 12:41.79 SG 125 1
+0 12:41.17 SG 125 1
+0 12:39.92 SG 125 1
+0 16:22.14 SG 125 1
+0 12:41.43 SG 125 1
+0 12:40.40 SG 125 1
+0 12:42.32 SG 125 1
+0 0:35.67 SG 27 1
+0 0:35.67 SG 27 1
+0 0:35.63 SG 27 1
+0 0:35.64 SG 27 1
+0 0:35.67 SG 27 1
+0 0:35.63 SG 27 1
+0 0:35.98 SG 27 1
+0 0:35.68 SG 27 1
+0 0:35.82 SG 27 1
+0 0:35.70 SG 27 1
+0 2:39.24 SG 64 1
+0 2:39.04 SG 64 1
+0 2:40.31 SG 64 1
+0 2:39.25 SG 64 1
+0 2:39.00 SG 64 1
+0 2:39.43 SG 64 1
+0 2:39.03 SG 64 1
+0 2:38.90 SG 64 1
+0 2:53.47 SG 64 1
+0 2:39.96 SG 64 1
+0 0:06.64 SG 8 1
+0 0:06.64 SG 8 1
+0 0:06.65 SG 8 1
+0 0:06.63 SG 8 1
+0 0:06.64 SG 8 1
+0 0:06.65 SG 8 1
+0 0:06.65 SG 8 1
+0 0:06.65 SG 8 1
+0 0:06.62 SG 8 1
+0 0:06.63 SG 8 1
+#+END_EXAMPLE
+**** Resultats 100x100x100
+***** seq
+#+BEGIN_EXAMPLE
+runningTime time type size nbProcess
+65.6422 1:14.92 C 125 1
+65.1091 1:14.46 C 125 1
+65.4656 1:14.80 C 125 1
+65.5825 1:14.88 C 125 1
+65.5714 1:14.86 C 125 1
+65.6130 1:14.89 C 125 1
+65.0871 1:14.38 C 125 1
+65.5446 1:14.88 C 125 1
+65.4327 1:14.73 C 125 1
+65.2483 1:14.81 C 125 1
+9.0917 0:10.64 C 27 1
+9.0733 0:10.79 C 27 1
+9.0901 0:10.63 C 27 1
+9.1063 0:10.66 C 27 1
+9.1651 0:10.75 C 27 1
+9.0983 0:10.65 C 27 1
+9.1241 0:10.67 C 27 1
+9.1053 0:10.66 C 27 1
+9.0854 0:10.64 C 27 1
+9.3117 0:10.86 C 27 1
+27.6211 0:31.85 C 64 1
+27.5383 0:31.81 C 64 1
+28.1047 0:32.33 C 64 1
+27.5474 0:31.78 C 64 1
+27.5679 0:31.80 C 64 1
+27.8471 0:32.09 C 64 1
+27.6594 0:31.90 C 64 1
+27.6238 0:31.86 C 64 1
+27.5488 0:31.79 C 64 1
+27.6035 0:31.84 C 64 1
+1.6071 0:02.17 C 8 1
+1.5998 0:02.16 C 8 1
+1.6021 0:02.16 C 8 1
+1.6069 0:02.17 C 8 1
+1.6021 0:02.16 C 8 1
+1.6248 0:02.20 C 8 1
+1.6022 0:02.17 C 8 1
+1.6008 0:02.17 C 8 1
+1.6116 0:02.17 C 8 1
+1.6039 0:02.17 C 8 1
+#+END_EXAMPLE
+***** 4
+#+BEGIN_EXAMPLE
+runningTime time type size nbProcess
+100.7368 1:45.53 C 125 4
+104.5829 1:49.45 C 125 4
+101.0400 1:45.84 C 125 4
+101.3628 1:46.39 C 125 4
+104.5504 1:49.38 C 125 4
+106.9564 1:51.88 C 125 4
+106.2386 1:51.21 C 125 4
+106.3905 1:51.36 C 125 4
+105.9277 1:50.88 C 125 4
+100.5132 1:45.24 C 125 4
+11.7191 0:13.11 C 27 4
+11.5689 0:13.14 C 27 4
+11.6307 0:13.05 C 27 4
+11.6831 0:13.11 C 27 4
+11.7168 0:13.18 C 27 4
+11.7111 0:13.20 C 27 4
+11.7562 0:13.24 C 27 4
+11.7172 0:13.16 C 27 4
+11.7124 0:13.20 C 27 4
+11.6535 0:13.14 C 27 4
+42.8527 0:47.24 C 64 4
+42.3892 0:46.62 C 64 4
+42.8917 0:46.85 C 64 4
+42.4082 0:46.47 C 64 4
+42.7795 0:46.77 C 64 4
+42.5858 0:46.67 C 64 4
+42.6497 0:46.61 C 64 4
+42.3414 0:46.53 C 64 4
+42.7565 0:46.70 C 64 4
+42.4248 0:46.49 C 64 4
+2.0321 0:02.50 C 8 4
+2.0156 0:02.61 C 8 4
+2.0233 0:02.55 C 8 4
+2.0435 0:02.50 C 8 4
+2.0195 0:02.48 C 8 4
+2.0455 0:02.57 C 8 4
+2.0406 0:02.48 C 8 4
+2.0289 0:02.55 C 8 4
+2.0201 0:02.61 C 8 4
+2.0145 0:02.61 C 8 4
+#+END_EXAMPLE
+***** 8
+#+BEGIN_EXAMPLE
+runningTime time type size nbProcess
+156.4072 2:39.40 C 125 8
+156.3021 2:39.29 C 125 8
+153.2208 2:36.29 C 125 8
+152.9518 2:35.93 C 125 8
+155.1088 2:38.08 C 125 8
+149.6829 2:32.68 C 125 8
+153.2648 2:36.33 C 125 8
+153.7827 2:36.75 C 125 8
+153.6575 2:36.68 C 125 8
+154.4929 2:37.48 C 125 8
+11.8927 0:13.45 C 27 8
+11.8948 0:13.56 C 27 8
+11.9236 0:13.53 C 27 8
+11.9089 0:13.47 C 27 8
+12.1797 0:13.77 C 27 8
+11.9949 0:13.60 C 27 8
+12.1249 0:13.72 C 27 8
+11.7850 0:13.39 C 27 8
+11.7989 0:13.36 C 27 8
+11.8416 0:13.41 C 27 8
+53.1180 0:55.94 C 64 8
+51.0356 0:53.41 C 64 8
+52.9389 0:55.31 C 64 8
+50.9185 0:53.26 C 64 8
+50.8244 0:53.17 C 64 8
+51.0193 0:53.34 C 64 8
+54.0152 0:56.40 C 64 8
+50.8525 0:53.24 C 64 8
+50.9193 0:53.27 C 64 8
+50.9349 0:53.30 C 64 8
+2.0765 0:02.69 C 8 8
+2.0828 0:02.68 C 8 8
+2.0679 0:02.68 C 8 8
+2.0763 0:02.75 C 8 8
+2.0696 0:02.70 C 8 8
+2.1130 0:02.73 C 8 8
+2.0603 0:02.66 C 8 8
+2.0687 0:02.69 C 8 8
+2.0470 0:02.67 C 8 8
+2.0586 0:02.68 C 8 8
+#+END_EXAMPLE
+***** AMG real
+#+BEGIN_EXAMPLE
+runningTime time type size nbProcess
+0 1:12.67 AMG 125 125
+0 1:12.42 AMG 125 125
+0 1:09.80 AMG 125 125
+0 1:12.34 AMG 125 125
+0 1:13.70 AMG 125 125
+0 1:12.83 AMG 125 125
+0 1:11.59 AMG 125 125
+0 1:11.64 AMG 125 125
+0 1:10.10 AMG 125 125
+0 1:09.95 AMG 125 125
+0 0:53.98 AMG 27 27
+0 0:52.68 AMG 27 27
+0 0:51.77 AMG 27 27
+0 1:01.88 AMG 27 27
+0 0:52.38 AMG 27 27
+0 0:54.20 AMG 27 27
+0 0:54.31 AMG 27 27
+0 0:51.64 AMG 27 27
+0 0:55.99 AMG 27 27
+0 0:51.66 AMG 27 27
+0 1:06.69 AMG 64 64
+0 1:09.44 AMG 64 64
+0 1:05.87 AMG 64 64
+0 1:06.28 AMG 64 64
+0 1:07.33 AMG 64 64
+0 1:06.70 AMG 64 64
+0 1:08.39 AMG 64 64
+0 1:07.40 AMG 64 64
+0 1:07.44 AMG 64 64
+0 1:06.47 AMG 64 64
+0 0:12.69 AMG 8 8
+0 0:12.68 AMG 8 8
+0 0:12.63 AMG 8 8
+0 0:12.67 AMG 8 8
+0 0:12.65 AMG 8 8
+0 0:12.67 AMG 8 8
+0 0:12.66 AMG 8 8
+0 0:12.65 AMG 8 8
+0 0:12.69 AMG 8 8
+0 0:12.61 AMG 8 8
+#+END_EXAMPLE
+***** Simgrid (emulation)
+#+BEGIN_EXAMPLE
+runningTime time type size nbProcess
+0 27:00.82 SG 125 1
+0 26:36.25 SG 125 1
+0 26:10.40 SG 125 1
+0 26:46.11 SG 125 1
+0 5:25.35 SG 27 1
+0 5:25.30 SG 27 1
+0 5:25.45 SG 27 1
+0 5:24.88 SG 27 1
+0 15:54.14 SG 64 1
+0 15:53.03 SG 64 1
+0 1:18.20 SG 8 1
+0 1:18.19 SG 8 1
+0 1:18.15 SG 8 1
+0 1:18.06 SG 8 1
+0 1:18.14 SG 8 1
+0 1:18.16 SG 8 1
+#+END_EXAMPLE
+*** 2017-07-27 jeudi
+**** Simgrid git
+***** old
+J'ai retenter avec SimGrid sur le git, mais ca marche même plus avec 8
+process (le replay). Surement du au fait que c'est encore tout cassé
+(cf IRC).
+J'ai l'erreur suivante :
+#+begin_src sh :results output :exports both
+home/chevamax/Téléchargements/simgrid/install/bin/smpirun -ext ../simgrid/examples/smpi/replay/smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform ../simgrid/examples/platforms/cluster.xml ../simgrid/examples/smpi/replay/smpi_replay ./toto.txt --cfg=smpi/display-timing:1 --cfg=smpi/coll_selector:mvapich2
+#+end_src
+#+BEGIN_EXAMPLE
+/home/chevamax/Téléchargements/simgrid/install/bin/smpirun -ext ../simgrid/examples/smpi/replay/smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform ../simgrid/examples/platforms/cluster.xml ../simgrid/examples/smpi/replay/smpi_replay ./toto.txt --cfg=smpi/display-timing:1 --cfg=smpi/coll_selector:mvapich2
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'surf/precision' to '1e-9'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/model' to 'SMPI'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/TCP-gamma' to '4194304'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'smpi/simulate-computation' to 'no'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'smpi/display-timing' to '1'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'smpi/coll_selector' to 'mvapich2'
+[0.000000] [xbt_cfg/INFO] Option smpi/coll_selector has been renamed to smpi/coll-selector. Consider switching.
+[0.000000] [smpi_coll/INFO] Switch to algorithm mvapich2 for collective gather
+[0.000000] [smpi_coll/INFO] Switch to algorithm mvapich2 for collective allgather
+[0.000000] [smpi_coll/INFO] Switch to algorithm mvapich2 for collective allgatherv
+[0.000000] [smpi_coll/INFO] Switch to algorithm mvapich2 for collective allreduce
+[0.000000] [smpi_coll/INFO] Switch to algorithm mvapich2 for collective alltoall
+[0.000000] [smpi_coll/INFO] Switch to algorithm mvapich2 for collective alltoallv
+[0.000000] [smpi_coll/INFO] Switch to algorithm mvapich2 for collective reduce
+[0.000000] [smpi_coll/INFO] Switch to algorithm mvapich2 for collective reduce_scatter
+[0.000000] [smpi_coll/INFO] Switch to algorithm mvapich2 for collective scatter
+[0.000000] [smpi_coll/INFO] Switch to algorithm mvapich2 for collective bcast
+[0.000000] [smpi_coll/INFO] Switch to algorithm mvapich2 for collective barrier
+[0.000000] [smpi_kernel/INFO] You did not set the power of the host running the simulation.  The timings will certainly not be accurate.  Use the option "--cfg=smpi/host-speed:<flops>" to set its value.Check http://simgrid.org/simgrid/latest/doc/options.html#options_smpi_bench for more information.
+ *** Error in `smpimain': free(): invalid pointer: 0x0000000000bc1250 ***
+======= Backtrace: =========
+/lib/x86_64-linux-gnu/libc.so.6(+0x777e5)[0x7f3c122347e5]
+/lib/x86_64-linux-gnu/libc.so.6(+0x8037a)[0x7f3c1223d37a]
+/lib/x86_64-linux-gnu/libc.so.6(cfree+0x4c)[0x7f3c1224153c]
+/home/chevamax/Téléchargements/simgrid/install/lib/libsimgrid.so.3.17(+0xfac48)[0x7f3c11d58c48]
+/home/chevamax/Téléchargements/simgrid/install/lib/libsimgrid.so.3.17(_Z17SIMIX_comm_finishN5boost13intrusive_ptrIN7simgrid6kernel8activity12ActivityImplEEE+0x7c2)[0x7f3c11d09e12]
+/home/chevamax/Téléchargements/simgrid/install/lib/libsimgrid.so.3.17(_ZN7simgrid6kernel8activity8CommImpl4postEv+0xa8)[0x7f3c11d15138]
+/home/chevamax/Téléchargements/simgrid/install/lib/libsimgrid.so.3.17(+0xc6548)[0x7f3c11d24548]
+/home/chevamax/Téléchargements/simgrid/install/lib/libsimgrid.so.3.17(+0xaf2f5)[0x7f3c11d0d2f5]
+/home/chevamax/Téléchargements/simgrid/install/lib/libsimgrid.so.3.17(SIMIX_run+0x3d5)[0x7f3c11d233a5]
+/home/chevamax/Téléchargements/simgrid/install/lib/libsimgrid.so.3.17(smpi_main+0x370)[0x7f3c11e416e0]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf0)[0x7f3c121dd830]
+smpimain(_start+0x29)[0x4007f9]
+======= Memory map: ========
+00400000-00401000 r-xp 00000000 08:01 13762802                           /usr/local/bin/smpimain
+00600000-00601000 r--p 00000000 08:01 13762802                           /usr/local/bin/smpimain
+00601000-00602000 rw-p 00001000 08:01 13762802                           /usr/local/bin/smpimain
+00a98000-00c9d000 rw-p 00000000 00:00 0                                  [heap]
+7f3c08000000-7f3c08021000 rw-p 00000000 00:00 0 
+7f3c08021000-7f3c0c000000 ---p 00000000 00:00 0 
+7f3c0c543000-7f3c0c544000 rw-p 00000000 00:00 0 
+7f3c0c544000-7f3c0c545000 ---p 00000000 00:00 0 
+7f3c0c545000-7f3c0cd47000 rw-p 00000000 00:00 0 
+7f3c0cd47000-7f3c0cd48000 ---p 00000000 00:00 0 
+7f3c0cd48000-7f3c0d54a000 rw-p 00000000 00:00 0 
+7f3c0d54a000-7f3c0d54b000 ---p 00000000 00:00 0 
+7f3c0d54b000-7f3c0dd4d000 rw-p 00000000 00:00 0 
+7f3c0dd4d000-7f3c0dd4e000 ---p 00000000 00:00 0 
+7f3c0dd4e000-7f3c0e550000 rw-p 00000000 00:00 0 
+7f3c0e550000-7f3c0e551000 ---p 00000000 00:00 0 
+7f3c0e551000-7f3c0ed53000 rw-p 00000000 00:00 0 
+7f3c0ed53000-7f3c0ed54000 ---p 00000000 00:00 0 
+7f3c0ed54000-7f3c0f556000 rw-p 00000000 00:00 0 
+7f3c0f556000-7f3c0f557000 ---p 00000000 00:00 0 
+7f3c0f557000-7f3c0fd59000 rw-p 00000000 00:00 0 
+7f3c0fd59000-7f3c0fd5a000 ---p 00000000 00:00 0 
+7f3c0fd5a000-7f3c1055b000 rw-p 00000000 00:00 0 
+7f3c1055b000-7f3c1055c000 r-xp 00000000 08:01 20320787                   /home/chevamax/Téléchargements/simgrid/examples/smpi/replay/smpi_replay
+7f3c1055c000-7f3c1075b000 ---p 00001000 08:01 20320787                   /home/chevamax/Téléchargements/simgrid/examples/smpi/replay/smpi_replay
+7f3c1075b000-7f3c1075c000 r--p 00000000 08:01 20320787                   /home/chevamax/Téléchargements/simgrid/examples/smpi/replay/smpi_replay
+7f3c1075c000-7f3c1075d000 rw-p 00001000 08:01 20320787                   /home/chevamax/Téléchargements/simgrid/examples/smpi/replay/smpi_replay
+7f3c1075d000-7f3c10760000 r-xp 00000000 08:01 13377486                   /usr/lib/x86_64-linux-gnu/libboost_system.so.1.58.0
+7f3c10760000-7f3c1095f000 ---p 00003000 08:01 13377486                   /usr/lib/x86_64-linux-gnu/libboost_system.so.1.58.0
+7f3c1095f000-7f3c10960000 r--p 00002000 08:01 13377486                   /usr/lib/x86_64-linux-gnu/libboost_system.so.1.58.0
+7f3c10960000-7f3c10961000 rw-p 00003000 08:01 13377486                   /usr/lib/x86_64-linux-gnu/libboost_system.so.1.58.0
+7f3c10961000-7f3c10985000 r-xp 00000000 08:01 13383652                   /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.58.0
+7f3c10985000-7f3c10b84000 ---p 00024000 08:01 13383652                   /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.58.0
+7f3c10b84000-7f3c10b86000 r--p 00023000 08:01 13383652                   /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.58.0
+7f3c10b86000-7f3c10b87000 rw-p 00025000 08:01 13383652                   /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.58.0
+7f3c10b87000-7f3c10b9d000 r-xp 00000000 08:01 21107076                   /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f3c10b9d000-7f3c10d9c000 ---p 00016000 08:01 21107076                   /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f3c10d9c000-7f3c10d9d000 rw-p 00015000 08:01 21107076                   /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f3c10d9d000-7f3c10ea5000 r-xp 00000000 08:01 21106938                   /lib/x86_64-linux-gnu/libm-2.23.so
+7f3c10ea5000-7f3c110a4000 ---p 00108000 08:01 21106938                   /lib/x86_64-linux-gnu/libm-2.23.so
+7f3c110a4000-7f3c110a5000 r--p 00107000 08:01 21106938                   /lib/x86_64-linux-gnu/libm-2.23.so
+7f3c110a5000-7f3c110a6000 rw-p 00108000 08:01 21106938                   /lib/x86_64-linux-gnu/libm-2.23.so
+7f3c110a6000-7f3c11218000 r-xp 00000000 08:01 13371521                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f3c11218000-7f3c11418000 ---p 00172000 08:01 13371521                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f3c11418000-7f3c11422000 r--p 00172000 08:01 13371521                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f3c11422000-7f3c11424000 rw-p 0017c000 08:01 13371521                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f3c11424000-7f3c11428000 rw-p 00000000 00:00 0 
+7f3c11428000-7f3c1142b000 r-xp 00000000 08:01 21102685                   /lib/x86_64-linux-gnu/libdl-2.23.so
+7f3c1142b000-7f3c1162a000 ---p 00003000 08:01 21102685                   /lib/x86_64-linux-gnu/libdl-2.23.so
+7f3c1162a000-7f3c1162b000 r--p 00002000 08:01 21102685                   /lib/x86_64-linux-gnu/libdl-2.23.so
+7f3c1162b000-7f3c1162c000 rw-p 00003000 08:01 21102685                   /lib/x86_64-linux-gnu/libdl-2.23.so
+7f3c1162c000-7f3c11633000 r-xp 00000000 08:01 21102682                   /lib/x86_64-linux-gnu/librt-2.23.so
+7f3c11633000-7f3c11832000 ---p 00007000 08:01 21102682                   /lib/x86_64-linux-gnu/librt-2.23.so
+7f3c11832000-7f3c11833000 r--p 00006000 08:01 21102682                   /lib/x86_64-linux-gnu/librt-2.23.so
+7f3c11833000-7f3c11834000 rw-p 00007000 08:01 21102682                   /lib/x86_64-linux-gnu/librt-2.23.so
+7f3c11834000-7f3c1184c000 r-xp 00000000 08:01 21102679                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f3c1184c000-7f3c11a4b000 ---p 00018000 08:01 21102679                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f3c11a4b000-7f3c11a4c000 r--p 00017000 08:01 21102679                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f3c11a4c000-7f3c11a4d000 rw-p 00018000 08:01 21102679                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f3c11a4d000-7f3c11a51000 rw-p 00000000 00:00 0 
+7f3c11a51000-7f3c11a5d000 r-xp 00000000 08:01 13383653                   /usr/lib/x86_64-linux-gnu/libboost_context.so.1.58.0
+7f3c11a5d000-7f3c11c5c000 ---p 0000c000 08:01 13383653                   /usr/lib/x86_64-linux-gnu/libboost_context.so.1.58.0
+7f3c11c5c000-7f3c11c5d000 r--p 0000b000 08:01 13383653                   /usr/lib/x86_64-linux-gnu/libboost_context.so.1.58.0
+7f3c11c5d000-7f3c11c5e000 rw-p 0000c000 08:01 13383653                   /usr/lib/x86_64-linux-gnu/libboost_context.so.1.58.0
+7f3c11c5e000-7f3c11f7b000 r-xp 00000000 08:01 20452070                   /home/chevamax/Téléchargements/simgrid/install/lib/libsimgrid.so.3.17
+7f3c11f7b000-7f3c1217b000 ---p 0031d000 08:01 20452070                   /home/chevamax/Téléchargements/simgrid/install/lib/libsimgrid.so.3.17
+7f3c1217b000-7f3c12182000 r--p 0031d000 08:01 20452070                   /home/chevamax/Téléchargements/simgrid/install/lib/libsimgrid.so.3.17
+7f3c12182000-7f3c121b7000 rw-p 00324000 08:01 20452070                   /home/chevamax/Téléchargements/simgrid/install/lib/libsimgrid.so.3.17
+7f3c121b7000-7f3c121bd000 rw-p 00000000 00:00 0 
+7f3c121bd000-7f3c1237d000 r-xp 00000000 08:01 21107059                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f3c1237d000-7f3c1257d000 ---p 001c0000 08:01 21107059                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f3c1257d000-7f3c12581000 r--p 001c0000 08:01 21107059                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f3c12581000-7f3c12583000 rw-p 001c4000 08:01 21107059                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f3c12583000-7f3c12587000 rw-p 00000000 00:00 0 
+7f3c12587000-7f3c125ad000 r-xp 00000000 08:01 21102617                   /lib/x86_64-linux-gnu/ld-2.23.so
+7f3c12786000-7f3c1278f000 rw-p 00000000 00:00 0 
+7f3c127a9000-7f3c127ac000 rw-p 00000000 00:00 0 
+7f3c127ac000-7f3c127ad000 r--p 00025000 08:01 21102617                   /lib/x86_64-linux-gnu/ld-2.23.so
+7f3c127ad000-7f3c127ae000 rw-p 00026000 08:01 21102617                   /lib/x86_64-linux-gnu/ld-2.23.so
+7f3c127ae000-7f3c127af000 rw-p 00000000 00:00 0 
+7ffc0dd40000-7ffc0dd61000 rw-p 00000000 00:00 0                          [stack]
+7ffc0ddd8000-7ffc0ddda000 r--p 00000000 00:00 0                          [vvar]
+7ffc0ddda000-7ffc0dddc000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+../simgrid/examples/smpi/replay/smpi_replay --cfg=smpi/privatization:1 --cfg=surf/precision:1e-9 --cfg=network/model:SMPI --cfg=network/TCP-gamma:4194304 --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no --cfg=smpi/display-timing:1 --cfg=smpi/coll_selector:mvapich2 ../simgrid/examples/platforms/cluster.xml smpitmp-appNH06C6
+Generated hostfile smpitmp-hostfHFmdnQ kept.
+Execution failed with code 134.
+#+END_EXAMPLE
+Mais si je lance avec
+#+begin_src sh :results output :exports both
+/home/chevamax/Téléchargements/simgrid/install/bin/smpirun -ext ../simgrid/examples/smpi/replay/smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform ../simgrid/examples/platforms/cluster.xml ../simgrid/examples/smpi/replay/smpi_replay ./toto.txt --cfg=smpi/display-timing:1
+#+end_src
+#+BEGIN_EXAMPLE
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'surf/precision' to '1e-9'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/model' to 'SMPI'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'network/TCP-gamma' to '4194304'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'smpi/simulate-computation' to 'no'
+[0.000000] [xbt_cfg/INFO] Configuration change: Set 'smpi/display-timing' to '1'
+[0.000000] [smpi_kernel/INFO] You did not set the power of the host running the simulation.  The timings will certainly not be accurate.  Use the option "--cfg=smpi/host-speed:<flops>" to set its value.Check http://simgrid.org/simgrid/latest/doc/options.html#options_smpi_bench for more information.
+[1.559341] [smpi_kernel/INFO] Simulated time: 1.55934 seconds. 
+
+The simulation took 2.09256 seconds (after parsing and platform setup)
+0 seconds were actual computation of the application
+#+END_EXAMPLE
+ca fonctionne pour 8
+
+Test pour 64 :
+#+begin_src sh :results output :exports both
+
+#+end_src
+
+fonctionne pas
+***** Fonctionne
+Avec le simgrid du git de ce matin, j'arrive à rejouer grace a degomme
+sur le IRC :
+****** Mail Arnaud
+C'est bon, ca marche, degomme m'a dit de regarder dans le fichier : teshsuite/smpi/pt2pt-pingpong/TI_output.tesh
+
+Et effectivement, au lieu de faire :
+#+BEGIN_EXAMPLE
+home/chevamax/Téléchargements/simgrid/install/bin/smpirun -ext ../simgrid/examples/smpi/replay/smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform ../simgrid/examples/platforms/cluster.xml ../simgrid/examples/smpi/replay/smpi_replay ./toto.txt --cfg=smpi/display-timing:1
+#+END_EXAMPLE
+il faut faire :
+#+BEGIN_EXAMPLE
+home/chevamax/Téléchargements/simgrid/install/bin/smpirun -ext smpi_replay --log=replay.thresh:critical --log=smpi_replay.thresh:critical --log=no_loc --cfg=smpi/simulate-computation:no -np 8 -platform ../simgrid/examples/platforms/cluster.xml ../simgrid/examples/smpi/replay/smpi_replay ./toto.txt --cfg=smpi/display-timing:1
+#+END_EXAMPLE
+
+
+voila, voila. Merci de regarder mon journal alors que t'es en vacances. Demain je rajoute SimGrid sur les courbes!
+
+**** Simulation AMG sur SimGrid
+Avec 125 process quand on lance AMG sur SimGrid, ca prend plus de 24
+Go de mémoire vive. Donc je pense pas que ca sera très performant.
+

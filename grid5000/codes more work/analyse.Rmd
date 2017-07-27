@@ -6,15 +6,16 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-## Expérience
-### Augmentation de la quantitée de calcul
+## Expérience CODES
+### Augmentation de la quantité de calcul
 
 Il y a dans cette expériences 3 générations différentes : 
- - 2x2x2 = trace de 8 processus
- - 3x3x3 = trace de 27 processus
- - 4x4x4 = trace de 64 processus
+
+* 2x2x2 = trace de 8 processus
+* 3x3x3 = trace de 27 processus
+* 4x4x4 = trace de 64 processus
  
-On va s'intéréssé à l'augmentation de la charge de calcul pour chaque processus dans un premier temps :
+On va s'intérésser à l'augmentation de la charge de calcul pour chaque processus dans un premier temps :
 
 #### Grille de 40x40x40 par processus
 
@@ -43,7 +44,10 @@ library(ggplot2)
 
 df <- rbind(data40par4, data40par1, data40seq )
 
-ggplot(df, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216, grille de calcul d'un processus 40x40x40") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
+require(gridExtra)
+
+ggplot(df, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216,\n grille de calcul d'un processus 40x40x40") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
+ggplot(df, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde") + ggtitle("Temps de simulation AMG2013") + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216,\n grille de calcul d'un processus 40x40x40") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
 ```
 
 #### Grille de 60x60x60 par processus
@@ -67,7 +71,7 @@ colnames(data60seq)[6] <- "time"
 
 df60 <- rbind(data60par4, data60par1, data60seq )
 
-ggplot(df60, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216, grille de calcul d'un processus 60x60x60") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
+ggplot(df60, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216,\n grille de calcul d'un processus 60x60x60") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
 ```
 
 #### Grille de 80x80x80 par processus
@@ -91,7 +95,7 @@ colnames(data80seq)[6] <- "time"
 
 df80 <- rbind(data80par4, data80par1, data80seq )
 
-ggplot(df80, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216, grille de calcul d'un processus 80x80x80") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
+ggplot(df80, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216,\n grille de calcul d'un processus 80x80x80") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
 ```
 #### Grille de 100x100x100 par processus
 
@@ -114,5 +118,5 @@ colnames(data100seq)[6] <- "time"
 
 df100 <- rbind(data100par4, data100par1, data100seq )
 
-ggplot(df100, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216, grille de calcul d'un processus 100x100x100") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
+ggplot(df100, aes(x=size,y=runningTime, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulées")+ylab("Running Time en seconde (échelle log)") + ggtitle("Temps de simulation AMG2013") + scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("Parallèle", "Sequentielle")) + labs(subtitle="Génération sur 64 noeuds physiques(parallèle), topologie dragonfly 216,\n grille de calcul d'un processus 100x100x100") + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
 ```
