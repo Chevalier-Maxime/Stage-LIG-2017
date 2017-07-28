@@ -19566,3 +19566,46 @@ voila, voila. Merci de regarder mon journal alors que t'es en vacances. Demain j
 Avec 125 process quand on lance AMG sur SimGrid, ca prend plus de 24
 Go de mémoire vive. Donc je pense pas que ca sera très performant.
 
+*** 2017-07-28 vendredi
+
+**** Mail Arnaud
+Salut,
+
+Le 27/07/2017 11:35, Maxime Chevalier a écrit :
+> C'est bon, ca marche, degomme m'a dit de regarder dans le fichier :
+> teshsuite/smpi/pt2pt-pingpong/TI_output.tesh
+
+
+Ah ok, j'ai compris, effectivement. Désolé, c'est moi qui avais
+magouillé cette ligne de commande. Ça peut valoir le temps (si tu
+peux...) de corriger la doc car visiblement c'était pas clair. Avoir une
+petite sectioh "how to capture and replay" avec les bonnes étapes.
+
+> voila, voila. Merci de regarder mon journal alors que t'es en vacances.
+> Demain je rajoute SimGrid sur les courbes!
+
+En théorie, c'était pas des vacances. :) C'est en août que je pars. Mon
+avion de retour est dans 9 heures.
+
+À bientôt,
+
+
+    Arnaud
+
+**** Meeting avec Florence
+
+Des conseils/corrections pour mes graphiques (cf papier)
+
+**** AMG taille problem
+For example, the small problem used for the Hopper baseline runs used
+4x4x6=96 MPI ranks, with each rank solving a 150x150x150 problem. The
+total problem size is 96x150x150x150=324,000,000. To redefine the
+problem to use 8 MPI ranks, the total problem size needs to be
+adjusted to the cube root of (324,000,000/8), which equals 343. In
+this case, the run script would be changed to "-P 2 2 2" and "-n 343
+343 343". It is reasonable to use a non-cubic solution to reach the
+same problem size, but it is desirable to keep it as cubic as possible.
+
+**** SimGrid replay Grid5000
+La version que j'ai installé sur grid5000 à pas l'air de vouloir faire
+du replay. Du coup il faut que je réinstalle et que je recompile AMG.
