@@ -1,0 +1,13 @@
+cd /usr/local/
+tar xzf amg20130624.tgz
+mv AMG2013 AMG2013REAL
+cd AMG2013REAL
+sed -i '/CC =/c\CC = mpicc' Makefile.include
+sed -i '/INCLUDE_CFLAGS = /c\INCLUDE_CFLAGS = -O2 -DTIMER_USE_MPI -DHYPRE_LONG_LONG ' Makefile.include
+sed -i '0,/INCLUDE_LFLAGS/! c\INCLUDE_LFLAGS = -lm -DSCOREP_USER_ENABLE' Makefile.include
+if ! make; then
+    echo "AMGSCOREP : make error"
+        exit
+	fi
+
+cp test/amg2013 $INSTALLPATH/bin/

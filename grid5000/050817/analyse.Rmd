@@ -1,0 +1,211 @@
+---
+title: "Grid5000"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## ExpÃ©rience CODES
+### Augmentation de la quantitÃ© de calcul
+
+Experiences réalisées sur le cluster edel (Grenoble) de Grid5000
+
+Il y a dans cette expÃ©riences 4 gÃ©nÃ©rations diffÃ©rentes : 
+
+* 2x2x2 = trace de 8 processus
+* 3x3x3 = trace de 27 processus
+* 4x4x4 = trace de 64 processus
+* 5x5x5 = trace de 125 processus
+ 
+On va s'intÃ©rÃ©sser Ã  l'augmentation de la charge de calcul pour chaque processus :
+
+#### Grille de 40x40x40 par processus
+
+```{r}
+data40par4 = read.csv(file="40_par4", header=TRUE, sep=" ")
+data40par8 = read.csv(file="40_par8", header=TRUE, sep=" ")
+data40seq = read.csv(file="40_seq", header=TRUE, sep=" ")
+data40sg = read.csv(file="40_sg", header=TRUE, sep=" ")
+data40amg = read.csv(file="40_amg", header=TRUE, sep=" ")
+
+convert <- function(rTime) {
+  as.numeric(strsplit(as.character(rTime),split=":")[[1]][1])*60+as.numeric(strsplit(as.character(rTime),split=":")[[1]][2])
+}
+
+data40par4$sim="Par"
+data40par4 = data.frame(data40par4[c(1,3,4,5,6)], apply(data40par4[2],1, convert))
+colnames(data40par4)[6] <- "time"
+
+data40par8$sim="Par"
+data40par8 = data.frame(data40par8[c(1,3,4,5,6)], apply(data40par8[2],1, convert))
+colnames(data40par8)[6] <- "time"
+
+data40seq$sim="Seq"
+data40seq = data.frame(data40seq[c(1,3,4,5,6)], apply(data40seq[2],1, convert))
+colnames(data40seq)[6] <- "time"
+
+data40sg$sim="SG"
+data40sg = data.frame(data40sg[c(1,3,4,5,6)], apply(data40sg[2],1, convert))
+colnames(data40sg)[6] <- "time"
+
+data40amg$sim="AMG"
+data40amg = data.frame(data40amg[c(1,3,4,5,6)], apply(data40amg[2],1, convert))
+colnames(data40amg)[6] <- "time"
+
+library(ggplot2)
+
+df <- rbind(data40par4, data40par8, data40seq, data40amg, data40sg )
+#+ scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("ParallÃ¨le", "Sequentielle")) + scale_shape_discrete(name=c("Nombre de Processus"), labels=c("1","4"))
+
+df$sim <- factor(df$sim)
+levels(df$sim) <- c("AMG execution", "CODES simulation parallèle", "CODES simulation séquentielle", "SimGrid emulation")
+
+ggplot(df, aes(x=size,y=time, color=factor(nbProcess), shape=sim)) +
+  geom_point() +
+  xlab("Degré de parallèlisme de l'application (nombre de processus)")+
+  ylab("Temps d'exécution en secondes (échelle log)") +
+  ggtitle("Temps de simulation/exécution d'AMG2013 comparatif")  + 
+  scale_color_discrete(name="Nombre de processus utilisés\npour l'expérimentation parallèle") + 
+  labs(subtitle="Génération sur 125 coeurs physiques(parallèle), topologie simple-net,\nTaille du problème à résoudre 40x40x40xDegré de parallélisme ") + 
+  scale_shape_discrete(name=c("Origine des données")) +
+  scale_y_log10(breaks=c(0,10,100,1000)) +
+  geom_jitter() + 
+  scale_x_continuous(breaks= c(0, 8, 27, 64, 125)) # + coord_flip() 
+
+
+ggsave("40general.emf", width = 20, height = 15, units = "cm")
+
+
+ggplot(df[df$size==8 & df$type!="SG" & df$time<2.0,], aes(x=size,y=time, color=factor(nbProcess), shape=sim)) +
+  geom_point() +
+  xlab("Degré de parallèlisme de l'application (nombre de processus)")+
+  ylab("Temps d'exécution en secondes") +
+  ggtitle("Temps de simulation/exécution d'AMG2013 comparatif")  + 
+  scale_color_discrete(name="Nombre de processus utilisés\npour l'expérimentation parallèle") + 
+  labs(subtitle="Génération sur 125 coeurs physiques(parallèle), topologie simple-net,\nTaille du problème à résoudre 40x40x40x8 ") + 
+  scale_shape_discrete(name=c("Origine des données")) +
+  scale_y_continuous(expand=c(0,0)) +
+  expand_limits(y = c(0,1.05 * max(df[df$size==8 & df$type!="SG" & df$time<2.0,]$time))) +
+  geom_jitter() + 
+  scale_x_continuous(breaks= c(8)) # + coord_flip() 
+
+
+ggsave("40generalZoom8.emf", width = 20, height = 15, units = "cm")
+
+ggplot(df[df$size==8,], aes(x=nbProcess,y=time)) +geom_point() + aes(ymin=0) +xlab("Nombre de processus utilisé")+ylab("Temps d'exécution (échelle log)") + ggtitle("Temps de simulation AMG2013")  + scale_color_discrete(name="Simulation", labels=c("AMG", "Parallèle", "Sequentielle", "SimGrid (Emulation)")) + labs(subtitle="Génération sur 125 coeurs physiques(parallèle), topologie simple-net,\ngrille de calcul d'un processus 40x40x40") + scale_shape_discrete(name=c("Nombre de Processus"))+geom_jitter()  +  facet_wrap(~ sim, nrow = 1) +scale_x_continuous(breaks= c(1,4,8)) # + geom_boxplot(aes(x=nbProcess, y=size))
+# + coord_flip() 
+
+ggplot(df[df$sim == "CODES simulation parallèle" | df$sim == "CODES simulation séquentielle",], aes(x=size,y=time, color=factor(nbProcess), shape= sim)) +
+  geom_point() +
+  xlab("Degré de parallèlisme de l'application (nombre de processus)")+
+  ylab("Temps d'exécution en secondes") +
+  ggtitle("Temps de simulation CODES d'AMG2013 comparatif")  + 
+  scale_color_discrete(name="Nombre de processus utilisés\npour l'expérimentation parallèle") + 
+  labs(subtitle="Génération sur 125 coeurs physiques(parallèle), topologie simple-net,\nTaille du problème à résoudre 40x40x40xDegré de parallèlisme ") + 
+  scale_shape_discrete(name=c("Origine des données")) +
+  scale_y_continuous(expand=c(0,0)) +
+  expand_limits(y = c(0,1.05 * max(df[df$sim == "CODES simulation parallèle" | df$sim == "CODES simulation séquentielle",]$time))) +
+  geom_jitter() +
+  scale_x_continuous(breaks= c(0, 8, 27, 64, 125))
+
+ggsave("40generalZoomCODES.emf", width = 20, height = 15, units = "cm")
+
+```
+
+#### Grille de 100x100x100 par processus
+
+```{r}
+data100par4 = read.csv(file="100_par4", header=TRUE, sep=" ")
+data100par8 = read.csv(file="100_par8", header=TRUE, sep=" ")
+data100seq = read.csv(file="100_seq", header=TRUE, sep=" ")
+data100sg = read.csv(file="100_sg", header=TRUE, sep=" ")
+data100amg = read.csv(file="100_amg", header=TRUE, sep=" ")
+
+data100par4$sim="Par"
+data100par4 = data.frame(data100par4[c(1,3,4,5,6)], apply(data100par4[2],1, convert))
+colnames(data100par4)[6] <- "time"
+
+data100par8$sim="Par"
+data100par8 = data.frame(data100par8[c(1,3,4,5,6)], apply(data100par8[2],1, convert))
+colnames(data100par8)[6] <- "time"
+
+data100seq$sim="Seq"
+data100seq = data.frame(data100seq[c(1,3,4,5,6)], apply(data100seq[2],1, convert))
+colnames(data100seq)[6] <- "time"
+
+data100sg$sim="SG"
+data100sg = data.frame(data100sg[c(1,3,4,5,6)], apply(data100sg[2],1, convert))
+colnames(data100sg)[6] <- "time"
+
+data100amg$sim="AMG"
+data100amg = data.frame(data100amg[c(1,3,4,5,6)], apply(data100amg[2],1, convert))
+colnames(data100amg)[6] <- "time"
+
+df100 <- rbind(data100par4, data100par8[data100par8$runningTime!=0,], data100seq, data100amg, data100sg )
+#+ scale_y_log10() + scale_color_discrete(name="Simulation", labels=c("ParallÃ¨le", "Sequentielle"))
+
+
+
+df100$sim <- factor(df100$sim)
+levels(df100$sim) <- c("AMG execution", "CODES simulation parallèle", "CODES simulation séquentielle", "SimGrid emulation")
+
+ggplot(df100, aes(x=size,y=time, color=factor(nbProcess), shape=sim)) +
+  geom_point() +
+  xlab("Degré de parallèlisme de l'application (nombre de processus)")+
+  ylab("Temps d'exécution en secondes (échelle log)") +
+  ggtitle("Temps de simulation/exécution d'AMG2013 comparatif")  + 
+  scale_color_discrete(name="Nombre de processus utilisés\npour l'expérimentation parallèle") + 
+  labs(subtitle="Génération sur 125 coeurs physiques(parallèle), topologie simple-net,\nTaille du problème à résoudre 100x100x100xDegré de parallélisme ") + 
+  scale_shape_discrete(name=c("Origine des données")) +
+  scale_y_log10(breaks=c(0,10,100,1000)) +
+  geom_jitter() + 
+  scale_x_continuous(breaks= c(0, 8, 27, 64, 125)) # + coord_flip() 
+
+ggsave("100general.emf", width = 20, height = 15, units = "cm")
+
+ggplot(df100[df100$size==8 & df100$type!="SG",], aes(x=size,y=time, color=factor(nbProcess), shape=sim)) +
+  geom_point() +
+  xlab("Degré de parallèlisme de l'application (nombre de processus)")+
+  ylab("Temps d'exécution en secondes") +
+  ggtitle("Temps de simulation/exécution d'AMG2013 comparatif")  + 
+  scale_color_discrete(name="Nombre de processus utilisés\npour l'expérimentation parallèle") + 
+  labs(subtitle="Génération sur 125 coeurs physiques(parallèle), topologie simple-net,\nTaille du problème à résoudre 100x100x100x8 ") + 
+  scale_shape_discrete(name=c("Origine des données")) +
+  scale_y_continuous(expand=c(0,0)) +
+  expand_limits(y = c(0,1.05 * max(df[df100$size==8 & df100$type!="SG" & df100$time<10.0,]$time))) +
+  geom_jitter() + 
+  scale_x_continuous(breaks= c(8)) # + coord_flip() 
+
+
+ggsave("100generalZoom8.emf", width = 20, height = 15, units = "cm")
+
+ggplot(df100[df100$sim == "CODES simulation parallèle" | df100$sim == "CODES simulation séquentielle",], aes(x=size,y=time, color=factor(nbProcess), shape= sim)) +
+  geom_point() +
+  xlab("Degré de parallèlisme de l'application (nombre de processus)")+
+  ylab("Temps d'exécution en secondes") +
+  ggtitle("Temps de simulation CODES d'AMG2013 comparatif")  + 
+  scale_color_discrete(name="Nombre de processus utilisés\npour l'expérimentation parallèle") + 
+  labs(subtitle="Génération sur 125 coeurs physiques(parallèle), topologie simple-net,\nTaille du problème à résoudre 100x100x100xDegré de parallèlisme ") + 
+  scale_shape_discrete(name=c("Origine des données")) +
+  scale_y_continuous(expand=c(0,0)) +
+  expand_limits(y = c(0,1.05 * max(df100[df100$sim == "CODES simulation parallèle" | df100$sim == "CODES simulation séquentielle",]$time))) +
+  geom_jitter() +
+  scale_x_continuous(breaks= c(0, 8, 27, 64, 125))
+
+ggsave("100generalZoomCODES.emf", width = 20, height = 15, units = "cm")
+
+
+
+
+
+
+
+
+ggplot(df100, aes(x=size,y=time, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulÃ©es/jouÃ©es")+ylab("Temps de simulation/execution") + ggtitle("Temps de simulation AMG2013") + scale_color_discrete(name="Simulation", labels=c("AMG", "ParallÃ¨le", "Sequentielle", "SimGrid (Emulation)"))  + labs(subtitle="GÃ©nÃ©ration sur 125 noeuds physiques(parallÃ¨le), topologie simple-net,\n grille de calcul d'un processus 100x100x100") + scale_shape_discrete(name=c("Nombre de Processus"))
+
+ggplot(df100[df100$sim == "Par" | df$sim == "Seq",], aes(x=size,y=time, color=sim, shape= factor(nbProcess))) +geom_point() + aes(ymin=0) +xlab("Taille des traces simulÃ©es/jouÃ©es")+ylab("Temps de simulation/execution") + ggtitle("Temps de simulation AMG2013") + scale_color_discrete(name="Simulation", labels=c("ParallÃ¨le", "Sequentielle"))  + labs(subtitle="GÃ©nÃ©ration sur 125 noeuds physiques(parallÃ¨le), topologie simple-net,\n grille de calcul d'un processus 100x100x100") + scale_shape_discrete(name=c("Nombre de Processus"))
+
+```
+
+Dans le premier graph SimGrid n'est pas performant surement Ã  cause de son execution sur une machine avec peu de RAM (8 Go, et il en prend 30 Go environs)
